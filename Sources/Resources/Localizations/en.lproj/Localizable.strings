@@ -1,0 +1,50 @@
+/*
+ Localizable.strings
+  RozetkaPaySDK
+
+  Created by Ruslan Kasian Dev on 19.08.2024.
+  Copyright © 2024 RozetkaPay. All rights reserved.
+ */
+
+//MARK: - Common
+"rozetka_pay_common_loading_message" = "Operation in progress…";
+"rozetka_pay_common_error_message" = "An unexpected error occurred";
+"rozetka_pay_common_button_cancel" = "Cancel";
+"rozetka_pay_common_button_retry" = "Try again";
+"rozetka_pay_common_button_done" = "Done";
+
+"rozetka_pay_tokenization_title" = "Add your new card";
+"rozetka_pay_tokenization_save_button" = "Save";
+"rozetka_pay_tokenization_error_common" = "Sorry… An error occurred during tokenization process";
+
+//MARK: - Payment
+"rozetka_pay_payment_title" = "Pay";
+"rozetka_pay_payment_pay_button" = "Pay %1";
+"rozetka_pay_payment_error_unsupported" = "Sorry.. Payment with card is not supported yet, it will be available later";
+"rozetka_pay_payment_error_apple_pay" = "An error occurred while trying to pay using Apple Pay. Please try again later or contact our support team";
+"rozetka_pay_payment_error_common" = "Sorry… An error occurred during payment process";
+"rozetka_pay_payment_label_use_card" = "Or pay using card";
+"rozetka_pay_payment_confirmation_3ds_loading" = "Please wait…";
+
+"rozetka_pay_payment_legal_text" = "Натискаючи кнопку «Оплатити», Ви підтверджуєте, що ознайомились з %1 від %2 та приймаєте його умови (приєднуєтеся до його умов), надаєте згоду на виконання разової платіжної операції та надаєте відмову від отримання повідомлення про здійснену операції з використанням платіжної картки.";
+"rozetka_pay_payment_legal_text_part_1" = "Публічним договором";
+"rozetka_pay_payment_legal_text_part_2" = "ТОВ «ФК «ЕВО»";
+
+//MARK: - Pay form
+"rozetka_pay_form_card_info_title" = "Card information";
+"rozetka_pay_form_optional_card_name" = "Card name";
+"rozetka_pay_form_card_number" = "Card number";
+"rozetka_pay_form_cvv" = "CVV";
+"rozetka_pay_form_exp_date" = "MM/YY";
+"rozetka_pay_form_cardholder_name" = "Cardholder name";
+"rozetka_pay_form_email" = "Email";
+"rozetka_pay_form_save_card" = "Save card";
+"rozetka_pay_form_validation_exp_date_invalid" = "Invalid expiration date value";
+"rozetka_pay_form_validation_exp_date_expired" = "Card expired";
+"rozetka_pay_form_validation_card_number_incorrect" = "Incorrect card number";
+"rozetka_pay_form_validation_card_number_empty" = "Card number can't be empty";
+"rozetka_pay_form_validation_cvv_incorrect" = "Incorrect CVV value";
+"rozetka_pay_form_validation_cardholder_name_empty" = "Cardholder name can't be empty";
+"rozetka_pay_form_validation_card_name_empty" = "Card name can't be empty";
+"rozetka_pay_form_validation_field_empty" = "Field can't be empty";
+"rozetka_pay_form_validation_email_incorrect" = "Incorrect email value";

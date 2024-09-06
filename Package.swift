@@ -5,17 +5,23 @@ import PackageDescription
 
 let package = Package(
     name: "RozetkaPaySDK",
+    defaultLocalization: "en",
+    platforms: [
+        .iOS(.v15)
+    ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "RozetkaPaySDK",
             targets: ["RozetkaPaySDK"]),
     ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "RozetkaPaySDK"),
+            name: "RozetkaPaySDK",
+            path: "Sources",
+            resources: [
+                .process("Resources")
+            ]
+        ),
         .testTarget(
             name: "RozetkaPaySDKTests",
             dependencies: ["RozetkaPaySDK"]),
