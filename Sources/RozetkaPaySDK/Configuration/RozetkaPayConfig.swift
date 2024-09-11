@@ -35,4 +35,5 @@ struct RozetkaPayConfig {
     /// Google Pay country code for RozetkaPay.
     static let APPLE_PAY_COUNTRY_CODE = "UA"
     
+    static let network_TimeoutInterval: TimeoutInterval = .standart
 }

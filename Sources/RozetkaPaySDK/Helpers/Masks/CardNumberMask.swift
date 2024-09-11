@@ -31,6 +31,22 @@ public final class CardNumberMask: TextMasking {
         return formattedText
     }
     
+    public func format(mask: String) -> String {
+        let characters = mask.filter { $0.isNumber || $0 == "*" }
+        var formattedText = ""
+        
+        for (index, character) in characters.enumerated() {
+            if index != 0 && (index % 4) == 0 {
+                formattedText.append(separator)
+            }
+            formattedText.append(character)
+            if formattedText.count == Self.MAX_CREDIT_CARD_NUMBER_LENGTH + separator.count * (Self.MAX_CREDIT_CARD_NUMBER_LENGTH / 4) {
+                break
+            }
+        }
+        return formattedText
+    }
+    
     public func maskAndFormat(text: String) -> String {
         
         let digits = text.filter { $0.isNumber }

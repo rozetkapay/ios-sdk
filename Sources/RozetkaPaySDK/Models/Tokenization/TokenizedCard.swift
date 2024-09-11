@@ -19,4 +19,35 @@ public struct TokenizedCard: Codable {
         public let isoA3Code: String?
         public let cardType: String?
     }
+    
+    init(
+        token: String,
+        name: String? = nil,
+        maskedNumber: String? = nil,
+        paymentSystem: String? = nil,
+        bank: String? = nil,
+        isoA3Code: String? = nil,
+        cardType: String? = nil
+    ) {
+        self.token = token
+        self.name = name
+        var _paymentSystem = paymentSystem
+        if _paymentSystem.isNilOrEmpty {
+            _paymentSystem = ProvideCardPaymentSystemUseCase().invoke(cardNumberPrefix: maskedNumber)?.rawValue
+        }
+        
+        var _maskedNumber = maskedNumber
+        if let value = _maskedNumber?.isEmptyOrValue {
+            _maskedNumber = CardNumberMask().format(mask: value)
+        }
+        
+        self.cardInfo = CardInfo(
+            maskedNumber: _maskedNumber,
+            paymentSystem: _paymentSystem,
+            bank: bank,
+            isoA3Code: isoA3Code,
+            cardType: cardType
+        )
+    }
+
 }

@@ -6,139 +6,153 @@
 //
 
 import Foundation
+import OSLog
 
-
-//protocol NetworkManagerProtocol: AnyObject {
-//    func createCard(cardInfo: _ , completion (SomeData) -> ())
-//}
-//
-//class NetworkManager: NetworkManagerProtocol {
-//    func func createCard(cardInfo: _ ) {
-//        дергаєш розетку
-//    }
-//}
-
-import Foundation
-
-enum HTTPMethod: String {
-    case POST
+public enum HTTPMethod: String {
     case GET
+    case POST
 }
 
-enum ApiProvider {
-    //MARK: - Auth
-    case tokenization(data: CardRequestModel)
-    case createPayment
-    case paymentInfo
-    
-    //MARK: - Path
-    private var path: String {
-        switch self {
-        case .tokenization:
-            return "/api/v2/sdk/tokenize"
-        case .createPayment:
-            return "/api/payments/v1/new"
-        case .paymentInfo:
-            return "/api/payments/v1/info"
-        }
-    }
-    
-    var requestPath: URL? {
-        let str: String
-        
-        switch self {
-        case .tokenization:
-            str = EnvironmentProviderImpl.environment.tokenizationApiProviderUrl + path
-        case .createPayment:
-            str = EnvironmentProviderImpl.environment.paymentsApiProviderUrl + path
-        case .paymentInfo:
-            str = EnvironmentProviderImpl.environment.paymentsApiProviderUrl + path
-        }
-        
-        return URL(string: str)
-    }
-    
-    var method: HTTPMethod {
-        switch self {
-        case .tokenization:
-            return .POST
-        case .createPayment:
-            return .POST
-        case .paymentInfo:
-            return .GET
-        }
-    }
-    
-    var timeInterval: TimeInterval {
-        return EnvironmentProviderImpl.environment.timeInterval
-    }
-    
-    var data
+public typealias Parameters = [String: String]
+public typealias Headers = [String: String]
+
+protocol APIConfiguration {
+    var method: HTTPMethod { get }
+    var endpoint: String { get }
+    var timeInterval: TimeInterval { get }
+    var body: Encodable? { get }
+    var headers: Headers? { get }
+    var parameters: Parameters? { get }
+    var contentType: RequestContentType? { get }
 }
+
+enum RequestContentType: String {
+    case json = "application/json"
+}
+
+enum RequestHeaderField: String {
+    case sign = "X-Sign"
+    case widget = "X-Widget-Id"
+    case contentType = "Content-Type"
+    case requested = "X-Requested-With"
+}
+
+enum RequestHeaderFieldValue: String {
+    case json = "application/json"
+    case xml = "XmlHttpRequest"
+}
+
+public struct Request {
+    let urlRequest: URLRequest
     
-extension ApiProvider {
-    
-    // Асинхронный запрос данных
-    func getData() async throws -> Data {
-        guard let request = Request(requestData: self) else {
-            throw URLError(.badURL)
+    init?(config: APIConfiguration) {
+        guard let url = URL(string: config.endpoint) else {
+           return nil
         }
         
-        let (response, data) = try await ApiService.shared.dataTask(with: request.urlRequest)
+        var baseRequest = URLRequest(
+            url: url,
+            cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
+            timeoutInterval: config.timeInterval
+        )
+        baseRequest.httpMethod = config.method.rawValue
+        baseRequest.allHTTPHeaderFields = config.headers
         
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            throw URLError(.badServerResponse)
+        if let parameters = config.parameters {
+            var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            urlComponents?.queryItems = parameters.map {
+                URLQueryItem(name: $0.key, value: $0.value)
+            }
+            baseRequest.url = urlComponents?.url
         }
         
-        return data
+        if let httpBody = Request.encoded(body: config.body) {
+            baseRequest.httpBody = httpBody
+        }
+        
+        self.urlRequest = baseRequest
     }
     
-    // Асинхронный метод для отправки данных
-    func send<T: Codable>(_ data: T, dataToEncrypt: String? = nil, authorization: Bool = true) async throws -> Data {
-        // Проверка на разрешение запроса
-        guard allowRequest(authorization: authorization) else {
-            throw URLError(.notConnectedToInternet)
-        }
-        
-        // Создание запроса с данными
-        guard let request = HTTPMethod.POST.baseRequest(path: self, authorization: authorization, dataToEncrypt: dataToEncrypt).buildApplicationJSONRequest(with: data) else {
-            throw URLError(.badURL)
+    private static func encoded(body: Encodable?) -> Data? {
+        guard let body = body else {
+            return nil
         }
         
         do {
-            let (response, data) = try await ApiService.shared.dataTask(with: request.urlRequest)
-            
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                try await self.validateFail(response)
-                return try await send(data, dataToEncrypt: dataToEncrypt, authorization: authorization) // Повторная отправка запроса
-            }
-            
-            return data
+            let jsonData = try JSONEncoder().encode(body)
+            return jsonData
         } catch {
-            throw error
+            print("Error encoding body: \(error)")
+            return nil
         }
-    }
-    
-    // Проверка разрешения на выполнение запроса
-    private func allowRequest(authorization: Bool) -> Bool {
-        // Ваш код проверки разрешения запроса
-        return true
-    }
-    
-    // Валидация ошибки и повторная отправка при необходимости
-    private func validateFail(_ response: URLResponse) async throws {
-        // Ваш код валидации и обработки неудачных запросов
     }
 }
 
-// Сервис для выполнения запросов
-class ApiService {
-    static let shared = ApiService()
+
+public enum APIError<ValidationError: Decodable & Swift.Error>: Swift.Error {
+    case decodingFailure(Swift.Error)
+    case networkUnreachable
+    case external(code: Int, message: String?, title: String?)
+    case validation(ValidationError)
+    case unknown
+}
+
+extension APIConfiguration {
+    var timeInterval: TimeInterval {
+        return 60.0
+    }
     
-    func dataTask(with urlRequest: URLRequest) async throws -> (URLResponse, Data) {
-        try await withCheckedThrowingContinuation { continuation in
+    var headers: Headers? { nil }
+    var parameters: Parameters? { nil }
+    var body: Encodable? { nil }
+    var contentType: RequestContentType? { nil }
+}
+
+extension APIConfiguration {
+    public func execute<T: Decodable, E: Decodable & Swift.Error>(_ success: T.Type, errorType: E.Type?) async throws -> T {
+        guard let request = Request(config: self) else {
+            Logger.network.warning("⚠️ WARNING: An error network - badURL. \(URLError(.badURL).localizedDescription) ⚠️")
+            throw URLError(.badURL)
+        }
+
+        do {
+            Logger.network.info("***************************************************************")
+            Logger.network.info("👀 Request.url: \n \(request.urlRequest.debugDescription) \n 👀")
+            Logger.network.info("👀 Request: \n \(String(data: request.urlRequest.httpBody ?? Data(), encoding: .utf8) ?? "Unable to convert data to String") \n 👀")
+            
+            let (response, data) = try await dataTask(with: request.urlRequest)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                try await self.validateFail(response: response, data: data, errorType: errorType)
+                return try await execute(success, errorType: errorType) // Retry request
+            }
+
+            Logger.network.info("⚠️ Response debugDescription: \n \(response.debugDescription) \n ⚠️")
+            Logger.network.info("⚠️ Response data: \n \(String(data: data, encoding: .utf8) ?? "Unable to convert data to String") \n ⚠️")
+            do {
+                let decodedResponse = try JSONDecoder().decode(T.self, from: data)
+                Logger.network.info(
+                    "✅ SUCCESS \n Response: \(response.debugDescription) \n Data: \(String(data: data, encoding: .utf8) ?? "Unable to convert data to String") ✅"
+                )
+                return decodedResponse
+            } catch let decodingError {
+                Logger.network.warning("⚠️ WARNING: An error decodingError. \(decodingError.localizedDescription) ⚠️")
+                throw APIError<E>.decodingFailure(decodingError)
+            }
+        } catch let urlError as URLError {
+            Logger.network.warning("⚠️ WARNING: An error network. \(urlError.localizedDescription) ⚠️")
+            throw APIError<E>.networkUnreachable
+        } catch {
+            Logger.network.warning("⚠️ WARNING: An error network. \(error.localizedDescription) ⚠️")
+            throw APIError<E>.unknown
+        }
+    }
+
+    private func dataTask(with urlRequest: URLRequest) async throws -> (URLResponse, Data) {
+       
+        // Specify the generic return type
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(URLResponse, Data), Error>) in
             let task = URLSession.shared.dataTask(with: urlRequest) { data, response, error in
                 if let error = error {
                     continuation.resume(throwing: error)
@@ -154,55 +168,26 @@ class ApiService {
             task.resume()
         }
     }
-}
 
-// Структура для создания URLRequest
-struct Request {
-    let urlRequest: URLRequest
-    
-    init?(requestData: NetworkRequest) {
-        guard let url = requestData.requestPath else {
-            return nil
+
+    private func validateFail<E: Decodable & Swift.Error>(response: URLResponse, data: Data, errorType: E.Type? = nil) async throws {
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw APIError<E>.unknown
         }
-        var baseRequest = URLRequest(
-            url: url,
-            cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
-            timeoutInterval: requestData.timeInterval
-        )
-        baseRequest.httpMethod = requestData.method.rawValue
-        Request.setDefaultHeaders(to: &baseRequest)
-        self.urlRequest = baseRequest
-    }
-    
-    private static func setDefaultHeaders(to request: inout URLRequest) {
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("XmlHttpRequest", forHTTPHeaderField: "X-Requested-With")
-    }
-}
 
-// Примеры базовых запросов и методов для сериализации JSON
-extension HTTPMethod {
-    func baseRequest(path: NetworkRequest, authorization: Bool, dataToEncrypt: String? = nil) -> RequestBuilder {
-        // Создание базового запроса и настройка
-        RequestBuilder(url: path.requestPath!, method: self)
-    }
-}
-
-// Построитель запроса
-struct RequestBuilder {
-    private var request: URLRequest
-    
-    init(url: URL, method: HTTPMethod) {
-        request = URLRequest(url: url)
-        request.httpMethod = method.rawValue
-    }
-    
-    func buildApplicationJSONRequest<T: Codable>(with data: T) -> Request? {
-        do {
-            request.httpBody = try JSONEncoder().encode(data)
-            return Request(urlRequest: request)
-        } catch {
-            return nil
+        if errorType != nil {
+            do {
+                let decodedError = try JSONDecoder().decode(E.self, from: data)
+                throw APIError<E>.validation(decodedError)
+            } catch {
+                throw APIError<E>.decodingFailure(error)
+            }
+        } else {
+            throw APIError<E>.external(
+                code: httpResponse.statusCode,
+                message: nil,
+                title: nil
+            )
         }
     }
 }

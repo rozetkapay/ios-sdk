@@ -205,30 +205,3 @@ extension InputTextFieldRepresentable {
         }
     }
 }
-
-
-
-
-
-
-#warning("пример удалить")
-/////////////////
-struct Lable: UIViewRepresentable {
-    
-    let text: String
-    
-    init(text: String) {
-        self.text = text
-    }
-    
-    func makeUIView(context: Context) -> UILabel {
-        let lbl = UILabel(frame: .zero)
-        lbl.textColor = .green
-        lbl.text = self.text
-        return lbl
-    }
-    
-    func updateUIView(_ uiView: UILabel, context: Context) {}
-    
-}
-

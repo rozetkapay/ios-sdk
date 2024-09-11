@@ -19,6 +19,8 @@ public struct TokenizationView: View {
     
     ///
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
+    
     @StateObject var viewModel: TokenizationViewModel
     
     //MARK: - Init
@@ -37,7 +39,24 @@ public struct TokenizationView: View {
     
     public var body: some View {
         NavigationView {
-            if viewModel.isLoaded {
+            if viewModel.isLoading {
+                ZStack {
+                    Color.white
+                        .ignoresSafeArea()
+                    LoadingView()
+                }
+            }else if viewModel.isError {
+                ErrorView(
+                    errorMessage: viewModel.errorMessage,
+                    onCancel: {
+                        viewModel.cancelled()
+                    },
+                    onRetry: {
+                        viewModel.validateAll()
+                    }
+                )
+                .padding()
+            }else {
                 VStack {
                     headerView
                     formView
@@ -49,12 +68,6 @@ public struct TokenizationView: View {
                 .navigationBarItems(leading: closeButton)
                 .onTapGesture {
                     hideKeyboard()
-                }
-            } else {
-                ZStack {
-                    Color.white
-                        .ignoresSafeArea()
-                    LoadingView()
                 }
             }
         }
@@ -377,21 +390,4 @@ public struct TokenizationView: View {
         callback: {
         _ in
     })
-        
-        
-        
-        
-        
-//        card: CardData(
-//            cardName: nil,
-//            cardNumber: "5168 7450 2164 9378",
-//            expiryDate: CardExpirationDate(
-//                month: 11,
-//                year: 24
-//            ),
-//            cvv: "123",
-//            cardholderName: nil,
-//            email: nil
-//        )
-//    )
 }

@@ -9,7 +9,7 @@ import UIKit
 
 extension String {
     var isEmptyOrValue: String? {
-        if self == "" {
+        if self == "" || self.isNilOrBlank {
             return nil
         }else{
             return self
@@ -17,13 +17,17 @@ extension String {
     }
     
     var isNilOrEmpty: Bool {
-        self == ""
+        self == "" || self.isNilOrBlank
+    }
+    
+    var isNilOrBlank: Bool {
+        return self.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
 
 extension Optional where Wrapped == String {
     var isNilOrEmpty: Bool {
-        self == nil || self == ""
+        self == nil || self == "" || self.isNilOrBlank
     }
     
     var isNilOrEmptyValue: String? {
@@ -142,3 +146,5 @@ extension NSMutableAttributedString {
         attributedString.replaceCharacters(in: nsRange, with: with)
     }
 }
+
+

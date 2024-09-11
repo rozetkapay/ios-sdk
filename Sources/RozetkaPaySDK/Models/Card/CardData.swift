@@ -26,8 +26,15 @@ public struct CardData: Identifiable {
         cardholderName: String?,
         email: String?
     ) {
+       
+        if cardNumber.containsNonDigits {
+            self.cardNumber = cardNumber.digitsOnly
+        }else {
+            self.cardNumber = cardNumber
+        }
+        
         self.cardName = cardName
-        self.cardNumber = cardNumber
+       
         self.expiryDate = expiryDate
         self.cvv = cvv
         self.cardholderName = cardholderName

@@ -19,7 +19,7 @@ public class ProvideCardPaymentSystemUseCase {
             return nil
         }
         
-        let _value = value.replacingOccurrences(of: " ", with: "")
+        let _value = value.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "*", with: "")
         
         guard _value.count >= 4, _value.range(of: "^[0-9]+$", options: .regularExpression) != nil else {
             return nil
