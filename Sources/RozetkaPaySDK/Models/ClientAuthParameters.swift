@@ -7,10 +7,10 @@
 
 import Foundation
 
-public struct ClientAuthParameters: Codable {
-    let token: String
+public struct ClientAuthParameters: ClientAuthParametersProtocol {
+    public let key: String
     
    public init(token: String) {
-        self.token = token
+        self.key = token
     }
 }

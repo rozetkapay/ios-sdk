@@ -35,11 +35,25 @@ enum RequestHeaderField: String {
     case widget = "X-Widget-Id"
     case contentType = "Content-Type"
     case requested = "X-Requested-With"
+    case authorization = "Authorization"
 }
 
-enum RequestHeaderFieldValue: String {
-    case json = "application/json"
-    case xml = "XmlHttpRequest"
+enum RequestHeaderFieldValue {
+    case json
+    case xml
+    case basic(token: String)
+    
+    
+    var rawValue: String {
+        switch self {
+        case .json:
+            return "application/json"
+        case .xml:
+            return "XmlHttpRequest"
+        case .basic(let token):
+            return "Basic \(token)"
+        }
+    }
 }
 
 public struct Request {

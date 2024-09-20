@@ -9,7 +9,7 @@
 import SwiftUI
 import PassKit
 
-class PayViewModel: ObservableObject {
+class PayViewModel:  BaseViewModel {
     //    private val clientAuthParameters: ClientAuthParameters,
     //        private val parameters: PaymentParameters,
     //        private val resourcesProvider: ResourcesProvider,
@@ -18,65 +18,29 @@ class PayViewModel: ObservableObject {
     //        private val createPaymentUseCase: CreatePaymentUseCase,
     //        private val checkPaymentStatusUseCase: CheckPaymentStatusUseCase,
     //        private val googlePayInteractor: GooglePayInteractor?,
+    private let requestGroup = DispatchGroup()
     
-    
-    
-    //MARK: - Properties
-    let client: ClientAuthParameters
-    let viewFieldsParameters: PaymentViewParameters
-    let themeConfigurator: RozetkaPayThemeConfigurator
-    let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
-    
+    let applePaymentHandler: ApplePaymentHandler?
     let applePayConfig: ApplePayConfig?
 
     let amountParameters: PaymentParameters.AmountParameters
     let orderId: String
     let callbackUrl: String?
     
-    let isShowCardName: Bool
-    let isShowCardholderName: Bool
-    let isShowEmail: Bool
-    
     let isAllowTokenization: Bool
     let isAllowApplePay: Bool
  
     let amountWithCurrencyStr: String
     
+    @Published var start3dsConfirmation = false //
     private let callback: ((PaymentResult) -> Void)?
-    
-    //MARK: - UI Properties
-    
-    @Published var isLoaded: Bool = true
-    @Published var isNeedToTokenizationCard: Bool = false
-    
-    @Published var cardNumber: String? = nil
-    @Published var cvv: String?
-    @Published var expiryDate: String? = nil
-    @Published var cardholderName: String? = nil
-
-    @Published var errorMessageCardNumber: String? = nil
-    @Published var errorMessageCvv: String? = nil
-    @Published var errorMessageExpiryDate: String? = nil
-    @Published var errorMessageCardholderName: String? = nil
-
-    @Published var detectedPaymentSystem: PaymentSystem? = nil
-
-   
-    
-    
-    var paymentSystemLogoName: String {
-        detectedPaymentSystem?.logoName ?? PaymentSystem.defaultLogoName
-    }
     
     //MARK: _ Init
     init(
         parameters: PaymentParameters,
+        provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
         callback: @escaping (PaymentResult) -> Void
     ) {
-
-        self.client = parameters.client
-        self.viewFieldsParameters = parameters.viewFieldsParameters
-        self.themeConfigurator = parameters.themeConfigurator
         
         self.amountParameters = parameters.amountParameters
         self.amountWithCurrencyStr = MoneyFormatter.formatCoinsToMoney(
@@ -88,77 +52,124 @@ class PayViewModel: ObservableObject {
         self.callbackUrl = parameters.callbackUrl
         self.isAllowTokenization = parameters.isAllowTokenization
         
-        self.isShowCardName = parameters.viewFieldsParameters.cardNameField.isShow
-        self.isShowCardholderName = parameters.viewFieldsParameters.cardholderNameField.isShow
-        self.isShowEmail = parameters.viewFieldsParameters.emailField.isShow
-        
         self.applePayConfig = parameters.applePayConfig
         self.isAllowApplePay = parameters.applePayConfig?.checkApplePayAvailability() ?? false
+        self.applePaymentHandler = ApplePaymentHandler(config: parameters.applePayConfig)
         
-        self.provideCardPaymentSystemUseCase = ProvideCardPaymentSystemUseCase()
         self.callback = callback
 
-        self.setupBindings()
-    }
-
-    private func setupBindings() {
-        $cardNumber
-            .map { self.detectPaymentSystem($0) }
-            .assign(to: &$detectedPaymentSystem)
-    }
-
-    func validateAll() {
-        guard let validCardNumber = validateCardNumber(cardNumber),
-              let validExpiryDate = validateExpiryDate(expiryDate),
-              let validCVV = validateCVV(cvv)
-        else {
-            return
-        }
-        
-        callback?(
-            .complete(orderId: "test", paymentId: "test")
+        super.init(
+            client: parameters.client,
+            viewParameters: parameters.viewParameters,
+            themeConfigurator: parameters.themeConfigurator,
+            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
         )
     }
 
-    @discardableResult private func detectPaymentSystem(_ value: String?) -> PaymentSystem? {
-        return provideCardPaymentSystemUseCase.invoke(cardNumberPrefix: value)
-    }
-
-    func validateCardNumber(_ value: String?) -> String? {
-        switch CardNumberValidator().validate(value: value) {
-        case .valid:
-            errorMessageCardNumber = nil
-            return nil
-        case let .error(message):
-            errorMessageCardNumber = message
-            return value
+//    override func loading(validModel: ValidationResultModel) {
+//        callback?(
+//            .complete(orderId: "test", paymentId: "test")
+//        )
+//    }
+//    
+    override func loading(validModel: ValidationResultModel) {
+        var errors = false
+        
+        requestGroup.enter()
+        let model = CardRequestModel(
+            cardNumber: validModel.cardNumber,
+            cardExpMonth: validModel.cardExpMonth,
+            cardExpYear: validModel.cardExpYear,
+            cardCvv: validModel.cardCvv,
+            cardholderName: validModel.cardholderName,
+            customerEmail: validModel.customerEmail
+        )
+        tokenizeCard(key: client.key, model: model)
+        
+        requestGroup.enter()
+       
+        let payModel = PaymentRequestModel(
+            amount: amountParameters.amount.currencyFormatAmount(),
+            currency: amountParameters.currencyCode,
+            externalId: orderId,
+            customer: CustomerDto(paymentMethod: .cardToken(CardTokenDto(token: "тут нужен токен карті")))
+        )
+                                        
+        payByCard(key: client.key, model: payModel)
+        
+        requestGroup.notify(queue: .main) { [weak self] in
+            self?.isLoading = false
         }
     }
     
-    func validateExpiryDate(_ value: String?) -> CardExpirationDate? {
-        switch CardExpirationDateValidator(
-            expirationValidationRule: RozetkaPaySdkValidationRules().cardExpirationDateValidationRule
-        ).validate(value: value) {
-        case .valid:
-            errorMessageExpiryDate = nil
-            return CardExpirationDate(rawString: value)
-        case .error(let message):
-            errorMessageExpiryDate = message
-            return nil
+    
+   override func cancelled() {
+        self.isLoading = false
+        self.isError = false
+        self.errorMessage = nil
+       callback?(.cancelled)
+    }
+    
+    
+    func startApplePayPayment() {
+        #warning("to do - startApplePayPayment")
+        self.applePaymentHandler?.startPayment { (success) in
+            if success {
+                print("Success")
+            } else {
+                print("Failed")
+            }
         }
     }
-
-    func validateCVV(_ value: String?) -> String? {
-        switch CardCVVValidator().validate(value: value) {
-        case .valid:
-            errorMessageCvv = nil
-            return nil
-        case let .error(message):
-            errorMessageCvv = message
-            return nil
-        }
-    }
-
+    
+    private func payByCard(key: String, model: PaymentRequestModel) {
+           self.isLoading = true
+           self.isError = false
+           self.errorMessage = nil
+           
+        
+        PayService.createPayment(key: key, model: model) { [weak self] result in
+//               DispatchQueue.main.async {
+//                   
+//                   switch result {
+//                   case .complete(orderId: <#T##String#>, paymentId: <#T##String#>)
+//                           
+//                           .success(let success):
+//                       self?.requestGroup.leave()
+//                   case .failure(let error):
+//                       switch error {
+//                       case .cancelled:
+//                           self?.requestGroup.leave()
+//                       case let .failed(message, _):
+//                           self?.requestGroup.leave()
+//                       }
+//                   }
+//               }
+           }
+       }
+    
+    private func tokenizeCard(key: String, model: CardRequestModel) {
+           self.isLoading = true
+           self.isError = false
+           self.errorMessage = nil
+           
+           TokenizationService.tokenizeCard(key: key, model: model) { [weak self] result in
+               DispatchQueue.main.async {
+                   
+                   switch result {
+                   case .success(let success):
+                       self?.requestGroup.leave()
+                   case .failure(let error):
+                       switch error {
+                       case .cancelled:
+                           self?.requestGroup.leave()
+                       case let .failed(message, _):
+                           self?.requestGroup.leave()
+                       }
+                   }
+               }
+           }
+       }
     
 //    private fun checkGooglePayParameters() {
 //        if (parameters.googlePayConfig is GooglePayConfig.Test) {

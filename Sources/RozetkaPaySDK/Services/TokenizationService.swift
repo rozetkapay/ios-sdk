@@ -9,11 +9,12 @@ import Foundation
 import OSLog
 
 open class TokenizationService {
-    static func tokenizeCard(apiKey: String, model: CardRequestModel, result: @escaping (TokenizationResult) -> Void) {
+    
+    static func tokenizeCard(key: String, model: CardRequestModel, result: @escaping (TokenizationResult) -> Void) {
         Task {
             do {
                 let response = try await TokenizationServiceEndpoint
-                    .tokenizationCard(data: model, apiKey: apiKey)
+                    .tokenizationCard(data: model, key: key)
                     .execute(TokenizationResponse.self, errorType: TokenizationError.self)
                 
                 Logger.tokenizedCard.info("✅ Success: TokenizedCard is success")
@@ -35,12 +36,14 @@ open class TokenizationService {
             }
         }
     }
+    
 }
 
 fileprivate enum TokenizationServiceEndpoint: APIConfiguration {
+    
     case tokenizationCard(
         data: CardRequestModel,
-        apiKey: String,
+        key: String,
         signer: RequestSignerImpl = RequestSignerImpl()
     )
     
@@ -64,14 +67,14 @@ fileprivate enum TokenizationServiceEndpoint: APIConfiguration {
     
     var headers: Headers? {
         switch self {
-        case let .tokenizationCard(model, apiKey, signer):
+        case let .tokenizationCard(model, key, signer):
             do {
-                let signature = try signer.sign(key: apiKey, data: model)
+                let signature = try signer.sign(key: key, data: model)
                 return [
                     RequestHeaderField.contentType.rawValue: RequestHeaderFieldValue.json.rawValue,
                     RequestHeaderField.requested.rawValue: RequestHeaderFieldValue.xml.rawValue,
                     RequestHeaderField.sign.rawValue: signature,
-                    RequestHeaderField.widget.rawValue: apiKey
+                    RequestHeaderField.widget.rawValue: key
                 ]
             } catch {
                 Logger.network.warning("⚠️ WARNING: Error signing request: \(error)")

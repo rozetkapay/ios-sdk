@@ -13,8 +13,10 @@ class CardExpirationDateValidator: Validator {
     private let expirationValidationRule: CardExpirationDateValidationRule
     private let currentLocalDateProvider: () -> Date
     
-    init(expirationValidationRule: CardExpirationDateValidationRule,
-         currentLocalDateProvider: @escaping () -> Date = Date.init) {
+    init(
+        expirationValidationRule: CardExpirationDateValidationRule,
+        currentLocalDateProvider: @escaping () -> Date = Date.init
+    ) {
         self.expirationValidationRule = expirationValidationRule
         self.currentLocalDateProvider = currentLocalDateProvider
     }

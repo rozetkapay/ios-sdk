@@ -7,10 +7,16 @@
 
 import Foundation
 
-public struct TokenizationParameters {
-    let client: ClientWidgetParameters
-    let viewParameters: TokenizationViewParameters
-    let themeConfigurator: RozetkaPayThemeConfigurator
+public protocol ParametersProtocol {
+    var client: ClientAuthParametersProtocol {get}
+    var viewParameters: ViewParametersProtocol {get}
+    var themeConfigurator: RozetkaPayThemeConfigurator {get}
+}
+
+public struct TokenizationParameters: ParametersProtocol {
+    public let client: ClientAuthParametersProtocol
+    public let viewParameters: ViewParametersProtocol
+    public let themeConfigurator: RozetkaPayThemeConfigurator
     
     public init(
         client: ClientWidgetParameters,

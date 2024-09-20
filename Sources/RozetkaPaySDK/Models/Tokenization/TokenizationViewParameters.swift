@@ -7,10 +7,10 @@
 
 import Foundation
 
-public struct TokenizationViewParameters {
-    let cardNameField: FieldRequirement
-    let emailField: FieldRequirement
-    let cardholderNameField: FieldRequirement
+public struct TokenizationViewParameters: ViewParametersProtocol {
+    public let cardNameField: FieldRequirement
+    public let emailField: FieldRequirement
+    public let cardholderNameField: FieldRequirement
 
     public init(
         cardNameField: FieldRequirement = .optional,

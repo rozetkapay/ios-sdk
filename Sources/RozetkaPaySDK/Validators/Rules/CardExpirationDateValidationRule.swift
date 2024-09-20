@@ -12,6 +12,8 @@ public protocol CardExpirationDateValidationRule {
 }
 
 public struct DefaultCardExpirationDateValidationRule: CardExpirationDateValidationRule {
+    public init() {}
+    
     public func validate(currentDate: Date, expYear: Int, expMonth: Int) -> Bool {
         let calendar = Calendar.current
         let currentYear = calendar.component(.year, from: currentDate) % 100
@@ -20,14 +22,14 @@ public struct DefaultCardExpirationDateValidationRule: CardExpirationDateValidat
     }
 }
 
-struct MinimalDateCardExpirationDateValidationRule: CardExpirationDateValidationRule {
+public struct MinimalDateCardExpirationDateValidationRule: CardExpirationDateValidationRule {
     private let allowedMinimalDate: Date
 
-    init(allowedMinimalDate: Date) {
+    public init(allowedMinimalDate: Date) {
         self.allowedMinimalDate = allowedMinimalDate
     }
 
-    func validate(currentDate: Date, expYear: Int, expMonth: Int) -> Bool {
+    public func validate(currentDate: Date, expYear: Int, expMonth: Int) -> Bool {
         let calendar = Calendar.current
         let minYear = calendar.component(.year, from: allowedMinimalDate) % 100
         let minMonth = calendar.component(.month, from: allowedMinimalDate)

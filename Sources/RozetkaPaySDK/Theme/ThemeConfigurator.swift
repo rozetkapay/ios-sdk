@@ -91,14 +91,18 @@ public struct RozetkaPayDomainThemeDefaults {
     
     public static func sizes(
         sheetCornerRadius: CGFloat = 20,
-        componentCornerRadius: CGFloat = 12,
-        buttonCornerRadius: CGFloat = 12,
+        componentCornerRadius: CGFloat = 16,
+        buttonCornerRadius: CGFloat = 16,
+        textFieldCornerRadius: CGFloat = 16,
+        textFieldFrameHeight: CGFloat = 22,
         borderWidth: CGFloat = 1
     ) -> DomainSizes {
         return DomainSizes(
             sheetCornerRadius: sheetCornerRadius,
             componentCornerRadius: componentCornerRadius,
             buttonCornerRadius: buttonCornerRadius,
+            textFieldCornerRadius: textFieldCornerRadius,
+            textFieldFrameHeight: textFieldFrameHeight,
             borderWidth: borderWidth
         )
     }

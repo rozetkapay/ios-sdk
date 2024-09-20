@@ -7,10 +7,16 @@
 
 import Foundation
 
-public struct PaymentViewParameters {
-    let cardNameField: FieldRequirement
-    let emailField: FieldRequirement
-    let cardholderNameField: FieldRequirement
+public protocol ViewParametersProtocol {
+    var cardNameField: FieldRequirement { get}
+    var emailField: FieldRequirement { get }
+    var cardholderNameField: FieldRequirement {get}
+}
+
+public struct PaymentViewParameters: ViewParametersProtocol {
+    public let cardNameField: FieldRequirement
+    public let emailField: FieldRequirement
+    public let cardholderNameField: FieldRequirement
 
     public init(
         cardNameField: FieldRequirement = .none,

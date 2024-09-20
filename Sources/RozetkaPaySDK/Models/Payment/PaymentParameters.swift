@@ -7,11 +7,11 @@
 
 import Foundation
 
-public struct PaymentParameters {
-    let client: ClientAuthParameters
-    let viewFieldsParameters: PaymentViewParameters
-    let themeConfigurator: RozetkaPayThemeConfigurator
-
+public struct PaymentParameters: ParametersProtocol {
+    public let client: ClientAuthParametersProtocol
+    public let viewParameters: ViewParametersProtocol
+    public let themeConfigurator: RozetkaPayThemeConfigurator
+    
     let amountParameters: AmountParameters
     let orderId: String
     let callbackUrl: String?
@@ -35,7 +35,7 @@ public struct PaymentParameters {
     
     public init(
         client: ClientAuthParameters,
-        viewFieldsParameters: PaymentViewParameters = PaymentViewParameters(),
+        viewParameters: PaymentViewParameters = PaymentViewParameters(),
         themeConfigurator: RozetkaPayThemeConfigurator = RozetkaPayThemeConfigurator(),
         amountParameters: AmountParameters,
         orderId: String,
@@ -49,7 +49,7 @@ public struct PaymentParameters {
         self.isAllowTokenization = isAllowTokenization
         self.applePayConfig = applePayConfig
         self.client = client
-        self.viewFieldsParameters = viewFieldsParameters
+        self.viewParameters = viewParameters
         self.themeConfigurator = themeConfigurator
     }
 }

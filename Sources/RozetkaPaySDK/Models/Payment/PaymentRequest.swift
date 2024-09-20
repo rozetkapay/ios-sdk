@@ -31,10 +31,26 @@ public struct ApplePayPaymentRequest: PaymentRequest {
     public let paymentParameters: BasePaymentParameters
     public let applePayToken: String
     
-    public init(authParameters: ClientAuthParameters, paymentParameters: BasePaymentParameters, applePayToken: String) {
+    public init(
+        authParameters: ClientAuthParameters,
+        paymentParameters: BasePaymentParameters,
+        applePayToken: String
+    ) {
         self.authParameters = authParameters
         self.paymentParameters = paymentParameters
         self.applePayToken = applePayToken
     }
 }
 
+public struct CardPayPaymentRequest: PaymentRequest {
+    public let authParameters: ClientAuthParameters
+    public let paymentParameters: BasePaymentParameters
+    
+    public init(
+        authParameters: ClientAuthParameters,
+        paymentParameters: BasePaymentParameters
+    ) {
+        self.authParameters = authParameters
+        self.paymentParameters = paymentParameters
+    }
+}
