@@ -33,13 +33,13 @@ class PayViewModel:  BaseViewModel {
     let amountWithCurrencyStr: String
     
     @Published var start3dsConfirmation = false //
-    private let callback: ((PaymentResult) -> Void)?
+    private let onResultCallback: ((PaymentResult) -> Void)?
     
     //MARK: _ Init
     init(
         parameters: PaymentParameters,
         provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
-        callback: @escaping (PaymentResult) -> Void
+        onResultCallback: @escaping (PaymentResult) -> Void
     ) {
         
         self.amountParameters = parameters.amountParameters
@@ -54,9 +54,9 @@ class PayViewModel:  BaseViewModel {
         
         self.applePayConfig = parameters.applePayConfig
         self.isAllowApplePay = parameters.applePayConfig?.checkApplePayAvailability() ?? false
-        self.applePaymentHandler = ApplePaymentHandler(config: parameters.applePayConfig)
+        self.applePaymentHandler = ApplePaymentHandler(config: parameters.applePayConfig, amount:  parameters.amountParameters)
         
-        self.callback = callback
+        self.onResultCallback = onResultCallback
 
         super.init(
             client: parameters.client,
@@ -66,17 +66,12 @@ class PayViewModel:  BaseViewModel {
         )
     }
 
-//    override func loading(validModel: ValidationResultModel) {
-//        callback?(
-//            .complete(orderId: "test", paymentId: "test")
-//        )
-//    }
-//    
     override func loading(validModel: ValidationResultModel) {
         var errors = false
         
         requestGroup.enter()
         let model = CardRequestModel(
+            cardName: validModel.cardName,
             cardNumber: validModel.cardNumber,
             cardExpMonth: validModel.cardExpMonth,
             cardExpYear: validModel.cardExpYear,
@@ -107,7 +102,7 @@ class PayViewModel:  BaseViewModel {
         self.isLoading = false
         self.isError = false
         self.errorMessage = nil
-       callback?(.cancelled)
+       onResultCallback?(.cancelled)
     }
     
     
@@ -129,8 +124,8 @@ class PayViewModel:  BaseViewModel {
            
         
         PayService.createPayment(key: key, model: model) { [weak self] result in
-//               DispatchQueue.main.async {
-//                   
+               DispatchQueue.main.async {
+                   self?.isLoading = false
 //                   switch result {
 //                   case .complete(orderId: <#T##String#>, paymentId: <#T##String#>)
 //                           
@@ -144,7 +139,7 @@ class PayViewModel:  BaseViewModel {
 //                           self?.requestGroup.leave()
 //                       }
 //                   }
-//               }
+               }
            }
        }
     

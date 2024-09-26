@@ -31,6 +31,11 @@ public enum Localization: String {
     
     case rozetka_pay_payment_confirmation_3ds_loading
     
+    case rozetka_pay_payment_applepay_label_amount
+    case rozetka_pay_payment_applepay_label_tax
+    case rozetka_pay_payment_applepay_label_total
+    
+    
     case rozetka_pay_form_card_info_title
     case rozetka_pay_form_optional_card_name
     case rozetka_pay_form_card_number

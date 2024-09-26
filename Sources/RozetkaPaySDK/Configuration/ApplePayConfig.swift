@@ -14,27 +14,37 @@ public class ApplePayConfig {
     let merchantName: String
     let supportedNetworks: [PKPaymentNetwork]
     let merchantCapabilities: PKMerchantCapability
+    let currencyCode: String
+    let countryCode: String
     
-    public init(
+    init(
         merchantIdentifier: String,
         merchantName: String,
         supportedNetworks: [PKPaymentNetwork]? = nil,
-        merchantCapabilities: PKMerchantCapability? = nil
+        merchantCapabilities: PKMerchantCapability? = nil,
+        currencyCode: String? = nil,
+        countryCode: String? = nil
     ) {
         self.merchantIdentifier = merchantIdentifier
         self.merchantName = merchantName
         self.supportedNetworks = supportedNetworks ?? [.visa, .masterCard]
         self.merchantCapabilities = merchantCapabilities ?? .capability3DS
+        self.countryCode = countryCode ?? "UA"
+        self.currencyCode = currencyCode ?? "UAH"
     }
     
     public class Test: ApplePayConfig {
         public init(
             merchantIdentifier: String,
-            merchantName: String = "RozetkaPay Test Merchant"
+            merchantName: String = "RozetkaPay Test Merchant",
+            currencyCode: String? = nil,
+            countryCode: String? = nil
         ) {
             super.init(
                 merchantIdentifier: merchantIdentifier,
-                merchantName: merchantName
+                merchantName: merchantName,
+                currencyCode: currencyCode,
+                countryCode: countryCode
             )
         }
     }
@@ -44,13 +54,17 @@ public class ApplePayConfig {
             merchantIdentifier: String,
             merchantName: String,
             supportedNetworks: [PKPaymentNetwork] = [.visa, .masterCard],
-            merchantCapabilities: PKMerchantCapability = .capability3DS
+            merchantCapabilities: PKMerchantCapability = .capability3DS,
+            currencyCode: String? = nil,
+            countryCode: String? = nil
         ) {
             super.init(
                 merchantIdentifier: merchantIdentifier,
                 merchantName: merchantName,
                 supportedNetworks: supportedNetworks,
-                merchantCapabilities: merchantCapabilities
+                merchantCapabilities: merchantCapabilities,
+                currencyCode: currencyCode,
+                countryCode: countryCode
             )
         }
     }

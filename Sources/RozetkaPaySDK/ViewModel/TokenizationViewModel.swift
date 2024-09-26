@@ -9,13 +9,13 @@ import SwiftUI
 
 final class TokenizationViewModel: BaseViewModel {
     
-    private let callback: ((TokenizationResult) -> Void)?
+    private let onResultCallback: ((TokenizationResult) -> Void)?
     init(
         parameters: TokenizationParameters,
         provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
-        callback: @escaping (TokenizationResult) -> Void
+        onResultCallback: @escaping (TokenizationResult) -> Void
     ) {
-        self.callback = callback
+        self.onResultCallback = onResultCallback
         super.init(
             client: parameters.client,
             viewParameters: parameters.viewParameters,
@@ -27,7 +27,7 @@ final class TokenizationViewModel: BaseViewModel {
         
 #warning("to do - Удалить тестовые данные")
         cardName = "test"
-        cardNumber = "4242 4242 4242 4243"
+        cardNumber = "4242 4242 4242 4242"
         expiryDate = "12/29"
         cvv = "123"
         cardholderName = "Test Test"
@@ -37,6 +37,7 @@ final class TokenizationViewModel: BaseViewModel {
     
     override func loading(validModel: ValidationResultModel) {
         let model = CardRequestModel(
+            cardName: validModel.cardName,
             cardNumber: validModel.cardNumber,
             cardExpMonth: validModel.cardExpMonth,
             cardExpYear: validModel.cardExpYear,
@@ -52,7 +53,7 @@ final class TokenizationViewModel: BaseViewModel {
         self.isLoading = false
         self.isError = false
         self.errorMessage = nil
-        callback?(.failure(.cancelled))
+        onResultCallback?(.failure(.cancelled))
     }
     
     private func tokenizeCard(key: String, model: CardRequestModel) {
@@ -66,7 +67,11 @@ final class TokenizationViewModel: BaseViewModel {
                 switch result {
                 case .success(let success):
                     self?.isError = false
-                    self?.callback?(.success(success))
+                    var successModel = success
+                    successModel.setup(name: model.cardName)
+                    self?.onResultCallback?(
+                        .success(successModel)
+                    )
                 case .failure(let error):
                     switch error {
                     case .cancelled:

@@ -8,21 +8,20 @@
 import SwiftUI
 
 struct ErrorView: View {
-    private enum Constants {
-        static let textFieldCornerRadius: CGFloat = 16
-        static let textFieldFrameHeight: CGFloat = 22
-        static let buttonCornerRadius: CGFloat = 16
-    }
+    @Environment(\.colorScheme) var colorScheme
+    private let themeConfigurator: RozetkaPayThemeConfigurator
     
     var errorMessage: String
     var onCancel: () -> Void
     var onRetry: () -> Void
     
     init(
+        themeConfigurator: RozetkaPayThemeConfigurator,
         errorMessage: String? = nil,
         onCancel: @escaping () -> Void,
         onRetry: @escaping () -> Void
     ) {
+        self.themeConfigurator = themeConfigurator
         self.errorMessage = errorMessage ?? Localization.rozetka_pay_tokenization_error_common.description
         self.onCancel = onCancel
         self.onRetry = onRetry
@@ -31,57 +30,111 @@ struct ErrorView: View {
     var body: some View {
         VStack {
             Spacer()
-
-            
-            // Illustration Image
-            Image("rozetka_pay_error", bundle: .module)
-                .resizable()
-                .frame(width: 200, height: 200)
-                .foregroundColor(.green)
-                .padding()
-            
-            // Error Message
-            Text(errorMessage)  // Using the errorMessage parameter here
-                .font(.headline)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-                .padding(.bottom, 20)
-            
+            imageView
+            errorMessageView
             // Buttons
             VStack(spacing: 16) {
-                Button(action: onCancel) {
-                    Text(Localization.rozetka_pay_common_button_cancel.description)
-                        .foregroundColor(.green)
-                        .font(.system(size: 18, weight: .medium))
-                }
-                
-                Button(action: {
-                    onRetry()
-                }) {
-                    Text(Localization.rozetka_pay_common_button_retry.description)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(Color.green)
-                        .cornerRadius(Constants.buttonCornerRadius)
-                }
-//                .padding(.top, )
-                
-                
+                secondButton
+                mainButton
                 .padding(.horizontal, 20)
             }
             
             Spacer()
         }
-        .background(Color(.systemGray6))
-        .cornerRadius(20)
+        .background(
+            themeConfigurator
+            .colorScheme(colorScheme)
+            .surface
+        )
+        .cornerRadius(
+            themeConfigurator
+                .sizes
+                .sheetCornerRadius
+        )
         .padding()
+    }
+    
+    private var imageView: some View {
+        Image("rozetka_pay_error", bundle: .module)
+            .resizable()
+            .frame(width: 200, height: 200)
+            .padding()
+        
+    }
+    
+    private var errorMessageView: some View {
+        Text(errorMessage)
+            .font(
+                themeConfigurator
+                    .typography
+                    .body
+                
+            )
+            .multilineTextAlignment(.center)
+            .padding(.horizontal)
+            .padding(.bottom, 20)
+        
+    }
+    
+    private var mainButton: some View {
+        Button(action: {
+            onRetry()
+        }) {
+            Text(Localization.rozetka_pay_common_button_retry.description)
+                .font(
+                    themeConfigurator
+                        .typography
+                        .labelLarge
+                )
+                .bold()
+                .frame(maxWidth: .infinity)
+                .padding()
+                .foregroundColor(
+                   themeConfigurator
+                        .colorScheme(colorScheme)
+                        .onPrimary
+                    
+                )
+                .background(
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .primary
+                )
+                .cornerRadius(
+                    themeConfigurator
+                        .sizes
+                        .buttonCornerRadius
+                )
+        }
+        .padding(.top, 20)
+    }
+    
+    private var secondButton: some View {
+        Button(action: {
+            onCancel()
+        }) {
+            Text(Localization.rozetka_pay_common_button_cancel.description)
+                .font(
+                    themeConfigurator
+                        .typography
+                        .labelLarge
+                )
+                .bold()
+                .foregroundColor(
+                   themeConfigurator
+                        .colorScheme(colorScheme)
+                        .primary
+                    
+                )
+        }
+        .padding(.top, 20)
     }
 }
 
 #Preview {
     ErrorView(
-//        errorMessage: "test",  // Example error message
+        themeConfigurator: RozetkaPayThemeConfigurator(), 
+//        errorMessage: "test",
         onCancel: { print("Cancel tapped") },
         onRetry: { print("Retry tapped") }
     )

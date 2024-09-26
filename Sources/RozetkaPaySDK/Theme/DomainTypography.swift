@@ -6,84 +6,203 @@
 //
 
 import SwiftUI
+import UIKit
 
-// MARK: - DomainTypography Protocol
-/// A protocol that defines the typography styles for the domain.
-protocol DomainTypography: Codable {
-    var title: Font { get }
-    var subtitle: Font { get }
-    var body: Font { get }
-    var labelSmall: Font { get }
-    var labelLarge: Font { get }
-    var input: Font { get }
-    var legalText: Font { get }
+// MARK: - DomainTypography Struct
+
+public struct DomainTypography {
+    private let titleDp: Font
+    private let subtitleDp: Font
+    private let bodyDp: Font
+    private let labelSmallDp: Font
+    private let labelLargeDp: Font
+    private let inputDp: Font
+    private let legalTextDp: Font
+    
+    private let titleUIDp: UIFont
+    private let subtitleUIDp: UIFont
+    private let bodyUIDp: UIFont
+    private let labelSmallUIDp: UIFont
+    private let labelLargeUIDp: UIFont
+    private let inputUIDp: UIFont
+    private let legalTextUIDp: UIFont
+    
+    var title: Font {
+        return titleDp
+    }
+    
+    var subtitle: Font {
+        return subtitleDp
+    }
+    
+    var body: Font {
+        return  bodyDp
+    }
+    
+    var labelSmall: Font {
+        return labelSmallDp
+    }
+    
+    var labelLarge: Font {
+        return labelLargeDp
+    }
+    
+    var input: Font {
+        return inputDp
+    }
+    
+    var legalText: Font {
+        return legalTextDp
+    }
+    
+    // UIKit fonts
+    var titleUI: UIFont {
+       return titleUIDp
+    }
+    
+    var subtitleUI: UIFont {
+        return subtitleUIDp
+    }
+    
+    var bodyUI: UIFont {
+        return bodyUIDp
+    }
+    
+    var labelSmallUI: UIFont {
+        return labelSmallUIDp
+    }
+    
+    var labelLargeUI: UIFont {
+        return labelLargeUIDp
+    }
+    
+    var inputUI: UIFont {
+        return inputUIDp
+    }
+    
+    var legalTextUI: UIFont {
+        return legalTextUIDp
+    }
+    
+    public init(
+        ///Font
+        title: Font,
+        subtitle: Font,
+        body: Font,
+        labelSmall: Font,
+        labelLarge: Font,
+        input: Font,
+        legalText: Font,
+        ///UIFont
+        titleUI: UIFont,
+        subtitleUI: UIFont,
+        bodyUI: UIFont,
+        labelSmallUI: UIFont,
+        labelLargeUI: UIFont,
+        inputUI: UIFont,
+        legalTextUI: UIFont
+    ) {
+        self.titleDp = title
+        self.subtitleDp = subtitle
+        self.bodyDp = body
+        self.labelSmallDp = labelSmall
+        self.labelLargeDp = labelLarge
+        self.inputDp = input
+        self.legalTextDp = legalText
+        ///
+        self.titleUIDp = titleUI
+        self.subtitleUIDp = subtitleUI
+        self.bodyUIDp = bodyUI
+        self.labelSmallUIDp = labelSmallUI
+        self.labelLargeUIDp = labelLargeUI
+        self.inputUIDp = inputUI
+        self.legalTextUIDp = legalTextUI
+    }
 }
 
-// MARK: - DomainTypographyDefaults Struct
-
 /// Default implementation of `DomainTypography` providing standard text styles.
-struct DomainTypographyDefaults: DomainTypography {
+public struct DomainTypographyDefaults {
     
-    /// Default font family for all text styles
+    /// Default font family for all text styles in SwiftUI
     private static let defaultFont = Font.system(.body, design: .default)
     
+    /// Default font family for all text styles in UIKit
+    private static let defaultFontUI = UIFont.systemFont(ofSize: 16, weight: .regular)
+    
     /// Title text style
-    var title: Font {
+    public static var title: Font {
         DomainTypographyDefaults.defaultFont
             .weight(.semibold)
             .size(22)
     }
     
+    public static var titleUI: UIFont {
+        DomainTypographyDefaults.defaultFontUI.withSize(22).withWeight(.semibold)
+    }
+    
     /// Subtitle text style
-    var subtitle: Font {
+    public static var subtitle: Font {
         DomainTypographyDefaults.defaultFont
-            .weight(.semibold)
+            .weight(.medium)
             .size(16)
     }
     
+    public static var subtitleUI: UIFont {
+        DomainTypographyDefaults.defaultFontUI.withSize(16).withWeight(.semibold)
+    }
+    
     /// Body text style
-    var body: Font {
+    public static var body: Font {
         DomainTypographyDefaults.defaultFont
             .weight(.regular)
             .size(16)
     }
     
+    public static var bodyUI: UIFont {
+        DomainTypographyDefaults.defaultFontUI.withSize(16).withWeight(.regular)
+    }
+    
     /// Small label text style
-    var labelSmall: Font {
+    public static var labelSmall: Font {
         DomainTypographyDefaults.defaultFont
             .weight(.regular)
             .size(14)
     }
     
+    public static var labelSmallUI: UIFont {
+        DomainTypographyDefaults.defaultFontUI.withSize(14).withWeight(.regular)
+    }
+    
     /// Large label text style
-    var labelLarge: Font {
+    public static var labelLarge: Font {
         DomainTypographyDefaults.defaultFont
             .weight(.semibold)
             .size(18)
     }
     
+    public static var labelLargeUI: UIFont {
+        DomainTypographyDefaults.defaultFontUI.withSize(18).withWeight(.semibold)
+    }
+    
     /// Input text style
-    var input: Font {
+    public static var input: Font {
         DomainTypographyDefaults.defaultFont
             .weight(.regular)
             .size(16)
     }
     
+    public static var inputUI: UIFont {
+        DomainTypographyDefaults.defaultFontUI.withSize(16).withWeight(.regular)
+    }
+    
     /// Legal text style
-    var legalText: Font {
+    public static var legalText: Font {
         DomainTypographyDefaults.defaultFont
             .weight(.regular)
             .size(9)
     }
-}
-
-// MARK: - Font Extension
-extension Font {
-    /// Returns a font with the specified size.
-    ///
-    /// - Parameter size: The desired font size.
-    /// - Returns: A new `Font` instance with the specified size.
-    func size(_ size: CGFloat) -> Font {
-        return Self.system(size: size)
+    
+    public static var legalTextUI: UIFont {
+        DomainTypographyDefaults.defaultFontUI.withSize(9).withWeight(.regular)
     }
 }

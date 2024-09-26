@@ -26,6 +26,10 @@
 "rozetka_pay_payment_label_use_card" = "Or pay using card";
 "rozetka_pay_payment_confirmation_3ds_loading" = "Please wait…";
 
+"rozetka_pay_payment_applepay_label_amount" = "Amount";
+"rozetka_pay_payment_applepay_label_tax" = "Tax";
+"rozetka_pay_payment_applepay_label_total" = "Total";
+
 "rozetka_pay_payment_legal_text" = "Натискаючи кнопку «Оплатити», Ви підтверджуєте, що ознайомились з %1 від %2 та приймаєте його умови (приєднуєтеся до його умов), надаєте згоду на виконання разової платіжної операції та надаєте відмову від отримання повідомлення про здійснену операції з використанням платіжної картки.";
 "rozetka_pay_payment_legal_text_part_1" = "Публічним договором";
 "rozetka_pay_payment_legal_text_part_2" = "ТОВ «ФК «ЕВО»";

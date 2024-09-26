@@ -131,8 +131,8 @@ extension APIConfiguration {
 
         do {
             Logger.network.info("***************************************************************")
-            Logger.network.info("👀 Request.url: \n \(request.urlRequest.debugDescription) \n 👀")
-            Logger.network.info("👀 Request: \n \(String(data: request.urlRequest.httpBody ?? Data(), encoding: .utf8) ?? "Unable to convert data to String") \n 👀")
+            Logger.network.info("⚠️ Request.url: \n \(request.urlRequest.debugDescription) \n ⚠️")
+            Logger.network.info("⚠️ Request: \n \(String(data: request.urlRequest.httpBody ?? Data(), encoding: .utf8) ?? "Unable to convert data to String") \n ⚠️")
             
             let (response, data) = try await dataTask(with: request.urlRequest)
 

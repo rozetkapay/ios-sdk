@@ -13,16 +13,17 @@ public struct PayView: View {
     ///
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel: PayViewModel
+    @Environment(\.colorScheme) var colorScheme
     
     public init(
         parameters: PaymentParameters,
-        callback: @escaping (PaymentResult) -> Void
+        onResultCallback: @escaping (PaymentResult) -> Void
     ) {
         
         self._viewModel = StateObject(
             wrappedValue: PayViewModel(
                 parameters: parameters,
-                callback: callback
+                onResultCallback: onResultCallback
             )
         )
     }
@@ -31,12 +32,53 @@ public struct PayView: View {
         NavigationView {
             if viewModel.isLoading {
                 ZStack {
-                    Color.white
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .surface
+                        .opacity(0.8)
                         .ignoresSafeArea()
-                    LoadingView()
+                    LoadingView(
+                        tintColor: 
+                            viewModel
+                            .themeConfigurator
+                            .colorScheme(colorScheme)
+                            .primary
+                        ,
+                        textFont:
+                            viewModel
+                            .themeConfigurator
+                            .typography
+                            .body
+                        ,
+                        textColorDark: 
+                            viewModel
+                            .themeConfigurator
+                            .darkColorScheme
+                            .onSurface
+                        ,
+                        textColorWhite:
+                            viewModel
+                            .themeConfigurator
+                            .lightColorScheme
+                            .onSurface
+                        ,
+                        backgroundColorDark:
+                            viewModel
+                            .themeConfigurator
+                            .darkColorScheme
+                            .surface
+                        ,
+                        backgroundColorWhite:
+                            viewModel
+                            .themeConfigurator
+                            .lightColorScheme
+                            .surface
+                    )
                 }
             }else if viewModel.isError {
                 ErrorView(
+                    themeConfigurator: viewModel.themeConfigurator, 
                     errorMessage: viewModel.errorMessage,
                     onCancel: {
                         viewModel.cancelled()
@@ -87,8 +129,20 @@ public struct PayView: View {
         VStack(alignment: .leading) {
             HStack{
                 Text(Localization.rozetka_pay_payment_title.description)
-                    .font(.title)
+                    .font(
+                        viewModel
+                            .themeConfigurator
+                            .typography
+                            .title
+                    )
                     .bold()
+                    .foregroundColor(
+                        viewModel
+                            .themeConfigurator
+                            .colorScheme(colorScheme)
+                            .title
+                            
+                    )
                     .padding(.bottom, 20)
                 Spacer()
             }
@@ -112,7 +166,12 @@ public struct PayView: View {
             presentationMode.wrappedValue.dismiss()
         }) {
             Image(systemName: "xmark")
-                .foregroundColor(.black)
+                .foregroundColor(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .appBarIcon
+                )
         }
     }
     
@@ -124,13 +183,25 @@ public struct PayView: View {
         ApplePayButton(
             action: viewModel.startApplePayPayment,
             paymentButtonStyle:
-                viewModel.themeConfigurator.darkColorScheme.applePayButtonStyle
+                viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .applePayButtonStyle
         )
         .frame(height: 50)
-        .cornerRadius(viewModel.themeConfigurator.sizes.buttonCornerRadius)
+        .cornerRadius(
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonCornerRadius)
         .padding(.top, 20)
         .clipShape(
-            RoundedRectangle(cornerRadius: viewModel.themeConfigurator.sizes.buttonCornerRadius)
+            RoundedRectangle(
+                cornerRadius:
+                    viewModel
+                    .themeConfigurator
+                    .sizes
+                    .buttonCornerRadius)
         )
     }
     
@@ -139,12 +210,34 @@ public struct PayView: View {
             viewModel.validateAll()
         }) {
             Text(Localization.rozetka_pay_payment_pay_button.description(with: [viewModel.amountWithCurrencyStr]))
+                .font(
+                    viewModel
+                        .themeConfigurator
+                        .typography
+                        .labelLarge
+                )
+                .bold()
                 .frame(maxWidth: .infinity)
                 .padding()
-                .foregroundColor(.white)
-                .font(.headline)
-                .background(Color.green)
-                .cornerRadius(viewModel.themeConfigurator.sizes.buttonCornerRadius)
+                .foregroundColor(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .onPrimary
+                    
+                )
+                .background(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .primary
+                )
+                .cornerRadius(
+                    viewModel
+                        .themeConfigurator
+                        .sizes
+                        .buttonCornerRadius
+                )
         }
         .padding(.top, 20)
     }
@@ -160,7 +253,7 @@ public struct PayView: View {
         ),
         orderId: "test"
     ),
-            callback: {
+    onResultCallback: {
         _ in
     })
 }

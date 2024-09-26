@@ -109,7 +109,17 @@ public struct CardInfoView: View {
             }
             HStack{
                 Text(Localization.rozetka_pay_form_card_info_title.description)
-                    .font(.headline)
+                    .font(
+                        themeConfigurator
+                            .typography
+                            .subtitle
+                    )
+                    .bold()
+                    .foregroundColor(
+                        themeConfigurator
+                            .colorScheme(colorScheme)
+                            .subtitle
+                    )
                     .padding(.top, 20)
                 Spacer()
             }
@@ -143,26 +153,73 @@ public struct CardInfoView: View {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
-                    Localization.rozetka_pay_form_optional_card_name.description,
+                    placeholder: Localization.rozetka_pay_form_optional_card_name.description,
+                    placeholderFont: themeConfigurator
+                        .typography
+                        .inputUI,
+                    placeholderColor: themeConfigurator
+                        .colorScheme(colorScheme)
+                        .placeholder
+                        .toUIColor(),
                     text: $cardName,
+                    textColor: errorMessageCardName.isNilOrEmpty ?
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .onComponent
+                        .toUIColor()
+                    :
+                        themeConfigurator
+                        .colorScheme(
+                            colorScheme
+                        )
+                        .error
+                        .toUIColor(),
                     contentType: .name,
                     keyboardType: .default
                 )
-                .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
+                .frame(
+                    height: themeConfigurator.sizes.textFieldFrameHeight
+                )
                 .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
+                .background(
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .componentSurface
+                )
+                .cornerRadius(
+                    themeConfigurator
+                        .sizes
+                        .textFieldCornerRadius
+                )
             }
         }
     }
-        
+    
     private var cardHolderNameView: some View {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
-                    Localization.rozetka_pay_form_cardholder_name.description,
+                    placeholder: Localization.rozetka_pay_form_cardholder_name.description,
+                    placeholderFont: themeConfigurator
+                        .typography
+                        .inputUI,
+                    placeholderColor: themeConfigurator
+                        .colorScheme(colorScheme)
+                        .placeholder
+                        .toUIColor(),
                     text: $cardholderName,
-                    textColor: errorMessageCardholderName.isNilOrEmpty ? .black : .red,
+                    textColor: errorMessageCardholderName.isNilOrEmpty ?
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .onComponent
+                        .toUIColor()
+                    :
+                        themeConfigurator
+                        .colorScheme(
+                            colorScheme
+                        )
+                        .error
+                        .toUIColor(),
                     contentType: .name,
                     keyboardType: .default,
                     validators: ValidatorsComposer(validators: [
@@ -179,15 +236,27 @@ public struct CardInfoView: View {
                 )
                 .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .componentSurface
+                )
                 .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
                 
                 if let errorMessage = errorMessageCardholderName.isNilOrEmptyValue {
                     
                     HStack{
                         Text(errorMessage)
-                            .font(.subheadline)
-                            .foregroundColor(.red)
+                            .font(
+                                themeConfigurator
+                                    .typography
+                                    .labelSmall
+                            )
+                            .foregroundColor(
+                                themeConfigurator
+                                    .colorScheme(colorScheme)
+                                    .error
+                            )
                             .padding()
                         Spacer()
                     }
@@ -200,9 +269,27 @@ public struct CardInfoView: View {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
-                    Localization.rozetka_pay_form_email.description,
+                    placeholder: Localization.rozetka_pay_form_email.description,
+                    placeholderFont: themeConfigurator
+                        .typography
+                        .inputUI,
+                    placeholderColor: themeConfigurator
+                        .colorScheme(colorScheme)
+                        .placeholder
+                        .toUIColor(),
                     text: $email,
-                    textColor: errorMessagEmail.isNilOrEmpty ? .black : .red,
+                    textColor: errorMessagEmail.isNilOrEmpty ?
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .onComponent
+                        .toUIColor()
+                    :
+                        themeConfigurator
+                        .colorScheme(
+                            colorScheme
+                        )
+                        .error
+                        .toUIColor(),
                     contentType: .emailAddress,
                     keyboardType: .emailAddress,
                     validators: ValidatorsComposer(validators: [
@@ -219,15 +306,27 @@ public struct CardInfoView: View {
                 )
                 .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .componentSurface
+                )
                 .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
                 
                 if let errorMessage = errorMessagEmail.isNilOrEmptyValue {
                     
                     HStack{
                         Text(errorMessage)
-                            .font(.subheadline)
-                            .foregroundColor(.red)
+                            .font(
+                                themeConfigurator
+                                    .typography
+                                    .labelSmall
+                            )
+                            .foregroundColor(
+                                themeConfigurator
+                                    .colorScheme(colorScheme)
+                                    .error
+                            )
                             .padding()
                         Spacer()
                     }
@@ -241,9 +340,28 @@ public struct CardInfoView: View {
             VStack(spacing: 2) {
                 HStack {
                     InputTextFieldRepresentable(
-                        Localization.rozetka_pay_form_card_number.description,
+                        placeholder: Localization.rozetka_pay_form_card_number.description,
+                        placeholderFont: themeConfigurator
+                            .typography
+                            .inputUI,
+                        placeholderColor: themeConfigurator
+                            .colorScheme(colorScheme)
+                            .placeholder
+                            .toUIColor(),
                         text: $cardNumber,
-                        textColor: errorMessageCardNumber.isNilOrEmpty ? .black : .red,
+                        textColor:
+                            errorMessageCardNumber.isNilOrEmpty ?
+                        themeConfigurator
+                            .colorScheme(colorScheme)
+                            .onComponent
+                            .toUIColor()
+                        :
+                            themeConfigurator
+                            .colorScheme(
+                                colorScheme
+                            )
+                            .error
+                            .toUIColor(),
                         contentType: .dateTime,
                         keyboardType: .numberPad,
                         maxLength: CardNumberValidator.MAX_CARD_NUMBER_LENGTH,
@@ -263,7 +381,11 @@ public struct CardInfoView: View {
                     .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
                     .padding()
                     .keyboardType(.numberPad)
-                    .background(Color(.systemGray6))
+                    .background(
+                        themeConfigurator
+                            .colorScheme(colorScheme)
+                            .componentSurface
+                    )
                     .clipShape(
                         RoundedCorner(
                             radius: themeConfigurator.sizes.textFieldCornerRadius,
@@ -274,11 +396,15 @@ public struct CardInfoView: View {
                         paymentSystemLogoName,
                         bundle: .module
                     )
-                        .resizable()
-                        .frame(width: 36, height: 22)
-                        .padding(.trailing)
+                    .resizable()
+                    .frame(width: 36, height: 22)
+                    .padding(.trailing)
                 }
-                .background(Color(UIColor.systemGray6))
+                .background(
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .componentSurface
+                )
                 .clipShape(
                     RoundedCorner(
                         radius: themeConfigurator.sizes.textFieldCornerRadius,
@@ -288,9 +414,28 @@ public struct CardInfoView: View {
                 
                 HStack(spacing: 2) {
                     InputTextFieldRepresentable(
-                        Localization.rozetka_pay_form_exp_date.description,
+                        placeholder: Localization.rozetka_pay_form_exp_date.description,
+                        placeholderFont: themeConfigurator
+                            .typography
+                            .inputUI,
+                        placeholderColor: themeConfigurator
+                            .colorScheme(colorScheme)
+                            .placeholder
+                            .toUIColor(),
                         text: $expiryDate,
-                        textColor: errorMessageExpiryDate.isNilOrEmpty ? .black : .red,
+                        textColor:
+                            errorMessageExpiryDate.isNilOrEmpty ?
+                        themeConfigurator
+                            .colorScheme(colorScheme)
+                            .onComponent
+                            .toUIColor()
+                        :
+                            themeConfigurator
+                            .colorScheme(
+                                colorScheme
+                            )
+                            .error
+                            .toUIColor(),
                         contentType: .dateTime,
                         keyboardType: .numberPad,
                         maxLength: CardExpirationDateValidator.MAX_CREDIT_CARD_EXPIRATION_DATE_LENGTH,
@@ -312,7 +457,11 @@ public struct CardInfoView: View {
                     .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
                     .padding()
                     .keyboardType(.numberPad)
-                    .background(Color(.systemGray6))
+                    .background(
+                        themeConfigurator
+                            .colorScheme(colorScheme)
+                            .componentSurface
+                    )
                     .clipShape(
                         RoundedCorner(
                             radius: themeConfigurator.sizes.textFieldCornerRadius,
@@ -321,9 +470,26 @@ public struct CardInfoView: View {
                     )
                     
                     InputTextFieldRepresentable(
-                        Localization.rozetka_pay_form_cvv.description,
+                        placeholder: Localization.rozetka_pay_form_cvv.description,
+                        placeholderFont: themeConfigurator
+                            .typography
+                            .inputUI,
+                        placeholderColor: themeConfigurator
+                            .colorScheme(colorScheme)
+                            .placeholder
+                            .toUIColor(),
                         text: $cvv,
-                        textColor: errorMessageCvv.isNilOrEmpty ? .black : .red,
+                        textColor:
+                            errorMessageCvv.isNilOrEmpty ?
+                        themeConfigurator
+                            .colorScheme(colorScheme)
+                            .onComponent
+                            .toUIColor()
+                        :
+                            themeConfigurator
+                            .colorScheme(colorScheme)
+                            .error
+                            .toUIColor(),
                         isSecure: true,
                         contentType: .password,
                         keyboardType: .numberPad,
@@ -343,7 +509,11 @@ public struct CardInfoView: View {
                     .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
                     .padding()
                     .keyboardType(.numberPad)
-                    .background(Color(.systemGray6))
+                    .background(
+                        themeConfigurator
+                            .colorScheme(colorScheme)
+                            .componentSurface
+                    )
                     .clipShape(
                         RoundedCorner(
                             radius: themeConfigurator.sizes.textFieldCornerRadius,
@@ -352,7 +522,11 @@ public struct CardInfoView: View {
                     )
                 }
             }
-            .background(Color(.systemGray5))
+            .background(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .componentDivider
+            )
             .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
             
             if let errorMessage = errorMessageExpiryDate.isNilOrEmptyValue ??
@@ -361,8 +535,16 @@ public struct CardInfoView: View {
                 
                 HStack{
                     Text(errorMessage)
-                        .font(.subheadline)
-                        .foregroundColor(.red)
+                        .font(
+                            themeConfigurator
+                                .typography
+                                .labelSmall
+                        )
+                        .foregroundColor(
+                            themeConfigurator
+                                .colorScheme(colorScheme)
+                                .error
+                        )
                         .padding()
                     Spacer()
                 }
@@ -373,26 +555,54 @@ public struct CardInfoView: View {
     //MARK: - checkBox
     private var checkBoxView: some View {
         HStack {
-            Toggle("", isOn: $isNeedToTokenizationCard)
-                .toggleStyle(CheckBoxStyle())
+            Toggle("",isOn: $isNeedToTokenizationCard)
+                .toggleStyle(
+                    CheckBoxStyle(
+                        colorOn: themeConfigurator
+                            .colorScheme(colorScheme)
+                            .primary,
+                        colorOff: themeConfigurator
+                            .colorScheme(colorScheme)
+                            .placeholder
+                    )
+                )
                 .labelsHidden()
             
             Text(Localization.rozetka_pay_form_save_card.description)
-                .font(.subheadline)
-                .foregroundColor(.black)
+                .font(
+                    themeConfigurator
+                        .typography
+                        .labelSmall
+                )
+                .foregroundColor(
+                    themeConfigurator
+                        .colorScheme(colorScheme)
+                        .onSurface
+                )
         }
         .padding()
     }
     
     struct CheckBoxStyle: ToggleStyle {
+        let colorOn: Color
+        let colorOff: Color
+        
         func makeBody(configuration: Configuration) -> some View {
             return Button(action: {
                 configuration.isOn.toggle()
             }) {
-                Image(systemName: configuration.isOn ? "checkmark.square" : "square")
+                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
                     .resizable()
-                    .frame(width: 24, height: 24)
-                    .foregroundColor(configuration.isOn ? .black : .gray)
+                    .frame(width: 26, height: 26)
+                    .foregroundColor(
+                        configuration.isOn ? colorOn : colorOff
+                    )
+                    .overlay(
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.white)
+                            .opacity(configuration.isOn ? 1 : 0)
+                            .padding(4)
+                    )
             }
         }
     }
@@ -409,7 +619,7 @@ public struct CardInfoView: View {
             cardNameField: .optional,
             emailField: .required,
             cardholderNameField: .optional
-        ), 
+        ),
         themeConfigurator: RozetkaPayThemeConfigurator(),
         isNeedToTokenizationCard: .constant(true),
         isShowNeedToTokenizationCard: true,
@@ -426,7 +636,7 @@ public struct CardInfoView: View {
         errorMessageCardholderName: .constant(nil),
         errorMessagEmail: .constant(nil)
     )
-                 
+    
 }
 
 

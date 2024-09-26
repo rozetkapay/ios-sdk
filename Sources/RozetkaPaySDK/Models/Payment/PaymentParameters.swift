@@ -21,14 +21,38 @@ public struct PaymentParameters: ParametersProtocol {
     public struct AmountParameters: Codable {
         let amount: Int64
         let currencyCode: String
+        let tax: Int64?
+        let total: Int64
         
-        public init(amount: Int64, currencyCode: String) {
+        public init(
+            amount: Int64,
+            tax: Int64? = nil,
+            total: Int64? = nil,
+            currencyCode: String
+        ) {
             self.amount = amount
+            self.tax = tax
+            if let total =  total.isNilOrEmptyValue {
+                self.total = total
+            }else {
+                self.total = self.amount + (self.tax ?? 0)
+            }
             self.currencyCode = currencyCode
         }
         
-        public init(amount: Double, currencyCode: String) {
+        public init(
+            amount: Double,
+            tax: Double? = nil,
+            total: Double? = nil,
+            currencyCode: String
+        ) {
             self.amount = amount.convertToCoinsAmount()
+            self.tax = tax?.convertToCoinsAmount()
+            if let total =  total.isNilOrEmptyValue {
+                self.total = total.convertToCoinsAmount()
+            }else {
+                self.total = self.amount + (self.tax ?? 0)
+            }
             self.currencyCode = currencyCode
         }
     }

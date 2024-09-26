@@ -11,7 +11,9 @@ import SwiftUI
 public struct InputTextFieldRepresentable: UIViewRepresentable {
     @Binding private var text: String?
     
-    private var prompt: String?
+    private var placeholder: String?
+    private var placeholderFont: UIFont
+    private var placeholderColor: UIColor
     private var isSecure: Bool
     private var contentType: UITextContentType?
     private var rightViewMode: UITextField.ViewMode
@@ -38,7 +40,9 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
     }()
     
     public init(
-        _ prompt: String? = nil,
+        placeholder: String? = nil,
+        placeholderFont: UIFont = UIFont.systemFont(ofSize: 16),
+        placeholderColor: UIColor = UIColor.gray,
         text: Binding<String?>,
         textFont: UIFont = UIFont.systemFont(ofSize: 16),
         textColor: UIColor = UIColor.black,
@@ -53,7 +57,9 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         validationTextFieldResult: ValidationTextFieldResult? = nil,
         textMasking: TextMasking? = nil
     ) {
-        self.prompt = prompt
+        self.placeholder = placeholder
+        self.placeholderFont = placeholderFont
+        self.placeholderColor = placeholderColor
         self._text = text
         self.textFont = textFont
         self.textColor = textColor
@@ -87,13 +93,13 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
         textField.passwordRules = self.passwordRules
-        textField.placeholder = self.prompt
+        textField.placeholder = self.placeholder
         
         textField.attributedPlaceholder = NSAttributedString(
-            string: self.prompt ?? "",
+            string: self.placeholder ?? "",
             attributes: [
-                .font: UIFont.systemFont(ofSize: 16),
-                .foregroundColor: UIColor.gray
+                .font: self.placeholderFont,
+                .foregroundColor: self.placeholderColor
             ]
         )
         

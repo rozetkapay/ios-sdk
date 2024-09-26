@@ -5,89 +5,92 @@
 //  Created by Ruslan Kasian Dev on 20.08.2024.
 //
 
-import UIKit
+import SwiftUI
 import PassKit
 
 public struct DomainColorScheme {
-    let surfaceInt: Int
-    let onSurfaceInt: Int
-    let appBarIconInt: Int
-    let titleInt: Int
-    let subtitleInt: Int
-    let errorInt: Int
-    let primaryInt: Int
-    let onPrimaryInt: Int
-    let placeholderInt: Int
-    let componentSurfaceInt: Int
-    let componentDividerInt: Int
-    let onComponentInt: Int
-    let applePayButtonStyle: PKPaymentButtonStyle
+    private let surfaceHex: UInt
+    private let onSurfaceHex: UInt
+    private let appBarIconHex: UInt
+    private let titleHex: UInt
+    private let subtitleHex: UInt
+    private let errorHex: UInt
+    private let primaryHex: UInt
+    private let onPrimaryHex: UInt
+    private let placeholderHex: UInt
+    private let componentSurfaceHex: UInt
+    private let componentDividerHex: UInt
+    private let onComponentHex: UInt
+    private let applePayButtonStyleDp: PKPaymentButtonStyle
 
-    var surface: UIColor {
-        return UIColor(rgb: surfaceInt)
+    var surface: Color {
+        return Color(hex: surfaceHex)
     }
-    var onSurface: UIColor {
-        return UIColor(rgb: onSurfaceInt)
+    var onSurface: Color {
+        return Color(hex: onSurfaceHex)
     }
-    var appBarIcon: UIColor {
-        return UIColor(rgb: appBarIconInt)
+    var appBarIcon: Color {
+        return Color(hex: appBarIconHex)
     }
-    var title: UIColor {
-        return UIColor(rgb: titleInt)
+    var title: Color {
+        return Color(hex: titleHex)
     }
-    var subtitle: UIColor {
-        return UIColor(rgb: subtitleInt)
+    var subtitle: Color {
+        return Color(hex: subtitleHex)
     }
-    var error: UIColor {
-        return UIColor(rgb: errorInt)
+    var error: Color {
+        return Color(hex: errorHex)
     }
-    var primary: UIColor {
-        return UIColor(rgb: primaryInt)
+    var primary: Color {
+        return Color(hex: primaryHex)
     }
-    var onPrimary: UIColor {
-        return UIColor(rgb: onPrimaryInt)
+    var onPrimary: Color {
+        return Color(hex: onPrimaryHex)
     }
-    var placeholder: UIColor {
-        return UIColor(rgb: placeholderInt)
+    var placeholder: Color {
+        return Color(hex: placeholderHex)
     }
-    var componentSurface: UIColor {
-        return UIColor(rgb: componentSurfaceInt)
+    var componentSurface: Color {
+        return Color(hex: componentSurfaceHex)
     }
-    var componentDivider: UIColor {
-        return UIColor(rgb: componentDividerInt)
+    var componentDivider: Color {
+        return Color(hex: componentDividerHex)
     }
-    var onComponent: UIColor {
-        return UIColor(rgb: onComponentInt)
+    var onComponent: Color {
+        return Color(hex: onComponentHex)
+    }
+    
+    var applePayButtonStyle: PKPaymentButtonStyle {
+        return applePayButtonStyleDp
     }
 
-    init(
-        surface: UIColor,
-        onSurface: UIColor,
-        appBarIcon: UIColor,
-        title: UIColor,
-        subtitle: UIColor,
-        error: UIColor,
-        primary: UIColor,
-        onPrimary: UIColor,
-        placeholder: UIColor,
-        componentSurface: UIColor,
-        componentDivider: UIColor,
-        onComponent: UIColor,
+    public init(
+        surface: Color,
+        onSurface: Color,
+        appBarIcon: Color,
+        title: Color,
+        subtitle: Color,
+        error: Color,
+        primary: Color,
+        onPrimary: Color,
+        placeholder: Color,
+        componentSurface: Color,
+        componentDivider: Color,
+        onComponent: Color,
         applePayButtonStyle: PKPaymentButtonStyle
     ) {
-        self.surfaceInt = surface.toInt()
-        self.onSurfaceInt = onSurface.toInt()
-        self.appBarIconInt = appBarIcon.toInt()
-        self.titleInt = title.toInt()
-        self.subtitleInt = subtitle.toInt()
-        self.errorInt = error.toInt()
-        self.primaryInt = primary.toInt()
-        self.onPrimaryInt = onPrimary.toInt()
-        self.placeholderInt = placeholder.toInt()
-        self.componentSurfaceInt = componentSurface.toInt()
-        self.componentDividerInt = componentDivider.toInt()
-        self.onComponentInt = onComponent.toInt()
-        self.applePayButtonStyle = applePayButtonStyle
+        self.surfaceHex = surface.toHex()
+        self.onSurfaceHex = onSurface.toHex()
+        self.appBarIconHex = appBarIcon.toHex()
+        self.titleHex = title.toHex()
+        self.subtitleHex = subtitle.toHex()
+        self.errorHex = error.toHex()
+        self.primaryHex = primary.toHex()
+        self.onPrimaryHex = onPrimary.toHex()
+        self.placeholderHex = placeholder.toHex()
+        self.componentSurfaceHex = componentSurface.toHex()
+        self.componentDividerHex = componentDivider.toHex()
+        self.onComponentHex = onComponent.toHex()
+        self.applePayButtonStyleDp = applePayButtonStyle
     }
 }
-

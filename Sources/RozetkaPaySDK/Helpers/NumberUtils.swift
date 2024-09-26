@@ -43,3 +43,116 @@ extension NSNumber {
         return type(of: self) == type(of: NSNumber(booleanLiteral: true))
     }
 }
+
+
+extension Optional where Wrapped == Double {
+    var isNilOrEmpty: Bool {
+        self == nil || self == 0
+    }
+    
+    var isNilOrEmptyValue: Double? {
+        if self == nil || self == 0 {
+            return nil
+        }else{
+            return self
+        }
+    }
+}
+
+extension Optional where Wrapped == Int {
+    var isNilOrEmpty: Bool {
+        self == nil || self == 0
+    }
+    
+    var isNilOrEmptyValue: Int? {
+        if self == nil || self == 0 {
+            return nil
+        }else{
+            return self
+        }
+    }
+}
+
+extension Optional where Wrapped == Int64 {
+    var isNilOrEmpty: Bool {
+        self == nil || self == 0
+    }
+    
+    var isNilOrEmptyValue: Int64? {
+        if self == nil || self == 0 {
+            return nil
+        }else{
+            return self
+        }
+    }
+}
+
+extension Optional where Wrapped == CGFloat {
+    var isNilOrEmpty: Bool {
+        self == nil || self == 0
+    }
+    
+    var isNilOrEmptyValue: CGFloat? {
+        if self == nil || self == 0 {
+            return nil
+        }else{
+            return self
+        }
+    }
+}
+
+extension Double {
+    var isEmpty: Bool {
+        self == 0
+    }
+    
+    var isEmptyOrValue: Double? {
+        if self == 0 {
+            return nil
+        } else {
+            return self
+        }
+    }
+}
+
+extension Int {
+    var isEmpty: Bool {
+        self == 0
+    }
+    
+    var isEmptyOrValue: Int? {
+        if self == 0 {
+            return nil
+        } else {
+            return self
+        }
+    }
+}
+
+extension Int64 {
+    var isEmpty: Bool {
+        self == 0
+    }
+    
+    var isEmptyOrValue: Int64? {
+        if self == 0 {
+            return nil
+        } else {
+            return self
+        }
+    }
+}
+
+extension CGFloat {
+    var isNilOrEmpty: Bool {
+        self == 0
+    }
+    
+    var isEmptyOrValue: CGFloat? {
+        if self == 0 {
+            return nil
+        } else {
+            return self
+        }
+    }
+}

@@ -9,6 +9,7 @@
 import UIKit
 
 public struct CardRequestModel: Encodable {
+    public  let cardName: String?
     private let cardNumber: String
     private let cardExpMonth: Int
     private let cardExpYear: Int
@@ -67,6 +68,7 @@ public struct CardRequestModel: Encodable {
     }
     
     init(
+        cardName: String?,
         cardNumber: String,
         cardExpMonth: Int,
         cardExpYear: Int,
@@ -95,7 +97,7 @@ public struct CardRequestModel: Encodable {
         deviceCountry: String? = nil,
         deviceCity: String? = nil
     ) {
-        
+        self.cardName = cardName
         if cardNumber.containsNonDigits {
             self.cardNumber = cardNumber.digitsOnly
         }else {
@@ -125,5 +127,34 @@ public struct CardRequestModel: Encodable {
         self.customerEmail = customerEmail
         self.deviceCountry = deviceCountry
         self.deviceCity = deviceCity
+    }
+    
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(self.cardNumber, forKey: .cardNumber)
+        try container.encode(self.cardExpMonth, forKey: .cardExpMonth)
+        try container.encode(self.cardExpYear, forKey: .cardExpYear)
+        try container.encode(self.cardCvv, forKey: .cardCvv)
+        try container.encodeIfPresent(self.cardholderName, forKey: .cardholderName)
+        try container.encode(self.platform, forKey: .platform)
+        try container.encode(self.sdkVersion, forKey: .sdkVersion)
+        try container.encode(self.osVersion, forKey: .osVersion)
+        try container.encode(self.osBuildVersion, forKey: .osBuildVersion)
+        try container.encode(self.osBuildNumber, forKey: .osBuildNumber)
+        try container.encode(self.deviceId, forKey: .deviceId)
+        try container.encodeIfPresent(self.deviceIp, forKey: .deviceIp)
+        try container.encodeIfPresent(self.deviceManufacturer, forKey: .deviceManufacturer)
+        try container.encodeIfPresent(self.deviceBrand, forKey: .deviceBrand)
+        try container.encodeIfPresent(self.deviceModel, forKey: .deviceModel)
+        try container.encodeIfPresent(self.deviceTags, forKey: .deviceTags)
+        try container.encodeIfPresent(self.deviceScreenRes, forKey: .deviceScreenRes)
+        try container.encodeIfPresent(self.deviceLocale, forKey: .deviceLocale)
+        try container.encodeIfPresent(self.deviceTimeZone, forKey: .deviceTimeZone)
+        try container.encodeIfPresent(self.appName, forKey: .appName)
+        try container.encodeIfPresent(self.appPackage, forKey: .appPackage)
+        try container.encodeIfPresent(self.customerId, forKey: .customerId)
+        try container.encodeIfPresent(self.customerEmail, forKey: .customerEmail)
+        try container.encodeIfPresent(self.deviceCountry, forKey: .deviceCountry)
+        try container.encodeIfPresent(self.deviceCity, forKey: .deviceCity)
     }
 }

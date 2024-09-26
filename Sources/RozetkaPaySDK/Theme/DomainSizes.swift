@@ -5,15 +5,15 @@
 //  Created by Ruslan Kasian Dev on 20.08.2024.
 //
 
-import UIKit
+import SwiftUI
 
-public struct DomainSizes: Codable {
-    let sheetCornerRadiusDp: Int
-    let componentCornerRadiusDp: Int
-    let buttonCornerRadiusDp: Int
-    let textFieldCornerRadiusDp: Int
-    let textFieldFrameHeightDp: Int
-    let borderWidthDp: Int
+public struct DomainSizes {
+    private let sheetCornerRadiusDp: Int
+    private let componentCornerRadiusDp: Int
+    private let buttonCornerRadiusDp: Int
+    private let textFieldCornerRadiusDp: Int
+    private let textFieldFrameHeightDp: Int
+    private let borderWidthDp: Int
 
     var sheetCornerRadius: CGFloat {
         return CGFloat(sheetCornerRadiusDp)

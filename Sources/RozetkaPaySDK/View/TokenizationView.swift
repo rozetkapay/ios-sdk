@@ -17,12 +17,12 @@ public struct TokenizationView: View {
     //MARK: - Init
     public init(
         parameters: TokenizationParameters,
-        callback: @escaping (TokenizationResult) -> Void
+        onResultCallback: @escaping (TokenizationResult) -> Void
     ) {
         self._viewModel = StateObject(
             wrappedValue: TokenizationViewModel(
                 parameters: parameters,
-                callback: callback
+                onResultCallback: onResultCallback
             )
         )
     }
@@ -31,12 +31,53 @@ public struct TokenizationView: View {
         NavigationView {
             if viewModel.isLoading {
                 ZStack {
-                    Color.white
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .surface
+                        .opacity(0.8)
                         .ignoresSafeArea()
-                    LoadingView()
+                    LoadingView(
+                        tintColor:
+                            viewModel
+                            .themeConfigurator
+                            .colorScheme(colorScheme)
+                            .primary
+                        ,
+                        textFont:
+                            viewModel
+                            .themeConfigurator
+                            .typography
+                            .body
+                        ,
+                        textColorDark:
+                            viewModel
+                            .themeConfigurator
+                            .darkColorScheme
+                            .onSurface
+                        ,
+                        textColorWhite:
+                            viewModel
+                            .themeConfigurator
+                            .lightColorScheme
+                            .onSurface
+                        ,
+                        backgroundColorDark:
+                            viewModel
+                            .themeConfigurator
+                            .darkColorScheme
+                            .surface
+                        ,
+                        backgroundColorWhite:
+                            viewModel
+                            .themeConfigurator
+                            .lightColorScheme
+                            .surface
+                    )
                 }
             }else if viewModel.isError {
                 ErrorView(
+                    themeConfigurator: viewModel.themeConfigurator, 
                     errorMessage: viewModel.errorMessage,
                     onCancel: {
                         viewModel.cancelled()
@@ -83,8 +124,20 @@ public struct TokenizationView: View {
         VStack(alignment: .leading) {
             HStack{
                 Text(Localization.rozetka_pay_tokenization_title.description)
-                    .font(.title)
+                    .font(
+                        viewModel
+                            .themeConfigurator
+                            .typography
+                            .title
+                    )
                     .bold()
+                    .foregroundColor(
+                        viewModel
+                            .themeConfigurator
+                            .colorScheme(colorScheme)
+                            .title
+                            
+                    )
                     .padding(.bottom, 20)
                 Spacer()
             }
@@ -96,11 +149,34 @@ public struct TokenizationView: View {
             viewModel.validateAll()
         }) {
             Text(Localization.rozetka_pay_form_save_card.description)
+                .font(
+                    viewModel
+                        .themeConfigurator
+                        .typography
+                        .labelLarge
+                )
+                .bold()
                 .frame(maxWidth: .infinity)
                 .padding()
-                .foregroundColor(.white)
-                .background(Color.green)
-                .cornerRadius(viewModel.themeConfigurator.sizes.buttonCornerRadius)
+                .foregroundColor(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .onPrimary
+                    
+                )
+                .background(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .primary
+                )
+                .cornerRadius(
+                    viewModel
+                        .themeConfigurator
+                        .sizes
+                        .buttonCornerRadius
+                )
         }
         .padding(.top, 20)
     }
@@ -121,7 +197,12 @@ public struct TokenizationView: View {
             presentationMode.wrappedValue.dismiss()
         }) {
             Image(systemName: "xmark")
-                .foregroundColor(.primary)
+                .foregroundColor(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .appBarIcon
+                )
         }
     }
     
@@ -135,7 +216,7 @@ public struct TokenizationView: View {
         parameters: TokenizationParameters(
             client: ClientWidgetParameters(widgetKey: "test")
         ),
-        callback: {
+        onResultCallback: {
         _ in
     })
 }

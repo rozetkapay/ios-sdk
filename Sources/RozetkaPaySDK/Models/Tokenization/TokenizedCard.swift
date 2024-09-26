@@ -9,7 +9,7 @@ import Foundation
 
 public struct TokenizedCard: Codable {
     public let token: String
-    public let name: String?
+    public var name: String?
     public let cardInfo: CardInfo?
 
     public struct CardInfo: Codable {
@@ -48,6 +48,10 @@ public struct TokenizedCard: Codable {
             isoA3Code: isoA3Code,
             cardType: cardType
         )
+    }
+    
+    mutating func setup(name: String?) {
+        self.name = name
     }
 
 }

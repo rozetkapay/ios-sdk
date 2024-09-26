@@ -12,8 +12,9 @@ public struct ApplePayButton: UIViewRepresentable {
     private var action: () -> Void
     private var paymentButtonStyle: PKPaymentButtonStyle
     
-    public init(action: @escaping () -> Void,
-                paymentButtonStyle: PKPaymentButtonStyle = .automatic
+    public init(
+        action: @escaping () -> Void,
+        paymentButtonStyle: PKPaymentButtonStyle = .automatic
     ) {
         self.action = action
         self.paymentButtonStyle = paymentButtonStyle

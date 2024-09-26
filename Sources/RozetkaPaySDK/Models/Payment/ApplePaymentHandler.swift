@@ -17,37 +17,61 @@ import PassKit
     var completionHandler: ApplePaymentCompletionHandler?
     
      private var config: ApplePayConfig
+     private var amountParameters: PaymentParameters.AmountParameters
      
-     init?(config: ApplePayConfig?) {
-         guard let config = config else {
+     init?(
+        config: ApplePayConfig?,
+        amount: PaymentParameters.AmountParameters?
+     ) {
+         guard let config = config,
+            let amount = amount
+         else {
              return nil
          }
          self.config = config
+         self.amountParameters = amount
      }
      
      
     func startPayment(completion: @escaping ApplePaymentCompletionHandler) {
         
-        let amount = PKPaymentSummaryItem(label: "Amount", amount: NSDecimalNumber(string: "8.88"), type: .final)
-        let tax = PKPaymentSummaryItem(label: "Tax", amount: NSDecimalNumber(string: "1.12"), type: .final)
-        let total = PKPaymentSummaryItem(label: "ToTal", amount: NSDecimalNumber(string: "10.00"), type: .pending)
+        let amount = PKPaymentSummaryItem(
+            label: Localization.rozetka_pay_payment_applepay_label_amount.description,
+            amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToMoney(coins: amountParameters.amount)),
+            type: .final
+        )
+        paymentSummaryItems.append(amount)
+
+        if let _tax = amountParameters.tax.isNilOrEmptyValue {
+            let tax = PKPaymentSummaryItem(
+                label: Localization.rozetka_pay_payment_applepay_label_tax.description,
+                amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToMoney(coins: _tax)),
+                type: .final
+            )
+            paymentSummaryItems.append(tax)
+        }
+        let total = PKPaymentSummaryItem(
+            label: Localization.rozetka_pay_payment_applepay_label_total.description,
+            amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToMoney(coins: amountParameters.total)),
+            type: .pending
+        )
+        paymentSummaryItems.append(total)
         
-        paymentSummaryItems = [amount, tax, total];
-        completionHandler = completion
+       
         
         // Create our payment request 
         let paymentRequest = PKPaymentRequest()
         paymentRequest.paymentSummaryItems = paymentSummaryItems
         paymentRequest.merchantIdentifier = config.merchantIdentifier
         paymentRequest.merchantCapabilities = config.merchantCapabilities
-        paymentRequest.countryCode = "US"
-        paymentRequest.currencyCode = "USD"
-        paymentRequest.requiredShippingContactFields = [.phoneNumber, .emailAddress]
+        paymentRequest.countryCode = config.countryCode
+        paymentRequest.currencyCode = config.currencyCode
         paymentRequest.supportedNetworks = config.supportedNetworks
         
         // Display our payment request
         paymentController = PKPaymentAuthorizationController(paymentRequest: paymentRequest)
         paymentController?.delegate = self
+        completionHandler = completion
         
         paymentController?.present(completion: { (presented: Bool) in
             if presented {
