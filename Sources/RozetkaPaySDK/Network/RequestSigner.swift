@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  RequestSigner.swift
 //  
 //
 //  Created by Ruslan Kasian Dev on 10.09.2024.
@@ -8,18 +8,26 @@
 import Foundation
 import CommonCrypto
 
-protocol RequestSigner {
+protocol RequestSignerProtocol {
     func sign(key: String, data: Encodable) throws -> String
 }
 
-final class RequestSignerImpl: RequestSigner {
+final class RequestSigner: RequestSignerProtocol {
     func sign(key: String, data: Encodable) throws -> String {
         guard let encodedData = stringEncode(data) else {
-            throw NSError(domain: "RequestSignerError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to encode data."])
+            throw NSError(
+                domain: "RequestSignerError",
+                code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to encode data."]
+            )
         }
         
         guard let hmacResult = hmac(encodedData: encodedData, key: key) else {
-            throw NSError(domain: "RequestSignerError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to generate HMAC."])
+            throw NSError(
+                domain: "RequestSignerError",
+                code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to generate HMAC."]
+            )
         }
         
         return hmacResult

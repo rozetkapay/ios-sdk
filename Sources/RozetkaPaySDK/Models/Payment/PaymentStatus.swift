@@ -7,10 +7,14 @@
 
 import Foundation
 
-enum PaymentStatus {
-    case start
+public enum PaymentStatus: String {
+    case start = "init"
     case pending
     case success
     case failure
+    
+    var isTerminated: Bool {
+        return self == .success || self == .failure
+    }
 }
 

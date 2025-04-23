@@ -29,11 +29,16 @@ struct RozetkaPayConfig {
     /// Legal company details link.
     static let LEGAL_COMPANY_DETAILS_LINK = "https://rozetkapay.com/legal-info/perekaz-koshtiv/"
     
-    /// Google Pay gateway for RozetkaPay.
+    /// Apple Pay gateway for RozetkaPay.
     static let APPLE_PAY_GATEWAY = "evopay"
     
-    /// Google Pay country code for RozetkaPay.
+    /// Apple Pay country code for RozetkaPay.
     static let APPLE_PAY_COUNTRY_CODE = "UA"
     
     static let network_TimeoutInterval: TimeoutInterval = .standart
+    
+    // sec
+    static let DEFAULT_RETRY_TIMEOUT: TimeInterval = 30
+    // sec
+    static let DEFAULT_RETRY_DELAY: TimeInterval = 1
 }

@@ -17,7 +17,7 @@ struct PaymentApiConstants {
     static let paymentMethodTypeCardToken = "cc_token"
 }
 
-// MARK: - PaymentRequestDto
+// MARK: - PaymentRequest
 
 struct PaymentRequestModel: Encodable {
     let amount: Double
@@ -25,9 +25,9 @@ struct PaymentRequestModel: Encodable {
     let externalId: String
     let callbackUrl: String?
     let mode: String
-    let customer: CustomerDto
+    let customer: Customer
 
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case amount
         case currency
         case externalId = "external_id"
@@ -42,7 +42,7 @@ struct PaymentRequestModel: Encodable {
         externalId: String,
         callbackUrl: String? = nil,
         mode: String = PaymentApiConstants.modeDirect,
-        customer: CustomerDto
+        customer: Customer
     ) {
         self.amount = amount
         self.currency = currency
@@ -53,41 +53,38 @@ struct PaymentRequestModel: Encodable {
     }
 }
 
-// MARK: - CustomerDto
+// MARK: - Customer
+struct Customer: Encodable {
+    let paymentMethod: PaymentMethod
 
-struct CustomerDto: Encodable {
-    let paymentMethod: PaymentMethodDto
-
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case paymentMethod = "payment_method"
     }
 }
 
-// MARK: - PaymentMethodDto
-
-struct PaymentMethodDto: Encodable {
+// MARK: - PaymentMethod
+struct PaymentMethod: Encodable {
     let type: String
-    let applePay: ApplePayDto?
-    let cardToken: CardTokenDto?
+    let applePay: ApplePay?
+    let cardToken: CardToken?
 
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case type
         case applePay = "apple_pay"
         case cardToken = "cc_token"
     }
 
     // MARK: - Factory Methods
-
-    static func applePay(_ applePay: ApplePayDto) -> PaymentMethodDto {
-        return PaymentMethodDto(
+    static func applePay(_ applePay: ApplePay) -> PaymentMethod {
+        return PaymentMethod(
             type: PaymentApiConstants.paymentMethodTypeApplePay,
             applePay: applePay,
             cardToken: nil
         )
     }
 
-    static func cardToken(_ cardToken: CardTokenDto) -> PaymentMethodDto {
-        return PaymentMethodDto(
+    static func cardToken(_ cardToken: CardToken) -> PaymentMethod {
+        return PaymentMethod(
             type: PaymentApiConstants.paymentMethodTypeCardToken,
             applePay: nil,
             cardToken: cardToken
@@ -95,13 +92,12 @@ struct PaymentMethodDto: Encodable {
     }
 }
 
-// MARK: - ApplePayDto
-
-struct ApplePayDto: Encodable {
+// MARK: - ApplePay
+struct ApplePay: Encodable {
     let token: String
     let use3dsFlow: Bool
 
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case token
         case use3dsFlow = "use_3ds_flow"
     }
@@ -112,13 +108,12 @@ struct ApplePayDto: Encodable {
     }
 }
 
-// MARK: - CardTokenDto
-
-struct CardTokenDto: Encodable {
+// MARK: - CardToken
+struct CardToken: Encodable {
     let token: String
     let use3dsFlow: Bool
 
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case token
         case use3dsFlow = "use_3ds_flow"
     }

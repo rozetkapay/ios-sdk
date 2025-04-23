@@ -16,6 +16,8 @@ class BaseViewModel: ObservableObject {
     let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
     
     //MARK: - UI Properties
+    @Published var alertItem: CustomAlertItem?
+    
     @Published var isLoading = false
     @Published var isError = false
     @Published var errorMessage: String?
@@ -35,9 +37,9 @@ class BaseViewModel: ObservableObject {
     
     @Published var errorMessageCardName: String? = nil
     @Published var errorMessageCardholderName: String? = nil
-    @Published var errorMessagEmail: String? = nil
+    @Published var errorMessageEmail: String? = nil
     
-    @Published var isNeedToTokenizationCard: Bool = false
+    @Published var isNeedToTokenizationCard: Bool = true
     
     //MARK: - Inits
     init(
@@ -73,7 +75,7 @@ class BaseViewModel: ObservableObject {
                 validEmail = value
             }
         case .none:
-           break
+            break
         case .required:
             guard let value = validateEmail(email) else {
                 return
@@ -92,7 +94,7 @@ class BaseViewModel: ObservableObject {
                 validCardholderName = value
             }
         case .none:
-           break
+            break
         case .required:
             guard let value = validateCardholderName(cardholderName) else {
                 return
@@ -112,10 +114,35 @@ class BaseViewModel: ObservableObject {
         
         loading(validModel: model)
     }
-
+    
     open func loading(validModel: ValidationResultModel) {}
     
     open func cancelled() {}
+    
+    open func resetState() {
+        self.isError = false
+        self.errorMessage = nil
+    }
+    
+    func startLoader() {
+        self.isLoading = true
+    }
+    
+    func stopLoader() {
+        self.isLoading = false
+    }
+    
+    func setTestData() {
+    #if DEBUG
+        cardName = "test"
+        cardNumber = "4242 4242 4242 4242"
+        expiryDate = "12/29"
+        cvv = "123"
+        cardholderName = "Test Test"
+        email = "test@test.com"
+    #endif
+    }
+    
     
     @discardableResult
     private func validateCardNumber(_ value: String?) -> String? {
@@ -159,14 +186,14 @@ class BaseViewModel: ObservableObject {
     private func validateEmail(_ value: String?) -> String? {
         switch EmailValidator().validate(value: value) {
         case .valid:
-            errorMessagEmail = nil
+            errorMessageEmail = nil
             return value
         case let .error(message):
-            errorMessagEmail = message
+            errorMessageEmail = message
             return nil
         }
     }
-
+    
     @discardableResult
     private func validateCardholderName(_ value: String?) -> String? {
         switch CardholderNameValidator().validate(value: value) {

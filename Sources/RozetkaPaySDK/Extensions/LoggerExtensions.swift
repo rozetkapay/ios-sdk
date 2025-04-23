@@ -41,14 +41,21 @@ extension Logger {
     /// Logs related to Apple Pay operations.
     ///
     /// Use this logger to capture events related to Apple Pay transactions, authorizations, and errors.
-    static let applePay = Logger(subsystem: subsystem, category: "applepay")
+    static let payByApplePay = Logger(subsystem: subsystem, category: "payByApplePay")
     
-    /// All logs related to tracking and analytics.
+    /// Use this logger to capture events related to Tokenized Card, authorizations, and errors.
     static let tokenizedCard = Logger(subsystem: subsystem, category: "tokenizedCard")
     
-    /// All logs related to tracking and analytics.
+    /// Use this logger to capture events related to Pay by Card transactions, authorizations, and errors.
     static let payByCard = Logger(subsystem: subsystem, category: "payByCard")
 
+    /// Use this logger to capture events related to Pay by Card transactions, authorizations, and errors.
+    static let payServices = Logger(subsystem: subsystem, category: "payServices")
+    
+    /// Use this logger to capture events related to localized.
+    static let localized = Logger(subsystem: subsystem, category: "localized")
+
+    
     /// Logs a warning message.
     ///
     /// - Parameter message: The warning message to log.

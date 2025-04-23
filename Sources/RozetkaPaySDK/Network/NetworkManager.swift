@@ -30,6 +30,10 @@ enum RequestContentType: String {
     case json = "application/json"
 }
 
+enum ParametersType: String, Encodable {
+    case externalId = "external_id"
+}
+
 enum RequestHeaderField: String {
     case sign = "X-Sign"
     case widget = "X-Widget-Id"
@@ -106,7 +110,7 @@ public struct Request {
 public enum APIError<ValidationError: Decodable & Swift.Error>: Swift.Error {
     case decodingFailure(Swift.Error)
     case networkUnreachable
-    case external(code: Int, message: String?, title: String?)
+    case external(code: Int, message: String?)
     case validation(ValidationError)
     case unknown
 }
@@ -124,26 +128,27 @@ extension APIConfiguration {
 
 extension APIConfiguration {
     public func execute<T: Decodable, E: Decodable & Swift.Error>(_ success: T.Type, errorType: E.Type?) async throws -> T {
+        Logger.network.info("***************************************************************")
         guard let request = Request(config: self) else {
             Logger.network.warning("⚠️ WARNING: An error network - badURL. \(URLError(.badURL).localizedDescription) ⚠️")
             throw URLError(.badURL)
         }
-
+        
         do {
-            Logger.network.info("***************************************************************")
-            Logger.network.info("⚠️ Request.url: \n \(request.urlRequest.debugDescription) \n ⚠️")
-            Logger.network.info("⚠️ Request: \n \(String(data: request.urlRequest.httpBody ?? Data(), encoding: .utf8) ?? "Unable to convert data to String") \n ⚠️")
+            
+            Logger.network.info("⚠️ Request.url: \n \(request.urlRequest.debugDescription)\n⚠️")
+            Logger.network.info("⚠️ Request: \n \(String(data: request.urlRequest.httpBody ?? Data(), encoding: .utf8).debugDescription ?? "Unable to convert data to String")\n⚠️")
             
             let (response, data) = try await dataTask(with: request.urlRequest)
-
+            
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode) else {
                 try await self.validateFail(response: response, data: data, errorType: errorType)
                 return try await execute(success, errorType: errorType) // Retry request
             }
-
-            Logger.network.info("⚠️ Response debugDescription: \n \(response.debugDescription) \n ⚠️")
-            Logger.network.info("⚠️ Response data: \n \(String(data: data, encoding: .utf8) ?? "Unable to convert data to String") \n ⚠️")
+            
+            Logger.network.info("⚠️ Response debugDescription: \n \(response.debugDescription) \n⚠️")
+            Logger.network.info("⚠️ Response data: \n \(String(data: data, encoding: .utf8) ?? "Unable to convert data to String") \n⚠️")
             do {
                 let decodedResponse = try JSONDecoder().decode(T.self, from: data)
                 Logger.network.info(
@@ -157,15 +162,25 @@ extension APIConfiguration {
         } catch let urlError as URLError {
             Logger.network.warning("⚠️ WARNING: An error network. \(urlError.localizedDescription) ⚠️")
             throw APIError<E>.networkUnreachable
+        } catch let apiError as APIError<E> {
+            Logger.network.warning("⚠️ WARNING: An error. \(apiError.localizedDescription) ⚠️")
+            throw apiError
         } catch {
-            Logger.network.warning("⚠️ WARNING: An error network. \(error.localizedDescription) ⚠️")
-            throw APIError<E>.unknown
+            switch error {
+            case URLError.timedOut, URLError.notConnectedToInternet, URLError.networkConnectionLost:
+                Logger.network.warning("⚠️ WARNING: An error network. \(request.urlRequest.debugDescription) ⚠️")
+                throw APIError<E>.networkUnreachable
+            case is DecodingError:
+                throw APIError<E>.decodingFailure(error)
+            default:
+                Logger.network.warning("⚠️ WARNING: An error network. \(error.localizedDescription) ⚠️")
+                throw APIError<E>.unknown
+            }
         }
     }
-
+    
     private func dataTask(with urlRequest: URLRequest) async throws -> (URLResponse, Data) {
-       
-        // Specify the generic return type
+        
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<(URLResponse, Data), Error>) in
             let task = URLSession.shared.dataTask(with: urlRequest) { data, response, error in
                 if let error = error {
@@ -182,26 +197,31 @@ extension APIConfiguration {
             task.resume()
         }
     }
-
-
+    
     private func validateFail<E: Decodable & Swift.Error>(response: URLResponse, data: Data, errorType: E.Type? = nil) async throws {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError<E>.unknown
         }
-
-        if errorType != nil {
+        
+        var decodingError: APIError<E>
+        
+        if let errorType = errorType {
             do {
-                let decodedError = try JSONDecoder().decode(E.self, from: data)
-                throw APIError<E>.validation(decodedError)
+                let decodedError = try JSONDecoder().decode(errorType, from: data)
+                Logger.network.warning("⚠️ WARNING: Decoded validation error. \(decodedError) ⚠️")
+                decodingError = APIError<E>.validation(decodedError)
             } catch {
-                throw APIError<E>.decodingFailure(error)
+                decodingError = APIError<E>.decodingFailure(error)
             }
         } else {
-            throw APIError<E>.external(
+            decodingError = APIError<E>.external(
                 code: httpResponse.statusCode,
-                message: nil,
-                title: nil
+                message: "Unknown error"
             )
         }
+        
+        
+        throw decodingError
     }
+    
 }

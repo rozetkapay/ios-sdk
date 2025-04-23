@@ -10,7 +10,7 @@ import OSLog
 
 open class TokenizationService {
     
-    static func tokenizeCard(key: String, model: CardRequestModel, result: @escaping (TokenizationResult) -> Void) {
+    static func tokenizeCard(key: String, model: CardRequestModel, result: @escaping TokenizationResultCompletionHandler) {
         Task {
             do {
                 let response = try await TokenizationServiceEndpoint
@@ -19,20 +19,33 @@ open class TokenizationService {
                 
                 Logger.tokenizedCard.info("✅ Success: TokenizedCard is success")
                 
-                result(.success(response.convertToTokenizedCard()))
-            } catch let error as TokenizationError {
+                result(
+                    .success(response.convertToTokenizedCard())
+                )
                 
-                switch error {
+            } catch let apiError as APIError<TokenizationError> {
+                Logger.tokenizedCard.error("🔴 ERROR: Error tokenizeCard request: \(apiError.localizedDescription)")
+                
+                let errorResult = TokenizationError.convertFrom(apiError)
+                switch errorResult {
                 case .cancelled:
                     Logger.tokenizedCard.warning("⚠️ WARNING: TokenizeCard cancelled")
                 case let .failed(message, errorDescription):
-                    Logger.tokenizedCard.warning("⚠️ WARNING: Error tokenizeCard: \n message:\(message ?? "") \n errorDescription: \(errorDescription ?? "")")
+                    Logger.tokenizedCard.error("🔴 ERROR: Error tokenizeCard: \n message:\(message ?? "") \n errorDescription: \(errorDescription ?? "")")
                 }
-               
-                result(.failure(error))
+                result(
+                    .failure(errorResult)
+                )
             } catch {
-                result(.failure(.failed(message: nil, errorDescription: error.localizedDescription)))
-                Logger.tokenizedCard.warning("⚠️ WARNING: Error tokenizeCard request: \(error.localizedDescription)")
+                Logger.tokenizedCard.error("🔴 ERROR: Error tokenizeCard request: \(error.localizedDescription)")
+                
+                let errorResult: TokenizationError = .failed(
+                    message: nil,
+                    errorDescription: error.localizedDescription
+                )
+                result(
+                    .failure(errorResult)
+                )
             }
         }
     }
@@ -44,7 +57,7 @@ fileprivate enum TokenizationServiceEndpoint: APIConfiguration {
     case tokenizationCard(
         data: CardRequestModel,
         key: String,
-        signer: RequestSignerImpl = RequestSignerImpl()
+        signer: RequestSigner = RequestSigner()
     )
     
     var method: HTTPMethod {
@@ -61,7 +74,7 @@ fileprivate enum TokenizationServiceEndpoint: APIConfiguration {
     var endpoint: String {
         switch self {
         case .tokenizationCard:
-           return EnvironmentProviderImpl.environment.tokenizationApiProviderUrl + path
+           return EnvironmentProvider.environment.tokenizationApiProviderUrl + path
         }
     }
     
@@ -77,7 +90,7 @@ fileprivate enum TokenizationServiceEndpoint: APIConfiguration {
                     RequestHeaderField.widget.rawValue: key
                 ]
             } catch {
-                Logger.network.warning("⚠️ WARNING: Error signing request: \(error)")
+                Logger.network.error("🔴 ERROR: Error signing request: \(error)")
                 return nil
             }
         }

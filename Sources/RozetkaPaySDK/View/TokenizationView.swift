@@ -11,13 +11,12 @@ public struct TokenizationView: View {
     //MARK: - Properties
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
-    
     @StateObject var viewModel: TokenizationViewModel
     
     //MARK: - Init
     public init(
         parameters: TokenizationParameters,
-        onResultCallback: @escaping (TokenizationResult) -> Void
+        onResultCallback: @escaping TokenizationResultCompletionHandler
     ) {
         self._viewModel = StateObject(
             wrappedValue: TokenizationViewModel(
@@ -27,100 +26,25 @@ public struct TokenizationView: View {
         )
     }
     
+    //MARK: - Body
     public var body: some View {
         NavigationView {
             if viewModel.isLoading {
-                ZStack {
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .surface
-                        .opacity(0.8)
-                        .ignoresSafeArea()
-                    LoadingView(
-                        tintColor:
-                            viewModel
-                            .themeConfigurator
-                            .colorScheme(colorScheme)
-                            .primary
-                        ,
-                        textFont:
-                            viewModel
-                            .themeConfigurator
-                            .typography
-                            .body
-                        ,
-                        textColorDark:
-                            viewModel
-                            .themeConfigurator
-                            .darkColorScheme
-                            .onSurface
-                        ,
-                        textColorWhite:
-                            viewModel
-                            .themeConfigurator
-                            .lightColorScheme
-                            .onSurface
-                        ,
-                        backgroundColorDark:
-                            viewModel
-                            .themeConfigurator
-                            .darkColorScheme
-                            .surface
-                        ,
-                        backgroundColorWhite:
-                            viewModel
-                            .themeConfigurator
-                            .lightColorScheme
-                            .surface
-                    )
-                }
+                loadingView
             }else if viewModel.isError {
-                ErrorView(
-                    themeConfigurator: viewModel.themeConfigurator, 
-                    errorMessage: viewModel.errorMessage,
-                    onCancel: {
-                        viewModel.cancelled()
-                    },
-                    onRetry: {
-                        viewModel.validateAll()
-                    }
-                )
-                .padding()
+                errorView
             }else {
-                VStack {
-                    headerView
-                    CardInfoView(
-                        viewParameters: viewModel.viewParameters,
-                        themeConfigurator: viewModel.themeConfigurator,
-                        isNeedToTokenizationCard: $viewModel.isNeedToTokenizationCard,
-                        cardNumber: $viewModel.cardNumber,
-                        cvv: $viewModel.cvv,
-                        expiryDate: $viewModel.expiryDate,
-                        cardName: $viewModel.cardName,
-                        cardholderName: $viewModel.cardholderName,
-                        email: $viewModel.email,
-                        errorMessageCardNumber: $viewModel.errorMessageCardNumber,
-                        errorMessageCvv: $viewModel.errorMessageCvv,
-                        errorMessageExpiryDate: $viewModel.errorMessageExpiryDate,
-                        errorMessageCardName: $viewModel.errorMessageCardName,
-                        errorMessageCardholderName: $viewModel.errorMessageCardholderName,
-                        errorMessagEmail: $viewModel.errorMessagEmail
-                    )
-                    mainButton
-                    footerView
-                    Spacer()
-                }
-                .padding()
-                .navigationBarItems(leading: closeButton)
-                .onTapGesture {
-                    hideKeyboard()
-                }
+                mainView
             }
         }
     }
+}
+
+//MARK: UI
+private extension TokenizationView {
     
-    private var headerView: some View {
+    ///
+    var headerView: some View {
         VStack(alignment: .leading) {
             HStack{
                 Text(Localization.rozetka_pay_tokenization_title.description)
@@ -136,7 +60,7 @@ public struct TokenizationView: View {
                             .themeConfigurator
                             .colorScheme(colorScheme)
                             .title
-                            
+                        
                     )
                     .padding(.bottom, 20)
                 Spacer()
@@ -144,56 +68,109 @@ public struct TokenizationView: View {
         }
     }
     
-    private var mainButton: some View {
-        Button(action: {
-            viewModel.validateAll()
-        }) {
-            Text(Localization.rozetka_pay_form_save_card.description)
-                .font(
-                    viewModel
-                        .themeConfigurator
-                        .typography
-                        .labelLarge
-                )
-                .bold()
-                .frame(maxWidth: .infinity)
-                .padding()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onPrimary
-                    
-                )
-                .background(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .primary
-                )
-                .cornerRadius(
-                    viewModel
-                        .themeConfigurator
-                        .sizes
-                        .buttonCornerRadius
-                )
-        }
-        .padding(.top, 20)
-    }
-    
-    private var footerView: some View {
-        HStack {
-            Spacer()
-            Image("rozetka_pay_legal_visa", bundle: .module)
-            Image("rozetka_pay_legal_pcidss", bundle: .module)
-            Image("rozetka_pay_legal_mastercard", bundle: .module)
+    var mainView: some View {
+        VStack {
+            headerView
+            cardInfoView
+            mainButton
+            footerView
             Spacer()
         }
-        .padding(.top, 20)
+        .padding()
+        .navigationBarItems(leading: closeButton)
+        .onTapGesture {
+            hideKeyboard()
+        }
     }
     
-    private var closeButton: some View {
+    ///
+    var loadingView: some View {
+        ZStack {
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .surface
+                .opacity(0.8)
+                .ignoresSafeArea()
+            LoadingView(
+                tintColor:
+                    viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .primary
+                ,
+                textFont:
+                    viewModel
+                    .themeConfigurator
+                    .typography
+                    .body
+                ,
+                textColorDark:
+                    viewModel
+                    .themeConfigurator
+                    .darkColorScheme
+                    .onSurface
+                ,
+                textColorWhite:
+                    viewModel
+                    .themeConfigurator
+                    .lightColorScheme
+                    .onSurface
+                ,
+                backgroundColorDark:
+                    viewModel
+                    .themeConfigurator
+                    .darkColorScheme
+                    .surface
+                ,
+                backgroundColorWhite:
+                    viewModel
+                    .themeConfigurator
+                    .lightColorScheme
+                    .surface
+            )
+        }
+    }
+    ///
+    var errorView: some View {
+        ErrorView(
+            themeConfigurator: viewModel.themeConfigurator,
+            errorMessage: viewModel.errorMessage,
+            onCancel: {
+                viewModel.cancelled()
+            },
+            onRetry: {
+                viewModel.validateAll()
+            }
+        )
+        .padding()
+    }
+    
+    ///
+    var cardInfoView: some View {
+        CardInfoView(
+            viewParameters: viewModel.viewParameters,
+            themeConfigurator: viewModel.themeConfigurator,
+            isNeedToTokenizationCard: $viewModel.isNeedToTokenizationCard,
+            cardNumber: $viewModel.cardNumber,
+            cvv: $viewModel.cvv,
+            expiryDate: $viewModel.expiryDate,
+            cardName: $viewModel.cardName,
+            cardholderName: $viewModel.cardholderName,
+            email: $viewModel.email,
+            errorMessageCardNumber: $viewModel.errorMessageCardNumber,
+            errorMessageCvv: $viewModel.errorMessageCvv,
+            errorMessageExpiryDate: $viewModel.errorMessageExpiryDate,
+            errorMessageCardName: $viewModel.errorMessageCardName,
+            errorMessageCardholderName: $viewModel.errorMessageCardholderName,
+            errorMessageEmail: $viewModel.errorMessageEmail
+        )
+        
+    }
+    ///
+    var closeButton: some View {
         Button(action: {
+            viewModel.cancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
             Image(systemName: "xmark")
@@ -205,12 +182,72 @@ public struct TokenizationView: View {
                 )
         }
     }
+    ///
+    var footerView: some View {
+        HStack {
+            Spacer()
+            Image("rozetka_pay_legal_visa", bundle: .module)
+            Image("rozetka_pay_legal_pcidss", bundle: .module)
+            Image("rozetka_pay_legal_mastercard", bundle: .module)
+            Spacer()
+        }
+        .padding(.top, 20)
+    }
     
-    private func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    ///
+    var mainButton: some View {
+       Button(action: {
+           viewModel.validateAll()
+       }) {
+           Text(Localization.rozetka_pay_form_save_card.description)
+               .font(
+                   viewModel
+                       .themeConfigurator
+                       .typography
+                       .labelLarge
+               )
+               .bold()
+               .frame(maxWidth: .infinity)
+               .padding()
+               .foregroundColor(
+                   viewModel
+                       .themeConfigurator
+                       .colorScheme(colorScheme)
+                       .onPrimary
+                   
+               )
+               .background(
+                   viewModel
+                       .themeConfigurator
+                       .colorScheme(colorScheme)
+                       .primary
+               )
+               .cornerRadius(
+                   viewModel
+                       .themeConfigurator
+                       .sizes
+                       .buttonCornerRadius
+               )
+       }
+       .padding(.top, 20)
+   }
+}
+
+
+//MARK: Private Methods
+private extension TokenizationView {
+
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
     }
 }
 
+//MARK: Preview
 #Preview {
     TokenizationView(
         parameters: TokenizationParameters(

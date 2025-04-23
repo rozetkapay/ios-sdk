@@ -10,7 +10,7 @@ import PassKit
 import OSLog
 
 public class ApplePayConfig {
-    let merchantIdentifier: String //"merchant.com.YOURDOMAIN.YOURAPPNAME"
+    let merchantIdentifier: String
     let merchantName: String
     let supportedNetworks: [PKPaymentNetwork]
     let merchantCapabilities: PKMerchantCapability
@@ -71,19 +71,19 @@ public class ApplePayConfig {
     
     func checkApplePayAvailability() -> Bool {
         if PKPaymentAuthorizationController.canMakePayments() {
-            Logger.applePay.info(
+            Logger.payByApplePay.info(
                 "🍏 Apple Pay is available on this device. 🍏"
             )
         
             if PKPaymentAuthorizationController.canMakePayments(usingNetworks: supportedNetworks) {
-                Logger.applePay.info("Apple Pay is available and supports payment networks: [\(supportedNetworks.debugDescription)].")
+                Logger.payByApplePay.info("Apple Pay is available and supports payment networks: [\(supportedNetworks.debugDescription)].")
                 return true
             } else {
-                Logger.applePay.warning("⚠️ WARNING: Apple Pay is available but does not support payment networks: [\(supportedNetworks.debugDescription)].")
+                Logger.payByApplePay.warning("⚠️ WARNING: Apple Pay is available but does not support payment networks: [\(supportedNetworks.debugDescription)].")
                 return false
             }
         } else {
-            Logger.applePay.warning("⚠️ WARNING: Apple Pay is not available on this device.")
+            Logger.payByApplePay.warning("⚠️ WARNING: Apple Pay is not available on this device.")
             return false
         }
     }

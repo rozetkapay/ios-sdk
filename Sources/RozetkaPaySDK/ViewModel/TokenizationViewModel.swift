@@ -9,11 +9,14 @@ import SwiftUI
 
 final class TokenizationViewModel: BaseViewModel {
     
-    private let onResultCallback: ((TokenizationResult) -> Void)?
+    //MARK: - Properties
+    private let onResultCallback: (TokenizationResultCompletionHandler)?
+    
+    //MARK: - Init
     init(
         parameters: TokenizationParameters,
         provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
-        onResultCallback: @escaping (TokenizationResult) -> Void
+        onResultCallback: @escaping TokenizationResultCompletionHandler
     ) {
         self.onResultCallback = onResultCallback
         super.init(
@@ -23,18 +26,10 @@ final class TokenizationViewModel: BaseViewModel {
             provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
         )
         
-        
-        
-#warning("to do - Удалить тестовые данные")
-        cardName = "test"
-        cardNumber = "4242 4242 4242 4242"
-        expiryDate = "12/29"
-        cvv = "123"
-        cardholderName = "Test Test"
-        email = "casiocompa@gmail.com"
-        
+        setTestData()
     }
     
+    //MARK: - overrides
     override func loading(validModel: ValidationResultModel) {
         let model = CardRequestModel(
             cardName: validModel.cardName,
@@ -50,20 +45,22 @@ final class TokenizationViewModel: BaseViewModel {
     
     
     override func cancelled() {
-        self.isLoading = false
-        self.isError = false
-        self.errorMessage = nil
-        onResultCallback?(.failure(.cancelled))
+        resetState()
+        stopLoader()
+        
+        onResultCallback?(
+            .failure(.cancelled)
+        )
     }
     
     private func tokenizeCard(key: String, model: CardRequestModel) {
-        self.isLoading = true
-        self.isError = false
-        self.errorMessage = nil
+        resetState()
+        startLoader()
         
         TokenizationService.tokenizeCard(key: key, model: model) { [weak self] result in
             DispatchQueue.main.async {
-                self?.isLoading = false
+                self?.stopLoader()
+                
                 switch result {
                 case .success(let success):
                     self?.isError = false

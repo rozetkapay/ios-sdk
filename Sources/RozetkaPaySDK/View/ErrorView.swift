@@ -8,43 +8,47 @@
 import SwiftUI
 
 struct ErrorView: View {
+    //MARK: - Properties
     @Environment(\.colorScheme) var colorScheme
     private let themeConfigurator: RozetkaPayThemeConfigurator
     
-    var errorMessage: String
-    var onCancel: () -> Void
-    var onRetry: () -> Void
+    private var errorMessage: String
+    private var onCancel: () -> Void
+    private var onRetry: () -> Void
+    private var isButtonRetryEnabled: Bool
     
+    //MARK: - Init
     init(
         themeConfigurator: RozetkaPayThemeConfigurator,
         errorMessage: String? = nil,
         onCancel: @escaping () -> Void,
-        onRetry: @escaping () -> Void
+        onRetry: @escaping () -> Void = {},
+        isButtonRetryEnabled: Bool = true
     ) {
         self.themeConfigurator = themeConfigurator
         self.errorMessage = errorMessage ?? Localization.rozetka_pay_tokenization_error_common.description
         self.onCancel = onCancel
         self.onRetry = onRetry
+        self.isButtonRetryEnabled = isButtonRetryEnabled
     }
     
+    //MARK: - Body
     var body: some View {
         VStack {
             Spacer()
             imageView
             errorMessageView
-            // Buttons
-            VStack(spacing: 16) {
-                secondButton
+            if isButtonRetryEnabled{
+                buttons
+            }else {
                 mainButton
-                .padding(.horizontal, 20)
             }
-            
             Spacer()
         }
         .background(
             themeConfigurator
-            .colorScheme(colorScheme)
-            .surface
+                .colorScheme(colorScheme)
+                .surface
         )
         .cornerRadius(
             themeConfigurator
@@ -54,7 +58,13 @@ struct ErrorView: View {
         .padding()
     }
     
-    private var imageView: some View {
+}
+
+//MARK: UI
+private extension ErrorView {
+    
+    ///
+    var imageView: some View {
         Image("rozetka_pay_error", bundle: .module)
             .resizable()
             .frame(width: 200, height: 200)
@@ -62,7 +72,8 @@ struct ErrorView: View {
         
     }
     
-    private var errorMessageView: some View {
+    ///
+    var errorMessageView: some View {
         Text(errorMessage)
             .font(
                 themeConfigurator
@@ -76,11 +87,27 @@ struct ErrorView: View {
         
     }
     
-    private var mainButton: some View {
+    ///
+    var buttons: some View {
+        VStack(spacing: 16) {
+            secondButton
+            mainButton
+                .padding(.horizontal, 20)
+        }
+    }
+    
+    ///
+    var mainButton: some View {
         Button(action: {
-            onRetry()
+            if isButtonRetryEnabled {
+                onRetry()
+            } else {
+                onCancel()
+            }
         }) {
-            Text(Localization.rozetka_pay_common_button_retry.description)
+            Text(isButtonRetryEnabled ? Localization.rozetka_pay_common_button_retry.description :
+                Localization.rozetka_pay_common_button_cancel.description
+            )
                 .font(
                     themeConfigurator
                         .typography
@@ -90,7 +117,7 @@ struct ErrorView: View {
                 .frame(maxWidth: .infinity)
                 .padding()
                 .foregroundColor(
-                   themeConfigurator
+                    themeConfigurator
                         .colorScheme(colorScheme)
                         .onPrimary
                     
@@ -109,7 +136,8 @@ struct ErrorView: View {
         .padding(.top, 20)
     }
     
-    private var secondButton: some View {
+    ///
+    var secondButton: some View {
         Button(action: {
             onCancel()
         }) {
@@ -121,7 +149,7 @@ struct ErrorView: View {
                 )
                 .bold()
                 .foregroundColor(
-                   themeConfigurator
+                    themeConfigurator
                         .colorScheme(colorScheme)
                         .primary
                     
@@ -131,10 +159,11 @@ struct ErrorView: View {
     }
 }
 
+//MARK: - Preview
 #Preview {
     ErrorView(
-        themeConfigurator: RozetkaPayThemeConfigurator(), 
-//        errorMessage: "test",
+        themeConfigurator: RozetkaPayThemeConfigurator(),
+        errorMessage: "test",
         onCancel: { print("Cancel tapped") },
         onRetry: { print("Retry tapped") }
     )

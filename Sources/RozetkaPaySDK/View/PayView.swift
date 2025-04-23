@@ -10,16 +10,16 @@ import PassKit
 
 public struct PayView: View {
    
-    ///
+    //MARK: - Properties
     @Environment(\.presentationMode) var presentationMode
-    @StateObject var viewModel: PayViewModel
     @Environment(\.colorScheme) var colorScheme
+    @StateObject var viewModel: PayViewModel
     
+    //MARK: - Init
     public init(
         parameters: PaymentParameters,
-        onResultCallback: @escaping (PaymentResult) -> Void
+        onResultCallback: @escaping PaymentResultCompletionHandler
     ) {
-        
         self._viewModel = StateObject(
             wrappedValue: PayViewModel(
                 parameters: parameters,
@@ -28,103 +28,130 @@ public struct PayView: View {
         )
     }
     
+    //MARK: - Body
     public var body: some View {
         NavigationView {
             if viewModel.isLoading {
-                ZStack {
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .surface
-                        .opacity(0.8)
-                        .ignoresSafeArea()
-                    LoadingView(
-                        tintColor: 
-                            viewModel
-                            .themeConfigurator
-                            .colorScheme(colorScheme)
-                            .primary
-                        ,
-                        textFont:
-                            viewModel
-                            .themeConfigurator
-                            .typography
-                            .body
-                        ,
-                        textColorDark: 
-                            viewModel
-                            .themeConfigurator
-                            .darkColorScheme
-                            .onSurface
-                        ,
-                        textColorWhite:
-                            viewModel
-                            .themeConfigurator
-                            .lightColorScheme
-                            .onSurface
-                        ,
-                        backgroundColorDark:
-                            viewModel
-                            .themeConfigurator
-                            .darkColorScheme
-                            .surface
-                        ,
-                        backgroundColorWhite:
-                            viewModel
-                            .themeConfigurator
-                            .lightColorScheme
-                            .surface
-                    )
-                }
+                loadingView
             }else if viewModel.isError {
-                ErrorView(
-                    themeConfigurator: viewModel.themeConfigurator, 
-                    errorMessage: viewModel.errorMessage,
-                    onCancel: {
-                        viewModel.cancelled()
-                    },
-                    onRetry: {
-                        viewModel.validateAll()
-                    }
-                )
-                .padding()
+                errorView
             }else {
-                VStack {
-                    headerView
-                    applePayButton
-                    CardInfoView(
-                        viewParameters: viewModel.viewParameters,
-                        themeConfigurator: viewModel.themeConfigurator,
-                        isNeedToTokenizationCard: $viewModel.isNeedToTokenizationCard,
-                        isShowNeedToTokenizationCard: viewModel.isAllowTokenization,
-                        cardNumber: $viewModel.cardNumber,
-                        cvv: $viewModel.cvv,
-                        expiryDate: $viewModel.expiryDate,
-                        cardName: $viewModel.cardName,
-                        cardholderName: $viewModel.cardholderName,
-                        email: $viewModel.email,
-                        errorMessageCardNumber: $viewModel.errorMessageCardNumber,
-                        errorMessageCvv: $viewModel.errorMessageCvv,
-                        errorMessageExpiryDate: $viewModel.errorMessageExpiryDate,
-                        errorMessageCardName: $viewModel.errorMessageCardName,
-                        errorMessageCardholderName: $viewModel.errorMessageCardholderName,
-                        errorMessagEmail: $viewModel.errorMessagEmail
-                    )
-                    cardPayButton
-                    footerView
-                    LegalTextView()
-                    Spacer()
-                }
-                .padding()
-                .navigationBarItems(leading: closeButton)
-                .onTapGesture {
-                    hideKeyboard()
-                }
+                mainView
             }
+        }
+        .fullScreenCover(isPresented:  $viewModel.isThreeDSConfirmationPresented) {
+            threeDSView
+        }
+        .customAlert(
+            item: $viewModel.alertItem,
+            themeConfigurator: viewModel.themeConfigurator
+        )
+    }
+}
+
+//MARK: UI
+private extension PayView {
+    
+    var mainView: some View {
+        VStack {
+            headerView
+            applePayButton
+            cardInfoView
+            cardPayButton
+            footerView
+            LegalTextView()
+            Spacer()
+        }
+        .padding()
+        .navigationBarItems(leading: closeButton)
+        .onTapGesture {
+            hideKeyboard()
+        }
+    }
+    ///
+    var loadingView: some View {
+        ZStack {
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .surface.opacity(0.8)
+                .ignoresSafeArea()
+            LoadingView(
+                tintColor: viewModel.themeConfigurator.colorScheme(colorScheme).primary,
+                textFont: viewModel.themeConfigurator.typography.body,
+                textColorDark: viewModel.themeConfigurator.darkColorScheme.onSurface,
+                textColorWhite: viewModel.themeConfigurator.lightColorScheme.onSurface,
+                backgroundColorDark: viewModel.themeConfigurator.darkColorScheme.surface,
+                backgroundColorWhite: viewModel.themeConfigurator.lightColorScheme.surface
+            )
         }
     }
     
-    //MARK: - headerView
+    ///
+    var errorView: some View {
+        ErrorView(
+            themeConfigurator: viewModel.themeConfigurator,
+            errorMessage: viewModel.errorMessage,
+            onCancel: {
+                viewModel.cancelled()
+            },
+            onRetry: {
+                viewModel.validateAll()
+            }
+        )
+        .padding()
+    }
+    
+    ///
+    @ViewBuilder var threeDSView: some View {
+        if let request = viewModel.threeDSModel {
+            ThreeDSHandlerView(
+                themeConfigurator: viewModel.themeConfigurator,
+                request: request,
+                isPresented: $viewModel.isThreeDSConfirmationPresented,
+                onResultCallback: viewModel.handleThreeDSResult
+            )
+        }
+    }
+    ///
+    var cardInfoView: some View {
+        CardInfoView(
+            viewParameters: viewModel.viewParameters,
+            themeConfigurator: viewModel.themeConfigurator,
+            isNeedToTokenizationCard: $viewModel.isNeedToTokenizationCard,
+            isShowNeedToTokenizationCard: viewModel.isAllowTokenization,
+            cardNumber: $viewModel.cardNumber,
+            cvv: $viewModel.cvv,
+            expiryDate: $viewModel.expiryDate,
+            cardName: $viewModel.cardName,
+            cardholderName: $viewModel.cardholderName,
+            email: $viewModel.email,
+            errorMessageCardNumber: $viewModel.errorMessageCardNumber,
+            errorMessageCvv: $viewModel.errorMessageCvv,
+            errorMessageExpiryDate: $viewModel.errorMessageExpiryDate,
+            errorMessageCardName: $viewModel.errorMessageCardName,
+            errorMessageCardholderName: $viewModel.errorMessageCardholderName,
+            errorMessageEmail: $viewModel.errorMessageEmail
+        )
+        
+    }
+    
+    ///
+    private var closeButton: some View {
+        Button(action: {
+            viewModel.cancelled()
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Image(systemName: "xmark")
+                .foregroundColor(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .appBarIcon
+                )
+        }
+    }
+    
     private var headerView: some View {
         VStack(alignment: .leading) {
             HStack{
@@ -158,51 +185,6 @@ public struct PayView: View {
             Spacer()
         }
         .padding(.top, 20)
-    }
-    
-    //MARK: - Methods
-    private var closeButton: some View {
-        Button(action: {
-            presentationMode.wrappedValue.dismiss()
-        }) {
-            Image(systemName: "xmark")
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .appBarIcon
-                )
-        }
-    }
-    
-    private func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
-    
-    private var applePayButton: some View {
-        ApplePayButton(
-            action: viewModel.startApplePayPayment,
-            paymentButtonStyle:
-                viewModel
-                .themeConfigurator
-                .colorScheme(colorScheme)
-                .applePayButtonStyle
-        )
-        .frame(height: 50)
-        .cornerRadius(
-            viewModel
-                .themeConfigurator
-                .sizes
-                .buttonCornerRadius)
-        .padding(.top, 20)
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius:
-                    viewModel
-                    .themeConfigurator
-                    .sizes
-                    .buttonCornerRadius)
-        )
     }
     
     private var cardPayButton: some View {
@@ -242,11 +224,49 @@ public struct PayView: View {
         .padding(.top, 20)
     }
     
+    private var applePayButton: some View {
+        ApplePayButton(
+            action: viewModel.startPayByApplePay,
+            paymentButtonStyle:
+                viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .applePayButtonStyle
+        )
+        .frame(height: 50)
+        .cornerRadius(
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonCornerRadius)
+        .padding(.top, 20)
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius:
+                    viewModel
+                    .themeConfigurator
+                    .sizes
+                    .buttonCornerRadius)
+        )
+    }
+}
+
+
+//MARK: Private Methods
+private extension PayView {
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
 }
 
 #Preview {
     PayView(parameters: PaymentParameters(
-        client: ClientAuthParameters(token: "test"),
+        client: ClientAuthParameters(token: "test", widgetKey: "test"),
         amountParameters: PaymentParameters.AmountParameters(
             amount: 100.00,
             currencyCode: "UAH"

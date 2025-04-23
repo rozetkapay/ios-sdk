@@ -18,7 +18,7 @@ struct TokenizationResponse: Decodable {
         let isoA3Code: String?
         let cardType: String?
         
-        enum CodingKeys: String, CodingKey {
+        private enum CodingKeys: String, CodingKey {
             case bank
             case isoA3Code = "iso_a3_code"
             case cardType = "card_type"
@@ -33,7 +33,7 @@ struct TokenizationResponse: Decodable {
         }
     }
     
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case token = "token"
         case expiresAt = "expires_at"
         case cardMask = "card_mask"

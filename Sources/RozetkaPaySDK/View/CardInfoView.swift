@@ -9,7 +9,7 @@ import SwiftUI
 
 public struct CardInfoView: View {
     
-    //MARK: - UI Properties
+    //MARK: - Properties
     ///
     @Binding var cardNumber: String?
     @Binding var cvv: String?
@@ -25,7 +25,7 @@ public struct CardInfoView: View {
     
     @Binding var errorMessageCardName: String?
     @Binding var errorMessageCardholderName: String?
-    @Binding var errorMessagEmail: String?
+    @Binding var errorMessageEmail: String?
     
     @Binding var isNeedToTokenizationCard: Bool
     
@@ -68,7 +68,7 @@ public struct CardInfoView: View {
         errorMessageExpiryDate: Binding<String?>,
         errorMessageCardName: Binding<String?>,
         errorMessageCardholderName: Binding<String?>,
-        errorMessagEmail: Binding<String?>
+        errorMessageEmail: Binding<String?>
     ) {
         self.themeConfigurator = themeConfigurator
         self.provideCardPaymentSystemUseCase = provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
@@ -90,14 +90,9 @@ public struct CardInfoView: View {
         self._errorMessageExpiryDate = errorMessageExpiryDate
         self._errorMessageCardName = errorMessageCardName
         self._errorMessageCardholderName = errorMessageCardholderName
-        self._errorMessagEmail = errorMessagEmail
+        self._errorMessageEmail = errorMessageEmail
         
         self._detectedPaymentSystem = State(initialValue: self.detectPaymentSystem(cardNumber.wrappedValue))
-    }
-    
-    @discardableResult
-    private func detectPaymentSystem(_ value: String?) -> PaymentSystem? {
-        return provideCardPaymentSystemUseCase.invoke(cardNumberPrefix: value)
     }
     
     public var body: some View {
@@ -149,7 +144,13 @@ public struct CardInfoView: View {
         }
     }
     
-    private var cardNameView: some View {
+}
+
+//MARK: UI
+private extension CardInfoView {
+    
+    ///
+    var cardNameView: some View {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
@@ -195,7 +196,8 @@ public struct CardInfoView: View {
         }
     }
     
-    private var cardHolderNameView: some View {
+    ///
+    var cardHolderNameView: some View {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
@@ -265,7 +267,8 @@ public struct CardInfoView: View {
         }
     }
     
-    private var emailView: some View {
+    ///
+    var emailView: some View {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
@@ -278,7 +281,7 @@ public struct CardInfoView: View {
                         .placeholder
                         .toUIColor(),
                     text: $email,
-                    textColor: errorMessagEmail.isNilOrEmpty ?
+                    textColor: errorMessageEmail.isNilOrEmpty ?
                     themeConfigurator
                         .colorScheme(colorScheme)
                         .onComponent
@@ -298,9 +301,9 @@ public struct CardInfoView: View {
                     validationTextFieldResult: { result in
                         switch result {
                         case .valid:
-                            errorMessagEmail = nil
+                            errorMessageEmail = nil
                         case let .error(message):
-                            errorMessagEmail = message
+                            errorMessageEmail = message
                         }
                     }
                 )
@@ -313,7 +316,7 @@ public struct CardInfoView: View {
                 )
                 .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
                 
-                if let errorMessage = errorMessagEmail.isNilOrEmptyValue {
+                if let errorMessage = errorMessageEmail.isNilOrEmptyValue {
                     
                     HStack{
                         Text(errorMessage)
@@ -335,7 +338,8 @@ public struct CardInfoView: View {
         }
     }
     
-    private var cardDetailsView: some View {
+    ///
+    var cardDetailsView: some View {
         VStack(spacing: 0) {
             VStack(spacing: 2) {
                 HStack {
@@ -552,10 +556,10 @@ public struct CardInfoView: View {
         }
     }
     
-    //MARK: - checkBox
-    private var checkBoxView: some View {
+    ///
+    var checkBoxView: some View {
         HStack {
-            Toggle("",isOn: $isNeedToTokenizationCard)
+            Toggle(isOn: $isNeedToTokenizationCard) {}
                 .toggleStyle(
                     CheckBoxStyle(
                         colorOn: themeConfigurator
@@ -606,13 +610,21 @@ public struct CardInfoView: View {
             }
         }
     }
+}
+
+//MARK: Private Methods
+private extension CardInfoView {
+    @discardableResult
+    func detectPaymentSystem(_ value: String?) -> PaymentSystem? {
+        return provideCardPaymentSystemUseCase.invoke(cardNumberPrefix: value)
+    }
     
-    
-    private func hideKeyboard() {
+    func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
+//MARK: Preview
 #Preview {
     CardInfoView(
         viewParameters: TokenizationViewParameters(
@@ -634,7 +646,7 @@ public struct CardInfoView: View {
         errorMessageExpiryDate: .constant(nil),
         errorMessageCardName: .constant(nil),
         errorMessageCardholderName: .constant(nil),
-        errorMessagEmail: .constant(nil)
+        errorMessageEmail: .constant(nil)
     )
     
 }

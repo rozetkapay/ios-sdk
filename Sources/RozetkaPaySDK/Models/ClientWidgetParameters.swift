@@ -7,14 +7,12 @@
 
 import Foundation
 
-public protocol ClientAuthParametersProtocol: Codable {
-    var key: String {get}
-}
-
 public struct ClientWidgetParameters: ClientAuthParametersProtocol {
     public let key: String
+    public let secondKey: String?
     
     public init(widgetKey: String) {
         self.key = widgetKey
+        self.secondKey = nil
     }
 }

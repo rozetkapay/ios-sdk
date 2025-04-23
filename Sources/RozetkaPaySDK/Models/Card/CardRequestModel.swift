@@ -39,7 +39,7 @@ public struct CardRequestModel: Encodable {
     private let deviceCountry: String?
     private let deviceCity: String?
     
-    enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case cardNumber = "card_number"
         case cardExpMonth = "card_exp_month"
         case cardExpYear = "card_exp_year"

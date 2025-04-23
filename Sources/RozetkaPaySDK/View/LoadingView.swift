@@ -30,9 +30,18 @@ struct LoadingView: View {
         }
         .padding(40)
         .background(
-            colorScheme == .dark ? backgroundColorDark.opacity(0.8) : backgroundColorWhite.opacity(0.8)
+            colorScheme == .dark ?
+                backgroundColorDark.opacity(0.8) :
+                backgroundColorWhite.opacity(0.8)
         )
         .cornerRadius(20)
-        .shadow(color: colorScheme == .dark ? backgroundColorWhite.opacity(0.2) : backgroundColorDark.opacity(0.2), radius: 10, x: 0, y: 4)
+        .shadow(
+            color: colorScheme == .dark ?
+                    backgroundColorWhite.opacity(0.2) :
+                    backgroundColorDark.opacity(0.2),
+            radius: 10,
+            x: 0,
+            y: 4
+        )
     }
 }

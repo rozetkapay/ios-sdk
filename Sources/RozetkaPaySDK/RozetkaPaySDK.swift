@@ -10,8 +10,10 @@ public final class RozetkaPaySdk {
     private static var _isInitialized: Bool = false
 
     static var appContext: UIApplication {
-        guard _isInitialized, let context = _appContext else {
-            fatalError("RozetkaPaySdk is not initialized. Call initSdk() first.")
+        guard _isInitialized,
+                let context = _appContext
+        else {
+            fatalError("⚠️ RozetkaPaySdk is not initialized. Call initSdk() first. ⚠️")
         }
         return context
     }
