@@ -109,10 +109,36 @@ private extension PayViewModel {
     }
 }
 
+//MARK: - PayByCard
+extension PayViewModel {
+#warning("in process - startPayByCard")
+    /// payment with card data not supported yet
+    /// it will be implemented in the future releases
+    private func startPayByCard(_ validModel: ValidationResultModel) {
+        alertItem = CustomAlertItem(
+            type: .soon,
+            title: "Soon ...",
+            message: Localization.rozetka_pay_payment_error_unsupported.description
+        )
+    }
+    
+#warning("in process - startPayByTokenizedCard")
+    /// payment with tokenizedCard data not supported yet
+    /// it will be implemented in the future releases
+    private func startPayByTokenizedCard(_ validModel: ValidationResultModel) {
+        alertItem = CustomAlertItem(
+            type: .soon,
+            title: "Soon ...",
+            message: Localization.rozetka_pay_payment_tokenized_error_unsupported.description
+        )
+    }
+    
+}
+
+
 //MARK: - PayByTokenizedCard
 extension PayViewModel {
-    
-    private func startPayByTokenizedCard(_ validModel: ValidationResultModel) {
+    private func inprocess(_ validModel: ValidationResultModel) {
         resetState()
         startLoader()
         
@@ -199,20 +225,6 @@ extension PayViewModel {
                 )
             }
         }
-    }
-}
-
-//MARK: - PayByCard
-extension PayViewModel {
-#warning("in process - startPayByCard")
-    /// payment with card data not supported yet
-    /// it will be implemented in the future releases
-    private func startPayByCard(_ validModel: ValidationResultModel) {
-        alertItem = CustomAlertItem(
-            type: .soon,
-            title: "Soon ...",
-            message: Localization.rozetka_pay_payment_error_unsupported.description
-        )
     }
 }
 
