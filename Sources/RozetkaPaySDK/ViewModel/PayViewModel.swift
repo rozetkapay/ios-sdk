@@ -129,7 +129,7 @@ extension PayViewModel {
         alertItem = CustomAlertItem(
             type: .soon,
             title: "Soon ...",
-            message: Localization.rozetka_pay_payment_tokenized_error_unsupported.description
+            message: Localization.rozetka_pay_payment_error_unsupported.description
         )
     }
     
