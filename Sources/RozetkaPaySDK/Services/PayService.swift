@@ -85,7 +85,7 @@ open class PayService {
                         message: "Payment status still pending after timeout",
                         orderId: model.orderId,
                         paymentId: model.paymentId,
-                        type: ErrorResponseType.paymentError.rawValue,
+                        type: ErrorResponseType.paymentError.rawValue
                     )
                     
                     result(
@@ -175,7 +175,7 @@ private extension PayService {
                 code: ErrorResponseCode.pending.rawValue,
                 message: "Payment status still pending after timeout",
                 paymentId: data.paymentId,
-                type: data.statusCode,
+                type: data.statusCode
             )
             
             result(
@@ -252,12 +252,12 @@ private extension PayService {
 fileprivate enum PayServiceEndpoint: APIConfiguration {
     case createPayment(
         data: PaymentRequestModel,
-        key: String,
+        key: String
     )
     
     case checkPayment(
         data: CheckPaymentRequestModel,
-        key: String,
+        key: String
     )
     
     var method: HTTPMethod {

@@ -143,12 +143,12 @@ extension PaymentError {
                 code: ErrorResponseCode.networkUnreachable.rawValue,
                 orderId: orderId,
                 paymentId: paymentId,
-                type: ErrorResponseType.networkError.rawValue,
+                type: ErrorResponseType.networkError.rawValue
             )
         case .unknown:
             return PaymentError(
               orderId: orderId,
-              paymentId: paymentId,
+              paymentId: paymentId
           )
         }
     }
