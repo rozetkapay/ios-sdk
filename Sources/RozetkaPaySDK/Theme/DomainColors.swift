@@ -23,44 +23,44 @@ public struct DomainColorScheme {
     private let onComponentHex: UInt
     private let applePayButtonStyleDp: PKPaymentButtonStyle
 
-    var surface: Color {
+    public var surface: Color {
         return Color(hex: surfaceHex)
     }
-    var onSurface: Color {
+    public var onSurface: Color {
         return Color(hex: onSurfaceHex)
     }
-    var appBarIcon: Color {
+    public var appBarIcon: Color {
         return Color(hex: appBarIconHex)
     }
-    var title: Color {
+    public var title: Color {
         return Color(hex: titleHex)
     }
-    var subtitle: Color {
+    public var subtitle: Color {
         return Color(hex: subtitleHex)
     }
-    var error: Color {
+    public var error: Color {
         return Color(hex: errorHex)
     }
-    var primary: Color {
+    public var primary: Color {
         return Color(hex: primaryHex)
     }
-    var onPrimary: Color {
+    public var onPrimary: Color {
         return Color(hex: onPrimaryHex)
     }
-    var placeholder: Color {
+    public var placeholder: Color {
         return Color(hex: placeholderHex)
     }
-    var componentSurface: Color {
+    public var componentSurface: Color {
         return Color(hex: componentSurfaceHex)
     }
-    var componentDivider: Color {
+    public var componentDivider: Color {
         return Color(hex: componentDividerHex)
     }
-    var onComponent: Color {
+    public var onComponent: Color {
         return Color(hex: onComponentHex)
     }
     
-    var applePayButtonStyle: PKPaymentButtonStyle {
+    public var applePayButtonStyle: PKPaymentButtonStyle {
         return applePayButtonStyleDp
     }
 

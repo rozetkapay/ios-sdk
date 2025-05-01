@@ -27,60 +27,60 @@ public struct DomainTypography {
     private let inputUIDp: UIFont
     private let legalTextUIDp: UIFont
     
-    var title: Font {
+    public var title: Font {
         return titleDp
     }
     
-    var subtitle: Font {
+    public  var subtitle: Font {
         return subtitleDp
     }
     
-    var body: Font {
+    public var body: Font {
         return  bodyDp
     }
     
-    var labelSmall: Font {
+    public var labelSmall: Font {
         return labelSmallDp
     }
     
-    var labelLarge: Font {
+    public var labelLarge: Font {
         return labelLargeDp
     }
     
-    var input: Font {
+    public var input: Font {
         return inputDp
     }
     
-    var legalText: Font {
+    public var legalText: Font {
         return legalTextDp
     }
     
     // UIKit fonts
-    var titleUI: UIFont {
+    public var titleUI: UIFont {
        return titleUIDp
     }
     
-    var subtitleUI: UIFont {
+    public var subtitleUI: UIFont {
         return subtitleUIDp
     }
     
-    var bodyUI: UIFont {
+    public var bodyUI: UIFont {
         return bodyUIDp
     }
     
-    var labelSmallUI: UIFont {
+    public var labelSmallUI: UIFont {
         return labelSmallUIDp
     }
     
-    var labelLargeUI: UIFont {
+    public var labelLargeUI: UIFont {
         return labelLargeUIDp
     }
     
-    var inputUI: UIFont {
+    public var inputUI: UIFont {
         return inputUIDp
     }
     
-    var legalTextUI: UIFont {
+    public var legalTextUI: UIFont {
         return legalTextUIDp
     }
     
