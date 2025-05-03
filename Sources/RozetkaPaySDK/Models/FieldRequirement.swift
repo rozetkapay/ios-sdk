@@ -15,4 +15,8 @@ public enum FieldRequirement {
     var isShow: Bool {
         return self != .none
     }
+    
+    var isRequired: Bool {
+        return self == .required
+    }
 }

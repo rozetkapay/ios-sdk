@@ -33,9 +33,10 @@ public struct CardInfoView: View {
     private let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
     private let themeConfigurator: RozetkaPayThemeConfigurator
     
-    private var isShowCardName: Bool
-    private var isShowCardholderName: Bool
-    private var isShowEmail: Bool
+    private var fieldRequirementCardName: FieldRequirement
+    private var fieldRequirementCardholderName: FieldRequirement
+    private var fieldRequirementEmail: FieldRequirement
+    
     private var isShowNeedToTokenizationCard: Bool
     
     @State var detectedPaymentSystem: PaymentSystem?
@@ -72,9 +73,9 @@ public struct CardInfoView: View {
     ) {
         self.themeConfigurator = themeConfigurator
         self.provideCardPaymentSystemUseCase = provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
-        self.isShowCardName = viewParameters.cardNameField.isShow
-        self.isShowCardholderName = viewParameters.cardholderNameField.isShow
-        self.isShowEmail = viewParameters.emailField.isShow
+        self.fieldRequirementCardName = viewParameters.cardNameField
+        self.fieldRequirementCardholderName = viewParameters.cardholderNameField
+        self.fieldRequirementEmail = viewParameters.emailField
         self.isShowNeedToTokenizationCard = isShowNeedToTokenizationCard
         
         self._cardNumber = cardNumber
@@ -97,7 +98,7 @@ public struct CardInfoView: View {
     
     public var body: some View {
         Group {
-            if isShowCardName {
+            if fieldRequirementCardName.isShow {
                 VStack(spacing: 16) {
                     cardNameView
                 }
@@ -115,14 +116,18 @@ public struct CardInfoView: View {
                             .colorScheme(colorScheme)
                             .subtitle
                     )
-                    .padding(.top, 20)
+                    .padding(.top, 16)
                 Spacer()
             }
             VStack(spacing: 16) {
                 cardDetailsView
                 
-                if isShowCardholderName {
+                if fieldRequirementCardholderName.isShow {
                     cardHolderNameView
+                }
+                
+                if fieldRequirementEmail.isShow {
+                    emailView
                 }
                 
                 if isShowNeedToTokenizationCard{
@@ -131,11 +136,6 @@ public struct CardInfoView: View {
                         Spacer()
                     }
                 }
-                
-                if isShowEmail {
-                    emailView
-                }
-                
             }
             
         }
@@ -176,7 +176,19 @@ private extension CardInfoView {
                         .error
                         .toUIColor(),
                     contentType: .name,
-                    keyboardType: .default
+                    keyboardType: .default,
+                    isRequired: fieldRequirementCardName.isRequired,
+                    validators: ValidatorsComposer(validators: [
+                        CardNameValidator()
+                    ]),
+                    validationTextFieldResult: { result in
+                        switch result {
+                        case .valid:
+                            errorMessageCardName = nil
+                        case let .error(message):
+                            errorMessageCardName = message
+                        }
+                    }
                 )
                 .frame(
                     height: themeConfigurator.sizes.textFieldFrameHeight
@@ -190,8 +202,27 @@ private extension CardInfoView {
                 .cornerRadius(
                     themeConfigurator
                         .sizes
-                        .textFieldCornerRadius
+                        .componentCornerRadius
                 )
+                
+                if let errorMessage = errorMessageCardName.isNilOrEmptyValue {
+                    
+                    HStack{
+                        Text(errorMessage)
+                            .font(
+                                themeConfigurator
+                                    .typography
+                                    .labelSmall
+                            )
+                            .foregroundColor(
+                                themeConfigurator
+                                    .colorScheme(colorScheme)
+                                    .error
+                            )
+                            .padding()
+                        Spacer()
+                    }
+                }
             }
         }
     }
@@ -224,6 +255,7 @@ private extension CardInfoView {
                         .toUIColor(),
                     contentType: .name,
                     keyboardType: .default,
+                    isRequired: fieldRequirementCardholderName.isRequired,
                     validators: ValidatorsComposer(validators: [
                         CardholderNameValidator()
                     ]),
@@ -243,7 +275,11 @@ private extension CardInfoView {
                         .colorScheme(colorScheme)
                         .componentSurface
                 )
-                .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
+                .cornerRadius(
+                    themeConfigurator
+                        .sizes
+                        .componentCornerRadius
+                )
                 
                 if let errorMessage = errorMessageCardholderName.isNilOrEmptyValue {
                     
@@ -295,6 +331,7 @@ private extension CardInfoView {
                         .toUIColor(),
                     contentType: .emailAddress,
                     keyboardType: .emailAddress,
+                    isRequired: fieldRequirementEmail.isRequired,
                     validators: ValidatorsComposer(validators: [
                         EmailValidator()
                     ]),
@@ -314,7 +351,11 @@ private extension CardInfoView {
                         .colorScheme(colorScheme)
                         .componentSurface
                 )
-                .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
+                .cornerRadius(
+                    themeConfigurator
+                        .sizes
+                        .componentCornerRadius
+                )
                 
                 if let errorMessage = errorMessageEmail.isNilOrEmptyValue {
                     
@@ -339,191 +380,235 @@ private extension CardInfoView {
     }
     
     ///
+    var cardNumberView: some View {
+        HStack {
+            InputTextFieldRepresentable(
+                placeholder: Localization.rozetka_pay_form_card_number.description,
+                placeholderFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                placeholderColor: themeConfigurator
+                    .colorScheme(colorScheme)
+                    .placeholder
+                    .toUIColor(),
+                text: $cardNumber,
+                textColor:
+                    errorMessageCardNumber.isNilOrEmpty ?
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onComponent
+                    .toUIColor()
+                :
+                    themeConfigurator
+                    .colorScheme(
+                        colorScheme
+                    )
+                    .error
+                    .toUIColor(),
+                contentType: .dateTime,
+                keyboardType: .numberPad,
+                maxLength: CardNumberValidator.MAX_CARD_NUMBER_LENGTH,
+                validators: ValidatorsComposer(validators: [
+                    CardNumberValidator()
+                ]),
+                validationTextFieldResult: { result in
+                    switch result {
+                    case .valid:
+                        errorMessageCardNumber = nil
+                    case let .error(message):
+                        errorMessageCardNumber = message
+                    }
+                },
+                textMasking: CardNumberMask()
+            )
+            .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
+            .padding()
+            .keyboardType(.numberPad)
+            .background(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .componentSurface
+            )
+            .clipShape(
+                RoundedCorner(
+                    radius: themeConfigurator
+                        .sizes
+                        .componentCornerRadius,
+                    corners: [
+                        .topLeft,
+                        .topRight
+                    ]
+                )
+            )
+            Image(
+                paymentSystemLogoName,
+                bundle: .module
+            )
+            .resizable()
+            .frame(width: 36, height: 22)
+            .padding(.trailing)
+        }
+        .background(
+            themeConfigurator
+                .colorScheme(colorScheme)
+                .componentSurface
+        )
+        .clipShape(
+            RoundedCorner(
+                radius: themeConfigurator
+                    .sizes
+                    .componentCornerRadius,
+                corners: [
+                    .topLeft,
+                    .topRight
+                ]
+            )
+        )
+    }
+    
+    ///
+    var expDateView: some View {
+        HStack {
+            InputTextFieldRepresentable(
+                placeholder: Localization.rozetka_pay_form_exp_date.description,
+                placeholderFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                placeholderColor: themeConfigurator
+                    .colorScheme(colorScheme)
+                    .placeholder
+                    .toUIColor(),
+                text: $expiryDate,
+                textColor:
+                    errorMessageExpiryDate.isNilOrEmpty ?
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onComponent
+                    .toUIColor()
+                :
+                    themeConfigurator
+                    .colorScheme(
+                        colorScheme
+                    )
+                    .error
+                    .toUIColor(),
+                contentType: .dateTime,
+                keyboardType: .numberPad,
+                maxLength: CardExpirationDateValidator.MAX_CREDIT_CARD_EXPIRATION_DATE_LENGTH,
+                validators: ValidatorsComposer(validators: [
+                    CardExpirationDateValidator(
+                        expirationValidationRule: RozetkaPaySdk.validationRules.cardExpirationDateValidationRule
+                    )
+                ]),
+                validationTextFieldResult: { result in
+                    switch result {
+                    case .valid:
+                        errorMessageExpiryDate = nil
+                    case let .error(message):
+                        errorMessageExpiryDate = message
+                    }
+                },
+                textMasking: ExpirationDateMask()
+            )
+            .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
+            .padding()
+            .keyboardType(.numberPad)
+            .background(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .componentSurface
+            )
+            .clipShape(
+                RoundedCorner(
+                    radius: themeConfigurator
+                        .sizes
+                        .componentCornerRadius,
+                    corners: [
+                        .bottomLeft
+                    ]
+                )
+            )
+        }
+    }
+    
+    ///
+    var cvvView: some View {
+        InputTextFieldRepresentable(
+            placeholder: Localization.rozetka_pay_form_cvv.description,
+            placeholderFont: themeConfigurator
+                .typography
+                .inputUI,
+            placeholderColor: themeConfigurator
+                .colorScheme(colorScheme)
+                .placeholder
+                .toUIColor(),
+            text: $cvv,
+            textColor:
+                errorMessageCvv.isNilOrEmpty ?
+            themeConfigurator
+                .colorScheme(colorScheme)
+                .onComponent
+                .toUIColor()
+            :
+                themeConfigurator
+                .colorScheme(colorScheme)
+                .error
+                .toUIColor(),
+            isSecure: true,
+            contentType: .password,
+            keyboardType: .numberPad,
+            maxLength: CardCVVValidator.MAX_CREDIT_CARD_CVV_LENGTH,
+            validators: ValidatorsComposer(validators: [
+                CardCVVValidator()
+            ]),
+            validationTextFieldResult: { result in
+                switch result {
+                case .valid:
+                    errorMessageCvv = nil
+                case let .error(message):
+                    errorMessageCvv = message
+                }
+            }
+        )
+        .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
+        .padding()
+        .keyboardType(.numberPad)
+        .background(
+            themeConfigurator
+                .colorScheme(colorScheme)
+                .componentSurface
+        )
+        .clipShape(
+            RoundedCorner(
+                radius:
+                    themeConfigurator
+                    .sizes
+                    .componentCornerRadius,
+                corners: [
+                    .bottomRight
+                ]
+            )
+        )
+    }
+    ///
     var cardDetailsView: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 2) {
-                HStack {
-                    InputTextFieldRepresentable(
-                        placeholder: Localization.rozetka_pay_form_card_number.description,
-                        placeholderFont: themeConfigurator
-                            .typography
-                            .inputUI,
-                        placeholderColor: themeConfigurator
-                            .colorScheme(colorScheme)
-                            .placeholder
-                            .toUIColor(),
-                        text: $cardNumber,
-                        textColor:
-                            errorMessageCardNumber.isNilOrEmpty ?
-                        themeConfigurator
-                            .colorScheme(colorScheme)
-                            .onComponent
-                            .toUIColor()
-                        :
-                            themeConfigurator
-                            .colorScheme(
-                                colorScheme
-                            )
-                            .error
-                            .toUIColor(),
-                        contentType: .dateTime,
-                        keyboardType: .numberPad,
-                        maxLength: CardNumberValidator.MAX_CARD_NUMBER_LENGTH,
-                        validators: ValidatorsComposer(validators: [
-                            CardNumberValidator()
-                        ]),
-                        validationTextFieldResult: { result in
-                            switch result {
-                            case .valid:
-                                errorMessageCardNumber = nil
-                            case let .error(message):
-                                errorMessageCardNumber = message
-                            }
-                        },
-                        textMasking: CardNumberMask()
-                    )
-                    .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
-                    .padding()
-                    .keyboardType(.numberPad)
-                    .background(
-                        themeConfigurator
-                            .colorScheme(colorScheme)
-                            .componentSurface
-                    )
-                    .clipShape(
-                        RoundedCorner(
-                            radius: themeConfigurator.sizes.textFieldCornerRadius,
-                            corners: [.topLeft, .topRight]
-                        )
-                    )
-                    Image(
-                        paymentSystemLogoName,
-                        bundle: .module
-                    )
-                    .resizable()
-                    .frame(width: 36, height: 22)
-                    .padding(.trailing)
-                }
-                .background(
+            VStack(
+                spacing:
                     themeConfigurator
-                        .colorScheme(colorScheme)
-                        .componentSurface
-                )
-                .clipShape(
-                    RoundedCorner(
-                        radius: themeConfigurator.sizes.textFieldCornerRadius,
-                        corners: [.topLeft, .topRight]
-                    )
-                )
+                    .sizes
+                    .borderWidth
+            ) {
+                cardNumberView
                 
-                HStack(spacing: 2) {
-                    InputTextFieldRepresentable(
-                        placeholder: Localization.rozetka_pay_form_exp_date.description,
-                        placeholderFont: themeConfigurator
-                            .typography
-                            .inputUI,
-                        placeholderColor: themeConfigurator
-                            .colorScheme(colorScheme)
-                            .placeholder
-                            .toUIColor(),
-                        text: $expiryDate,
-                        textColor:
-                            errorMessageExpiryDate.isNilOrEmpty ?
+                HStack(
+                    spacing:
                         themeConfigurator
-                            .colorScheme(colorScheme)
-                            .onComponent
-                            .toUIColor()
-                        :
-                            themeConfigurator
-                            .colorScheme(
-                                colorScheme
-                            )
-                            .error
-                            .toUIColor(),
-                        contentType: .dateTime,
-                        keyboardType: .numberPad,
-                        maxLength: CardExpirationDateValidator.MAX_CREDIT_CARD_EXPIRATION_DATE_LENGTH,
-                        validators: ValidatorsComposer(validators: [
-                            CardExpirationDateValidator(
-                                expirationValidationRule: RozetkaPaySdk.validationRules.cardExpirationDateValidationRule
-                            )
-                        ]),
-                        validationTextFieldResult: { result in
-                            switch result {
-                            case .valid:
-                                errorMessageExpiryDate = nil
-                            case let .error(message):
-                                errorMessageExpiryDate = message
-                            }
-                        },
-                        textMasking: ExpirationDateMask()
-                    )
-                    .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
-                    .padding()
-                    .keyboardType(.numberPad)
-                    .background(
-                        themeConfigurator
-                            .colorScheme(colorScheme)
-                            .componentSurface
-                    )
-                    .clipShape(
-                        RoundedCorner(
-                            radius: themeConfigurator.sizes.textFieldCornerRadius,
-                            corners: [.bottomLeft]
-                        )
-                    )
-                    
-                    InputTextFieldRepresentable(
-                        placeholder: Localization.rozetka_pay_form_cvv.description,
-                        placeholderFont: themeConfigurator
-                            .typography
-                            .inputUI,
-                        placeholderColor: themeConfigurator
-                            .colorScheme(colorScheme)
-                            .placeholder
-                            .toUIColor(),
-                        text: $cvv,
-                        textColor:
-                            errorMessageCvv.isNilOrEmpty ?
-                        themeConfigurator
-                            .colorScheme(colorScheme)
-                            .onComponent
-                            .toUIColor()
-                        :
-                            themeConfigurator
-                            .colorScheme(colorScheme)
-                            .error
-                            .toUIColor(),
-                        isSecure: true,
-                        contentType: .password,
-                        keyboardType: .numberPad,
-                        maxLength: CardCVVValidator.MAX_CREDIT_CARD_CVV_LENGTH,
-                        validators: ValidatorsComposer(validators: [
-                            CardCVVValidator()
-                        ]),
-                        validationTextFieldResult: { result in
-                            switch result {
-                            case .valid:
-                                errorMessageCvv = nil
-                            case let .error(message):
-                                errorMessageCvv = message
-                            }
-                        }
-                    )
-                    .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
-                    .padding()
-                    .keyboardType(.numberPad)
-                    .background(
-                        themeConfigurator
-                            .colorScheme(colorScheme)
-                            .componentSurface
-                    )
-                    .clipShape(
-                        RoundedCorner(
-                            radius: themeConfigurator.sizes.textFieldCornerRadius,
-                            corners: [.bottomRight]
-                        )
-                    )
+                        .sizes
+                        .borderWidth
+                ) {
+                    expDateView
+                    cvvView
                 }
             }
             .background(
@@ -531,7 +616,11 @@ private extension CardInfoView {
                     .colorScheme(colorScheme)
                     .componentDivider
             )
-            .cornerRadius(themeConfigurator.sizes.textFieldCornerRadius)
+            .cornerRadius(
+                themeConfigurator
+                    .sizes
+                    .componentCornerRadius
+            )
             
             if let errorMessage = errorMessageExpiryDate.isNilOrEmptyValue ??
                 errorMessageCardNumber.isNilOrEmptyValue ??
@@ -595,7 +684,10 @@ private extension CardInfoView {
             return Button(action: {
                 configuration.isOn.toggle()
             }) {
-                Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                Image(systemName: configuration.isOn ?
+                      "checkmark.square.fill" :
+                      "square"
+                )
                     .resizable()
                     .frame(width: 26, height: 26)
                     .foregroundColor(
@@ -614,6 +706,7 @@ private extension CardInfoView {
 
 //MARK: Private Methods
 private extension CardInfoView {
+    
     @discardableResult
     func detectPaymentSystem(_ value: String?) -> PaymentSystem? {
         return provideCardPaymentSystemUseCase.invoke(cardNumberPrefix: value)
@@ -650,5 +743,3 @@ private extension CardInfoView {
     )
     
 }
-
-

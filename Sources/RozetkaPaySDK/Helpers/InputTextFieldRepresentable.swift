@@ -25,6 +25,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
     private var textField: InsetTextField = InsetTextField()
     
     private var maxLength: Int
+    private var isRequired: Bool
     private var validators: ValidatorsComposer?
     private var validationTextFieldResult: ValidationTextFieldResult?
     private var textMasking: TextMasking?
@@ -53,6 +54,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         passwordRules: UITextInputPasswordRules? = nil,
         keyboardType: UIKeyboardType = .default,
         maxLength: Int = -1,
+        isRequired: Bool = true,
         validators: ValidatorsComposer? = nil,
         validationTextFieldResult: ValidationTextFieldResult? = nil,
         textMasking: TextMasking? = nil
@@ -70,6 +72,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         self.passwordRules = passwordRules
         self.keyboardType = keyboardType
         self.maxLength = maxLength
+        self.isRequired = isRequired
         self.validators = validators
         self.validationTextFieldResult = validationTextFieldResult
         self.textMasking = textMasking
@@ -175,7 +178,9 @@ extension InputTextFieldRepresentable {
                 return false
             }
             
-            guard let currentText = textField.text as NSString? else { return false }
+            guard let currentText = textField.text as NSString? else {
+                return false
+            }
             var newText = currentText.replacingCharacters(in: range, with: string)
             
             if parent.maxLength > 0 && newText.count > parent.maxLength {
@@ -187,10 +192,14 @@ extension InputTextFieldRepresentable {
             }
             parent.text = newText
             
-            if let validators = parent.validators {
-                parent.validationTextFieldResult?(
-                    validators.validate(value: newText)
-                )
+            if let validators = parent.validators {                
+                if parent.isRequired || !newText.isNilOrEmpty {
+                    parent.validationTextFieldResult?(
+                        validators.validate(value: newText)
+                    )
+                } else {
+                    parent.validationTextFieldResult?(.valid)
+                }
             }
             
             return true

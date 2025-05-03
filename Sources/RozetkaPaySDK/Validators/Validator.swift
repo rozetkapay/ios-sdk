@@ -54,7 +54,3 @@ public final class ValidatorsComposer: Validator {
         return .valid
     }
 }
-
-//func validatorOf(_ validators: Validator...) -> Validator {
-//    return ValidatorsComposer(validators: validators)
-//}

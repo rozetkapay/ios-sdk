@@ -110,7 +110,6 @@ public struct RozetkaPayDomainThemeDefaults {
         sheetCornerRadius: CGFloat = 20,
         componentCornerRadius: CGFloat = 16,
         buttonCornerRadius: CGFloat = 16,
-        textFieldCornerRadius: CGFloat = 16,
         textFieldFrameHeight: CGFloat = 22,
         borderWidth: CGFloat = 1
     ) -> DomainSizes {
@@ -119,7 +118,6 @@ public struct RozetkaPayDomainThemeDefaults {
             sheetCornerRadius: sheetCornerRadius,
             componentCornerRadius: componentCornerRadius,
             buttonCornerRadius: buttonCornerRadius,
-            textFieldCornerRadius: textFieldCornerRadius,
             textFieldFrameHeight: textFieldFrameHeight,
             borderWidth: borderWidth
         )

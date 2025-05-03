@@ -11,7 +11,6 @@ public struct DomainSizes {
     private let sheetCornerRadiusDp: Int
     private let componentCornerRadiusDp: Int
     private let buttonCornerRadiusDp: Int
-    private let textFieldCornerRadiusDp: Int
     private let textFieldFrameHeightDp: Int
     private let borderWidthDp: Int
 
@@ -24,9 +23,7 @@ public struct DomainSizes {
     public var buttonCornerRadius: CGFloat {
         return CGFloat(buttonCornerRadiusDp)
     }
-    public var textFieldCornerRadius: CGFloat {
-        return CGFloat(textFieldCornerRadiusDp)
-    }
+  
     public var textFieldFrameHeight: CGFloat {
         return CGFloat(textFieldFrameHeightDp)
     }
@@ -38,15 +35,13 @@ public struct DomainSizes {
         sheetCornerRadius: CGFloat,
         componentCornerRadius: CGFloat,
         buttonCornerRadius: CGFloat,
-        textFieldCornerRadius: CGFloat,
         textFieldFrameHeight: CGFloat,
         borderWidth: CGFloat
     ) {
         self.sheetCornerRadiusDp = Int(sheetCornerRadius)
         self.componentCornerRadiusDp = Int(componentCornerRadius)
         self.buttonCornerRadiusDp = Int(buttonCornerRadius)
-        self.borderWidthDp = Int(borderWidth)
-        self.textFieldCornerRadiusDp = Int(textFieldCornerRadius)
         self.textFieldFrameHeightDp = Int(textFieldFrameHeight)
+        self.borderWidthDp = Int(borderWidth)
     }
 }

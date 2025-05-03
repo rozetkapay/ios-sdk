@@ -240,6 +240,7 @@ private extension PayView {
                 .sizes
                 .buttonCornerRadius)
         .padding(.top, 20)
+        .padding(.bottom, viewModel.viewParameters.cardNameField.isShow ? 16 : 0)
         .clipShape(
             RoundedRectangle(
                 cornerRadius:
@@ -267,6 +268,11 @@ private extension PayView {
 #Preview {
     PayView(parameters: PaymentParameters(
         client: ClientAuthParameters(token: "test", widgetKey: "test"),
+        viewParameters: PaymentViewParameters(
+            cardNameField: .none,
+            emailField: .required,
+            cardholderNameField: .required
+        ),
         amountParameters: PaymentParameters.AmountParameters(
             amount: 100.00,
             currencyCode: "UAH"

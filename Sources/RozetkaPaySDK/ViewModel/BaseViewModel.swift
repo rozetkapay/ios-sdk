@@ -102,19 +102,38 @@ class BaseViewModel: ObservableObject {
             validCardholderName = value
         }
         
+        
+        var validCardName: String? = nil
+        switch viewParameters.cardNameField {
+        case .optional:
+            if !cardName.isNilOrEmpty {
+                guard let value = validateCardName(cardName) else {
+                    return
+                }
+                validCardName = value
+            }
+        case .none:
+            break
+        case .required:
+            guard let value = validateCardName(cardName) else {
+                return
+            }
+            validCardName = value
+        }
+        
         let model = ValidationResultModel(
             cardNumber: validCardNumber,
             cardExpMonth: validExpiryDate.month,
             cardExpYear: validExpiryDate.year,
             cardCvv: validCVV,
-            cardName: cardName,
+            cardName: validCardName,
             cardholderName: validCardholderName,
             customerEmail: validEmail
         )
         
         loading(validModel: model)
     }
-    
+
     open func loading(validModel: ValidationResultModel) {}
     
     open func cancelled() {}
@@ -202,6 +221,18 @@ class BaseViewModel: ObservableObject {
             return value
         case let .error(message):
             errorMessageCardholderName = message
+            return nil
+        }
+    }
+    
+    @discardableResult
+    private func validateCardName(_ value: String?) -> String? {
+        switch CardNameValidator().validate(value: value) {
+        case .valid:
+            errorMessageCardName = nil
+            return value
+        case let .error(message):
+            errorMessageCardName = message
             return nil
         }
     }
