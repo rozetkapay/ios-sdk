@@ -140,7 +140,7 @@ private extension TokenizationView {
                 viewModel.cancelled()
             },
             onRetry: {
-                viewModel.validateAll()
+                viewModel.retryLoading()
             }
         )
         .padding()
@@ -151,7 +151,6 @@ private extension TokenizationView {
         CardInfoView(
             viewParameters: viewModel.viewParameters,
             themeConfigurator: viewModel.themeConfigurator,
-            isNeedToTokenizationCard: $viewModel.isNeedToTokenizationCard,
             cardNumber: $viewModel.cardNumber,
             cvv: $viewModel.cvv,
             expiryDate: $viewModel.expiryDate,
@@ -173,7 +172,7 @@ private extension TokenizationView {
             viewModel.cancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            Image(systemName: "xmark")
+            DomainImages.xmark.image()
                 .foregroundColor(
                     viewModel
                         .themeConfigurator
@@ -184,20 +183,14 @@ private extension TokenizationView {
     }
     ///
     var footerView: some View {
-        HStack {
-            Spacer()
-            Image("rozetka_pay_legal_visa", bundle: .module)
-            Image("rozetka_pay_legal_pcidss", bundle: .module)
-            Image("rozetka_pay_legal_mastercard", bundle: .module)
-            Spacer()
-        }
+        CardInfoFooterView()
         .padding(.top, 20)
     }
     
     ///
     var mainButton: some View {
        Button(action: {
-           viewModel.validateAll()
+           viewModel.startLoading()
        }) {
            Text(Localization.rozetka_pay_form_save_card.description)
                .font(

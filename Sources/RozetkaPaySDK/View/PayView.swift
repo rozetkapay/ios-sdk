@@ -17,17 +17,29 @@ public struct PayView: View {
     
     //MARK: - Init
     public init(
-        parameters: PaymentParameters,
+        paymentParameters: PaymentParameters,
         onResultCallback: @escaping PaymentResultCompletionHandler
     ) {
         self._viewModel = StateObject(
             wrappedValue: PayViewModel(
-                parameters: parameters,
+                parameters: paymentParameters,
                 onResultCallback: onResultCallback
             )
         )
     }
     
+    public init(
+        batchPaymentParameters: BatchPaymentParameters,
+        onResultCallback: @escaping BatchPaymentResultCompletionHandler
+    ) {
+        self._viewModel = StateObject(
+            wrappedValue: PayViewModel(
+                parameters: batchPaymentParameters,
+                onResultCallback: onResultCallback
+            )
+        )
+    }
+
     //MARK: - Body
     public var body: some View {
         NavigationView {
@@ -96,15 +108,16 @@ private extension PayView {
                 viewModel.cancelled()
             },
             onRetry: {
-                viewModel.validateAll()
-            }
+                viewModel.retryLoading()
+            },
+            isButtonRetryEnabled: viewModel.getIsRetryEnabled()
         )
         .padding()
     }
     
     ///
     @ViewBuilder var threeDSView: some View {
-        if let request = viewModel.threeDSModel {
+        if let request = viewModel.getThreeDSModel() {
             ThreeDSHandlerView(
                 themeConfigurator: viewModel.themeConfigurator,
                 request: request,
@@ -118,8 +131,6 @@ private extension PayView {
         CardInfoView(
             viewParameters: viewModel.viewParameters,
             themeConfigurator: viewModel.themeConfigurator,
-            isNeedToTokenizationCard: $viewModel.isNeedToTokenizationCard,
-            isShowNeedToTokenizationCard: viewModel.isAllowTokenization,
             cardNumber: $viewModel.cardNumber,
             cvv: $viewModel.cvv,
             expiryDate: $viewModel.expiryDate,
@@ -142,7 +153,7 @@ private extension PayView {
             viewModel.cancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            Image(systemName: "xmark")
+            DomainImages.xmark.image()
                 .foregroundColor(
                     viewModel
                         .themeConfigurator
@@ -177,21 +188,17 @@ private extension PayView {
     }
 
     private var footerView: some View {
-        HStack {
-            Spacer()
-            Image("rozetka_pay_legal_visa", bundle: .module)
-            Image("rozetka_pay_legal_pcidss", bundle: .module)
-            Image("rozetka_pay_legal_mastercard", bundle: .module)
-            Spacer()
-        }
+        CardInfoFooterView()
         .padding(.top, 20)
     }
     
     private var cardPayButton: some View {
         Button(action: {
-            viewModel.validateAll()
+            viewModel.startPayByCard()
         }) {
-            Text(Localization.rozetka_pay_payment_pay_button.description(with: [viewModel.amountWithCurrencyStr]))
+            Text(Localization.rozetka_pay_payment_pay_button.description(with: [
+                viewModel.getAmountWithCurrency()
+            ]))
                 .font(
                     viewModel
                         .themeConfigurator
@@ -266,18 +273,24 @@ private extension PayView {
 }
 
 #Preview {
-    PayView(parameters: PaymentParameters(
+    PayView(
+        paymentParameters: PaymentParameters(
         client: ClientAuthParameters(token: "test", widgetKey: "test"),
-        viewParameters: PaymentViewParameters(
-            cardNameField: .none,
-            emailField: .required,
-            cardholderNameField: .required
-        ),
-        amountParameters: PaymentParameters.AmountParameters(
-            amount: 100.00,
+        paymentType: .regular(
+            RegularPayment(
+                viewParameters: PaymentViewParameters(
+                    cardNameField: .none,
+                    emailField: .required,
+                    cardholderNameField: .required
+                ),
+                isAllowTokenization: true,
+                applePayConfig: nil
+        )),
+        amountParameters: AmountParameters(
+            amount: 10000,
             currencyCode: "UAH"
         ),
-        orderId: "test"
+        externalId: "test"
     ),
     onResultCallback: {
         _ in

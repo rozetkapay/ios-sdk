@@ -14,7 +14,7 @@ public struct PaymentError: Error, Decodable {
     public var paymentId: String?
     public let type: ErrorResponseType
     public let errorId: String?
-    public var orderId: String?
+    public var externalId: String?
     
     private enum CodingKeys: String, CodingKey {
         case code = "code"
@@ -23,7 +23,7 @@ public struct PaymentError: Error, Decodable {
         case paymentId = "payment_id"
         case type = "type"
         case errorId = "error_id"
-        case orderId = "order_id"
+        case externalId = "external_id"
         case errorDescription = "error"
     }
     
@@ -35,7 +35,7 @@ public struct PaymentError: Error, Decodable {
         self.param = try? container.decode(String.self, forKey: .param)
         self.paymentId = try? container.decode(String.self, forKey: .paymentId)
         self.errorId = try? container.decode(String.self, forKey: .errorId)
-        self.orderId = try? container.decode(String.self, forKey: .orderId)
+        self.externalId = try? container.decode(String.self, forKey: .externalId)
         self.errorDescription = try? container.decode(String.self, forKey: .errorDescription)
     }
     
@@ -43,7 +43,7 @@ public struct PaymentError: Error, Decodable {
         code: String? = nil,
         message: String? = nil,
         param: String? = nil,
-        orderId: String? = nil,
+        externalId: String? = nil,
         paymentId: String? = nil,
         type: String? = nil,
         errorId: String? = nil,
@@ -55,13 +55,13 @@ public struct PaymentError: Error, Decodable {
         self.paymentId = paymentId
         self.type = ErrorResponseType.from(rawValue: type)
         self.errorId = errorId
-        self.orderId = orderId
+        self.externalId = externalId
         self.errorDescription = errorDescription
     }
     
     /// init unexpected error
     public init (
-        orderId: String,
+        externalId: String,
         message: String? = nil,
         errorDescription: String? = nil
     ) {
@@ -72,17 +72,17 @@ public struct PaymentError: Error, Decodable {
         self.paymentId = nil
         self.type = ErrorResponseType.from(rawValue: nil)
         self.errorId = nil
-        self.orderId = orderId
+        self.externalId = externalId
     }
-
+    
     
     public var localizedDescription: String {
         if let message = message.isNilOrEmptyValue {
             return message
         } else {
             var message = "Unknown error (code: \(code.rawValue), type: \(type.rawValue))"
-            if let orderId = orderId {
-                message += ", orderId: \(orderId)"
+            if let externalId = externalId {
+                message += ", externalId: \(externalId)"
             }
             if let paymentId = paymentId {
                 message += ", paymentId: \(paymentId)"
@@ -95,8 +95,8 @@ public struct PaymentError: Error, Decodable {
         }
     }
     
-    mutating func setOrderId(_ value: String) {
-        self.orderId = value
+    mutating func setExternalId(_ value: String) {
+        self.externalId = value
     }
     
     mutating func setPaymentId(_ value: String) {
@@ -107,14 +107,18 @@ public struct PaymentError: Error, Decodable {
 
 extension PaymentError {
     
-    static func convertFrom( _ apiError: APIError<Self>, orderId: String? = nil, paymentId: String? = nil) -> Self {
+    static func convertFrom(
+        _ apiError: APIError<Self>,
+        externalId: String? = nil,
+        paymentId: String? = nil
+    ) -> Self {
         
         switch apiError {
         case let .validation(model):
             var newModel = model
             
-            if let orderId {
-                newModel.setOrderId(orderId)
+            if let externalId {
+                newModel.setExternalId(externalId)
             }
             
             if let paymentId {
@@ -125,31 +129,31 @@ extension PaymentError {
         case let .decodingFailure(error):
             return PaymentError(
                 code: ErrorResponseCode.unknownAction.rawValue,
-                orderId: orderId,
+                externalId: externalId,
                 paymentId: paymentId,
                 type: ErrorResponseType.unknownAction.rawValue,
                 errorDescription: error.localizedDescription
             )
         case let .external(code, message):
             return PaymentError(
-              code: ErrorResponseCode.unknown(code: code.description).rawValue,
-              message: message,
-              orderId: orderId,
-              paymentId: paymentId,
-              type: ErrorResponseType.paymentError.rawValue
-          )
+                code: ErrorResponseCode.unknown(code: code.description).rawValue,
+                message: message,
+                externalId: externalId,
+                paymentId: paymentId,
+                type: ErrorResponseType.paymentError.rawValue
+            )
         case .networkUnreachable:
             return PaymentError(
                 code: ErrorResponseCode.networkUnreachable.rawValue,
-                orderId: orderId,
+                externalId: externalId,
                 paymentId: paymentId,
                 type: ErrorResponseType.networkError.rawValue
             )
         case .unknown:
             return PaymentError(
-              orderId: orderId,
-              paymentId: paymentId
-          )
+                externalId: externalId,
+                paymentId: paymentId
+            )
         }
     }
 }

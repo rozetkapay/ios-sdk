@@ -10,8 +10,8 @@ import Foundation
 public typealias PaymentResultCompletionHandler =  (PaymentResult) -> Void
 
 public enum PaymentResult: Error, Decodable {
-    case pending(orderId: String, paymentId: String?, message: String?, error: PaymentError?)
-    case complete(orderId: String, paymentId: String)
+    case pending(externalId: String, paymentId: String?, message: String?, error: PaymentError?)
+    case complete(externalId: String, paymentId: String, tokenizedCard: TokenizedCard?)
     case failed(error: PaymentError)
-    case cancelled(orderId: String?, paymentId: String?)
+    case cancelled(externalId: String?, paymentId: String?)
 }

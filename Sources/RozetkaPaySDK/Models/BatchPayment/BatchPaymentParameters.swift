@@ -1,18 +1,20 @@
 //
-//  File.swift
+//  BatchPaymentParameters.swift
+//  RozetkaPaySDK
 //
+//  Created by Ruslan Kasian Dev on 29.05.2025.
 //
-//  Created by Ruslan Kasian Dev on 03.09.2024.
-//
+
 
 import Foundation
 
 /// Represents the parameters required to initiate a payment.
-/// Conforms to `ParametersProtocol`.
+/// Conforms to `BatchPaymentParameters`.
 ///
-/// Use this model to configure client authentication, payment amount,
-/// order details, and the type of payment (regular or tokenized).
-public struct PaymentParameters: ParametersProtocol {
+/// Parameters for batch payment.
+/// Batch payment is a payment with multiple orders in one transaction.
+/// Each order is processed separately, but all are paid together.
+public struct BatchPaymentParameters: ParametersProtocol {
     
     /// Client authentication parameters.
     public let client: ClientAuthParametersProtocol
@@ -30,11 +32,17 @@ public struct PaymentParameters: ParametersProtocol {
     /// Payment amount details, including currency, tax, and total.
     let amountParameters: AmountParameters
     
-    /// Unique external ID in your system.
+    /// Unique external ID of the batch payment in your system.
     let externalId: String
     
     /// Optional URL that will be called after the payment is finished.
     let callbackUrl: String?
+    
+    /// Optional URL that will be called after the payment is finished.
+    let resultUrl: String?
+    
+    /// List of orders to be paid in the batch.
+    let orders: [BatchOrder]
     
     /// Creates a new instance of `PaymentParameters`.
     public init(
@@ -45,7 +53,9 @@ public struct PaymentParameters: ParametersProtocol {
         ),
         amountParameters: AmountParameters,
         externalId: String,
-        callbackUrl: String? = nil
+        callbackUrl: String? = nil,
+        resultUrl: String? = nil,
+        orders: [BatchOrder]
     ) {
         self.client = client
         self.themeConfigurator = themeConfigurator
@@ -53,6 +63,8 @@ public struct PaymentParameters: ParametersProtocol {
         self.paymentType = paymentType
         self.externalId = externalId
         self.callbackUrl = callbackUrl
+        self.resultUrl = resultUrl
+        self.orders = orders
     }
     
     var applePaymentService: ApplePaymentService? {
@@ -67,4 +79,3 @@ public struct PaymentParameters: ParametersProtocol {
         )
     }
 }
-

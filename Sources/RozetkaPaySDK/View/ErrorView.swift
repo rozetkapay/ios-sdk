@@ -65,7 +65,7 @@ private extension ErrorView {
     
     ///
     var imageView: some View {
-        Image("rozetka_pay_error", bundle: .module)
+        DomainImages.payError.image()
             .resizable()
             .frame(width: 200, height: 200)
             .padding()

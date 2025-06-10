@@ -8,7 +8,15 @@
 
 import Foundation
 
+/// Defines the operational mode of the RozetkaPay SDK.
+///
+/// Use `.production` for real payments and live environment,
+/// and `.development` for testing and sandbox usage.
 @frozen public enum RozetkaPaySdkMode: String {
+    
+    /// Production mode — used in the live environment with real transactions.
     case production
+    
+    /// Development mode — used for testing purposes and sandbox environments.
     case development
 }

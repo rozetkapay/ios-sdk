@@ -58,9 +58,9 @@ struct ThreeDSHandlerView: View {
     ThreeDSHandlerView(
         themeConfigurator: RozetkaPayThemeConfigurator(),
         request: ThreeDSRequest(
+            externalId: "test",
             acsUrl: "test",
             termUrl: nil,
-            orderId: "test",
             paymentId: "test"
         ),
         isPresented: $show3DS,

@@ -15,13 +15,18 @@ public protocol PaymentRequest {
 public struct BasePaymentParameters {
     let amount: Int64
     let currencyCode: String
-    let orderId: String
+    let externalId: String
     let callbackUrl: String?
     
-    public init(amount: Int64, currencyCode: String, orderId: String, callbackUrl: String? = nil) {
+    public init(
+        amount: Int64,
+        currencyCode: String,
+        externalId: String,
+        callbackUrl: String? = nil
+    ) {
         self.amount = amount
         self.currencyCode = currencyCode
-        self.orderId = orderId
+        self.externalId = externalId
         self.callbackUrl = callbackUrl
     }
 }

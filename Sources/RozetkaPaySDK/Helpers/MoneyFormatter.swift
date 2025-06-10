@@ -12,20 +12,21 @@ public final class MoneyFormatter {
     public static let decimalSeparator: Character = "."
     public static let defaultExponent: Int = 2
     public static var formatters: [Int: NumberFormatter] = [:]
+    public static var rawFormatters: [Int: NumberFormatter] = [:]
 
-    /// Formats a given coin value to a money string representation.
+    /// Formats a given coin value to a money string representation for UI.
     ///
     /// - Parameters:
     ///   - coins: The value in coins to be formatted.
-    ///   - currency: An optional currency string to append.
-    ///   - exponent: The exponent to define the decimal places.
-    /// - Returns: The formatted money string.
+    ///   - currency: An optional currency string to append (e.g. "UAH").
+    ///   - exponent: The exponent to define the decimal places (default is 2).
+    /// - Returns: The formatted money string (e.g. "1 400.00 UAH").
     public static func formatCoinsToMoney(coins: Decimal, currency: String? = nil, exponent: Int = defaultExponent) -> String {
         let money = coins * getCoinMultiplier(for: exponent)
         return formatMoney(money: money, currency: currency, exponent: exponent)
     }
 
-    /// Formats a given coin value to a money string representation.
+    /// Formats a given coin value to a money string representation for UI.
     ///
     /// - Parameters:
     ///   - coins: The value in coins to be formatted.
@@ -36,7 +37,7 @@ public final class MoneyFormatter {
         return formatCoinsToMoney(coins: Decimal(coins), currency: currency, exponent: exponent)
     }
 
-    /// Formats a given money value to a string representation.
+    /// Formats a given money value to a string representation for UI.
     ///
     /// - Parameters:
     ///   - money: The monetary value to be formatted.
@@ -48,6 +49,19 @@ public final class MoneyFormatter {
         let currencySuffix = currency != nil ? " \(currency!)" : ""
         let formattedMoney = getFormatter(for: exponent).string(from: money.magnitude as NSDecimalNumber) ?? "\(money)"
         return "\(sign)\(formattedMoney)\(currencySuffix)"
+    }
+
+    /// Formats a coin value to a raw money string representation **without grouping separators**.
+    ///
+    /// Use this for internal calculations or payment APIs (e.g. Apple Pay), where grouping (like spaces) is not allowed.
+    ///
+    /// - Parameters:
+    ///   - coins: The value in coins (e.g. 1400000 for 14,000.00).
+    ///   - exponent: The exponent to define the decimal places.
+    /// - Returns: A plain numeric string (e.g. "14000.00") suitable for `NSDecimalNumber(string:)`.
+    public static func formatCoinsToRawMoneyString(coins: Int64, exponent: Int = defaultExponent) -> String {
+        let money = Decimal(coins) * getCoinMultiplier(for: exponent)
+        return getRawFormatter(for: exponent).string(from: money as NSDecimalNumber) ?? "\(money)"
     }
 
     /// Calculates the coin multiplier based on the exponent.
@@ -62,28 +76,44 @@ public final class MoneyFormatter {
         return Decimal(1) / divisor
     }
 
-    /// Returns a cached `NumberFormatter` or creates a new one if not available.
+    /// Returns a cached `NumberFormatter` with grouping separators or creates a new one if not available.
     ///
     /// - Parameter exponent: The exponent for decimal places.
-    /// - Returns: A `NumberFormatter` configured for the given exponent.
+    /// - Returns: A `NumberFormatter` configured for UI formatting.
     private static func getFormatter(for exponent: Int) -> NumberFormatter {
         if let formatter = formatters[exponent] {
             return formatter
         } else {
-            let newFormatter = generateFormatter(for: exponent)
+            let newFormatter = generateFormatter(for: exponent, usesGroupingSeparator: true)
             formatters[exponent] = newFormatter
             return newFormatter
         }
     }
 
-    /// Generates a `NumberFormatter` based on the given exponent.
+    /// Returns a cached `NumberFormatter` **without** grouping separators or creates a new one if not available.
     ///
     /// - Parameter exponent: The exponent for decimal places.
-    /// - Returns: A `NumberFormatter` configured for the given exponent.
-    private static func generateFormatter(for exponent: Int) -> NumberFormatter {
+    /// - Returns: A `NumberFormatter` configured for raw formatting (Apple Pay, APIs).
+    private static func getRawFormatter(for exponent: Int) -> NumberFormatter {
+        if let formatter = rawFormatters[exponent] {
+            return formatter
+        } else {
+            let newFormatter = generateFormatter(for: exponent, usesGroupingSeparator: false)
+            rawFormatters[exponent] = newFormatter
+            return newFormatter
+        }
+    }
+
+    /// Generates a `NumberFormatter` based on the given exponent and separator config.
+    ///
+    /// - Parameters:
+    ///   - exponent: The exponent for decimal places.
+    ///   - usesGroupingSeparator: Whether to use grouping separators (e.g. space for thousands).
+    /// - Returns: A configured `NumberFormatter`.
+    private static func generateFormatter(for exponent: Int, usesGroupingSeparator: Bool) -> NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.groupingSeparator = " "
+        formatter.groupingSeparator = usesGroupingSeparator ? " " : ""
         formatter.decimalSeparator = String(decimalSeparator)
         formatter.minimumFractionDigits = exponent
         formatter.maximumFractionDigits = exponent

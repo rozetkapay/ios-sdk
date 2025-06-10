@@ -22,10 +22,13 @@ open class PayService {
                     .createPayment(data: model, key: key)
                     .execute(CreatePaymentResponse.self, errorType: PaymentError.self)
                 
-                handleCreatePaymentStatuses(orderId: model.externalId, response, result: result)
+                handleCreatePaymentStatuses(externalId: model.externalId, response, result: result)
             } catch let apiError as APIError<PaymentError> {
                 Logger.payServices.error("🔴 ERROR: Error createPayment request: \(apiError.localizedDescription)")
-                let errorResult = PaymentError.convertFrom(apiError, orderId: model.externalId)
+                let errorResult = PaymentError.convertFrom(
+                    apiError,
+                    externalId: model.externalId
+                )
                 
                 result(
                     .failed(error: errorResult)
@@ -33,7 +36,7 @@ open class PayService {
             } catch let error {
                 
                 let errorResult = PaymentError(
-                    orderId: model.externalId,
+                    externalId: model.externalId,
                     errorDescription: error.localizedDescription
                 )
                 
@@ -50,7 +53,7 @@ open class PayService {
         model: CheckPaymentRequestModel,
         result: @escaping PaymentResultCompletionHandler
     ) {
-
+        
         Task {
             let startTime = Date.now
             let timeout: TimeInterval = RozetkaPayConfig.DEFAULT_RETRY_TIMEOUT
@@ -83,14 +86,14 @@ open class PayService {
                     let error = PaymentError(
                         code: ErrorResponseCode.pending.rawValue,
                         message: "Payment status still pending after timeout",
-                        orderId: model.orderId,
+                        externalId: model.externalId,
                         paymentId: model.paymentId,
                         type: ErrorResponseType.paymentError.rawValue
                     )
                     
                     result(
                         .pending(
-                            orderId: model.orderId,
+                            externalId: model.externalId,
                             paymentId: model.paymentId,
                             message: error.localizedDescription,
                             error: error
@@ -99,7 +102,7 @@ open class PayService {
                 }
             } catch let apiError as APIError<PaymentError> {
                 Logger.payServices.error("🔴 ERROR: Error checkPayment request: \(apiError.localizedDescription)")
-                let errorResult = PaymentError.convertFrom(apiError, orderId: model.externalId)
+                let errorResult = PaymentError.convertFrom(apiError, externalId: model.externalId)
                 
                 result(
                     .failed(error: errorResult)
@@ -107,7 +110,7 @@ open class PayService {
             } catch let error {
                 
                 let errorResult = PaymentError(
-                    orderId: model.orderId,
+                    externalId: model.externalId,
                     paymentId: model.paymentId,
                     errorDescription: error.localizedDescription
                 )
@@ -121,21 +124,24 @@ open class PayService {
     }
 }
 
-
 private extension PayService {
-
-    static func handleCheckPaymentStatuses(_ response: PaymentDetailsResponse,_ model: CheckPaymentRequestModel, result: @escaping PaymentResultCompletionHandler) {
+    
+    static func handleCheckPaymentStatuses(
+        _ response: PaymentDetailsResponse,
+        _ model: CheckPaymentRequestModel,
+        result: @escaping PaymentResultCompletionHandler
+    ) {
         
         guard let data = response.convertToCheckPaymentData(paymentId: model.paymentId) else {
             
             let errorModel = PaymentError(
                 code: ErrorResponseCode.failedToFinishTransaction.rawValue,
-                message: "Payment with id \( model.paymentId) not found in purchase details of order \(model.orderId)",
-                orderId: model.orderId,
+                message: "Payment with id \( model.paymentId ?? "") not found in purchase details of order \(model.externalId)",
+                externalId: model.externalId,
                 paymentId: model.paymentId,
                 type: ErrorResponseType.paymentError.rawValue
             )
-           
+            
             Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.message ?? "")")
             
             result(
@@ -150,8 +156,9 @@ private extension PayService {
             Logger.payServices.info("✅ Success: Check payment API request success")
             result(
                 .complete(
-                    orderId: model.orderId,
-                    paymentId: model.paymentId ?? "Whithout paymentId"
+                    externalId: model.externalId,
+                    paymentId: model.paymentId ?? "Without paymentId",
+                    tokenizedCard: nil
                 )
             )
             
@@ -159,7 +166,7 @@ private extension PayService {
             let errorModel = PaymentError(
                 code: ErrorResponseCode.failedToFinishTransaction.rawValue,
                 message: data.statusDescription ?? "",
-                orderId: model.orderId,
+                externalId: model.externalId,
                 paymentId: data.paymentId,
                 type: ErrorResponseType.paymentError.rawValue
             )
@@ -169,7 +176,7 @@ private extension PayService {
             )
             
         case .start, .pending:
-            Logger.payServices.info("⚠️ PENDING: Payment with id \( model.paymentId) of order \(model.orderId) has not been terminated yet")
+            Logger.payServices.info("⚠️ PENDING: Payment with id \( model.paymentId ?? "") of order \(model.externalId) has not been terminated yet")
             
             let error = PaymentError(
                 code: ErrorResponseCode.pending.rawValue,
@@ -180,7 +187,7 @@ private extension PayService {
             
             result(
                 .pending(
-                    orderId: model.orderId,
+                    externalId: model.externalId,
                     paymentId: data.paymentId,
                     message: error.localizedDescription,
                     error: error
@@ -190,7 +197,11 @@ private extension PayService {
         
     }
     
-    static func handleCreatePaymentStatuses(orderId: String, _ response: CreatePaymentResponse, result: @escaping CreatePaymentResultCompletionHandler) {
+    static func handleCreatePaymentStatuses(
+        externalId: String,
+        _ response: CreatePaymentResponse,
+        result: @escaping CreatePaymentResultCompletionHandler
+    ) {
         
         let data = response.convertToCreatePaymentData()
         
@@ -199,7 +210,7 @@ private extension PayService {
             Logger.payServices.info("✅ Success: Payment is created")
             result(
                 .success(
-                    orderId: orderId,
+                    externalId: externalId,
                     paymentId: data.paymentId
                 )
             )
@@ -207,7 +218,7 @@ private extension PayService {
             let errorModel = PaymentError(
                 code: ErrorResponseCode.failedToCreateTransaction.rawValue,
                 message: data.statusDescription ?? "",
-                orderId: orderId,
+                externalId: externalId,
                 paymentId: data.paymentId,
                 type: ErrorResponseType.paymentError.rawValue
             )
@@ -221,7 +232,7 @@ private extension PayService {
             if case let .confirm3Ds(url) = data.action {
                 result(
                     .confirmation3DsRequired(
-                        orderId: orderId,
+                        externalId: externalId,
                         paymentId: data.paymentId,
                         url: url,
                         callbackUrl: EnvironmentProvider.environment.paymentsConfirmation3DsCallbackUrl
@@ -232,7 +243,7 @@ private extension PayService {
                 let errorModel = PaymentError(
                     code: ErrorResponseCode.unknownAction.rawValue,
                     message: "3DS confirmation action expected, but action is \(String(describing: data.action)), payment can't be finished",
-                    orderId: orderId,
+                    externalId: externalId,
                     paymentId: data.paymentId,
                     type: ErrorResponseType.unknownAction.rawValue
                 )
@@ -245,8 +256,6 @@ private extension PayService {
         }
     }
 }
-
-
 
 //MARK: - Endpoint
 fileprivate enum PayServiceEndpoint: APIConfiguration {

@@ -8,7 +8,7 @@
 typealias ApplePaymentCompletionHandler = (ApplePaymentResult) -> Void
 
 enum ApplePaymentResult {
-    case success(orderId: String, key: String)
+    case success(externalId: String, key: String)
     case failed(error: PaymentError)
-    case cancelled(orderId: String)
+    case cancelled(externalId: String)
 }

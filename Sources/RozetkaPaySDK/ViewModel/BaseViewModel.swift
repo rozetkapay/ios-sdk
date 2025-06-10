@@ -39,8 +39,6 @@ class BaseViewModel: ObservableObject {
     @Published var errorMessageCardholderName: String? = nil
     @Published var errorMessageEmail: String? = nil
     
-    @Published var isNeedToTokenizationCard: Bool = true
-    
     //MARK: - Inits
     init(
         client: ClientAuthParametersProtocol,
@@ -56,12 +54,12 @@ class BaseViewModel: ObservableObject {
     
     //MARK: - Methods
     
-    func validateAll() {
+    func validateAll() -> ValidationResultModel? {
         guard let validCardNumber = validateCardNumber(cardNumber),
               let validExpiryDate = validateExpiryDate(expiryDate),
               let validCVV = validateCVV(cvv)
         else {
-            return
+            return nil
         }
         
         ///
@@ -70,7 +68,7 @@ class BaseViewModel: ObservableObject {
         case .optional:
             if !email.isNilOrEmpty {
                 guard let value = validateEmail(email) else {
-                    return
+                    return nil
                 }
                 validEmail = value
             }
@@ -78,7 +76,7 @@ class BaseViewModel: ObservableObject {
             break
         case .required:
             guard let value = validateEmail(email) else {
-                return
+                return nil
             }
             validEmail = value
         }
@@ -89,7 +87,7 @@ class BaseViewModel: ObservableObject {
         case .optional:
             if !cardholderName.isNilOrEmpty {
                 guard let value = validateCardholderName(cardholderName) else {
-                    return
+                    return nil
                 }
                 validCardholderName = value
             }
@@ -97,7 +95,7 @@ class BaseViewModel: ObservableObject {
             break
         case .required:
             guard let value = validateCardholderName(cardholderName) else {
-                return
+                return nil
             }
             validCardholderName = value
         }
@@ -108,7 +106,7 @@ class BaseViewModel: ObservableObject {
         case .optional:
             if !cardName.isNilOrEmpty {
                 guard let value = validateCardName(cardName) else {
-                    return
+                    return nil
                 }
                 validCardName = value
             }
@@ -116,12 +114,12 @@ class BaseViewModel: ObservableObject {
             break
         case .required:
             guard let value = validateCardName(cardName) else {
-                return
+                return nil
             }
             validCardName = value
         }
         
-        let model = ValidationResultModel(
+        return ValidationResultModel(
             cardNumber: validCardNumber,
             cardExpMonth: validExpiryDate.month,
             cardExpYear: validExpiryDate.year,
@@ -130,25 +128,18 @@ class BaseViewModel: ObservableObject {
             cardholderName: validCardholderName,
             customerEmail: validEmail
         )
-        
-        loading(validModel: model)
-    }
-
-    open func loading(validModel: ValidationResultModel) {}
-    
-    open func cancelled() {}
-    
-    open func resetState() {
-        self.isError = false
-        self.errorMessage = nil
     }
     
     func startLoader() {
-        self.isLoading = true
+        DispatchQueue.main.async {
+            self.isLoading = true
+        }
     }
     
     func stopLoader() {
-        self.isLoading = false
+        DispatchQueue.main.async {
+            self.isLoading = false
+        }
     }
     
     func setTestData() {
