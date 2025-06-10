@@ -4,8 +4,6 @@
 //
 //  Created by Ruslan Kasian Dev on 16.04.2025.
 //
-
-
 import Foundation
 
 public struct CheckPaymentData {
