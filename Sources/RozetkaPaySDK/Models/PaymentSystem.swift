@@ -64,16 +64,16 @@ enum PaymentSystem: String, Identifiable, CaseIterable {
     var logoName: String {
         switch self {
         case .visa:
-            return "rozetka_pay_ic_visa"
+            return DomainImages.visa.name
         case .masterCard:
-            return "rozetka_pay_ic_mastercard"
+            return DomainImages.mastercard.name
         case .prostir:
-            return "rozetka_pay_ic_prostir"
+            return DomainImages.prostir.name
         }
     }
     
     /// The default logo name to be used when no specific payment system is identified.
     static var defaultLogoName: String {
-        return "rozetka_pay_ic_card_default"
+        return DomainImages.card.name
     }
 }

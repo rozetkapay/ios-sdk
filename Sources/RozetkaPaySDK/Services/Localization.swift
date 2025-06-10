@@ -75,12 +75,12 @@ public enum Localization: String {
            customLocalizedString != key {
             let result = customLocalizedString
 
-            Logger.localized.error("✏️ [Localization] Main localization used for key: '\(key)' -> '\(result)'")
+//            Logger.localized.error("✏️ [Localization] Main localization used for key: '\(key)' -> '\(result)'")
             return result
         } else {
             let fallback =  NSLocalizedString(key, bundle: Bundle.module, comment: "")
             
-            Logger.localized.error("✏️ [Localization] Fallback used for key: '\(key)' -> '\(fallback)'")
+//            Logger.localized.error("✏️ [Localization] Fallback used for key: '\(key)' -> '\(fallback)'")
             return fallback
         }
     }

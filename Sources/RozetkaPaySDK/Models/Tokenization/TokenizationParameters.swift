@@ -7,12 +7,6 @@
 
 import Foundation
 
-public protocol ParametersProtocol {
-    var client: ClientAuthParametersProtocol {get}
-    var viewParameters: ViewParametersProtocol {get}
-    var themeConfigurator: RozetkaPayThemeConfigurator {get}
-}
-
 public struct TokenizationParameters: ParametersProtocol {
     public let client: ClientAuthParametersProtocol
     public let viewParameters: ViewParametersProtocol

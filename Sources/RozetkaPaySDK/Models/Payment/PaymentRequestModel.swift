@@ -20,7 +20,7 @@ struct PaymentApiConstants {
 // MARK: - PaymentRequest
 
 struct PaymentRequestModel: Encodable {
-    let amount: Double
+    let amount: Decimal
     let currency: String
     let externalId: String
     let callbackUrl: String?
@@ -37,14 +37,14 @@ struct PaymentRequestModel: Encodable {
     }
 
     init(
-        amount: Double,
+        amountInCoins: Int64,
         currency: String,
         externalId: String,
         callbackUrl: String? = nil,
         mode: String = PaymentApiConstants.modeDirect,
         customer: Customer
     ) {
-        self.amount = amount
+        self.amount = amountInCoins.currencyFormatAmount()
         self.currency = currency
         self.externalId = externalId
         self.callbackUrl = callbackUrl

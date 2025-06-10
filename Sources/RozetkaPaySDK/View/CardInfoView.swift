@@ -27,8 +27,6 @@ public struct CardInfoView: View {
     @Binding var errorMessageCardholderName: String?
     @Binding var errorMessageEmail: String?
     
-    @Binding var isNeedToTokenizationCard: Bool
-    
     //MARK: - Properties
     private let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
     private let themeConfigurator: RozetkaPayThemeConfigurator
@@ -36,8 +34,6 @@ public struct CardInfoView: View {
     private var fieldRequirementCardName: FieldRequirement
     private var fieldRequirementCardholderName: FieldRequirement
     private var fieldRequirementEmail: FieldRequirement
-    
-    private var isShowNeedToTokenizationCard: Bool
     
     @State var detectedPaymentSystem: PaymentSystem?
     
@@ -52,9 +48,6 @@ public struct CardInfoView: View {
         viewParameters: ViewParametersProtocol,
         themeConfigurator: RozetkaPayThemeConfigurator,
         provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
-        
-        isNeedToTokenizationCard: Binding<Bool> = .constant(false),
-        isShowNeedToTokenizationCard: Bool = false,
         ///
         cardNumber: Binding<String?>,
         cvv: Binding<String?>,
@@ -71,28 +64,27 @@ public struct CardInfoView: View {
         errorMessageCardholderName: Binding<String?>,
         errorMessageEmail: Binding<String?>
     ) {
+        ///
         self.themeConfigurator = themeConfigurator
         self.provideCardPaymentSystemUseCase = provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
         self.fieldRequirementCardName = viewParameters.cardNameField
         self.fieldRequirementCardholderName = viewParameters.cardholderNameField
         self.fieldRequirementEmail = viewParameters.emailField
-        self.isShowNeedToTokenizationCard = isShowNeedToTokenizationCard
-        
+        ///
         self._cardNumber = cardNumber
         self._cvv = cvv
         self._expiryDate = expiryDate
         self._cardName = cardName
         self._cardholderName = cardholderName
         self._email = email
-        self._isNeedToTokenizationCard = isNeedToTokenizationCard
-        
+        ///
         self._errorMessageCardNumber = errorMessageCardNumber
         self._errorMessageCvv = errorMessageCvv
         self._errorMessageExpiryDate = errorMessageExpiryDate
         self._errorMessageCardName = errorMessageCardName
         self._errorMessageCardholderName = errorMessageCardholderName
         self._errorMessageEmail = errorMessageEmail
-        
+        ///
         self._detectedPaymentSystem = State(initialValue: self.detectPaymentSystem(cardNumber.wrappedValue))
     }
     
@@ -128,13 +120,6 @@ public struct CardInfoView: View {
                 
                 if fieldRequirementEmail.isShow {
                     emailView
-                }
-                
-                if isShowNeedToTokenizationCard{
-                    HStack{
-                        checkBoxView
-                        Spacer()
-                    }
                 }
             }
             
@@ -644,64 +629,6 @@ private extension CardInfoView {
             }
         }
     }
-    
-    ///
-    var checkBoxView: some View {
-        HStack {
-            Toggle(isOn: $isNeedToTokenizationCard) {}
-                .toggleStyle(
-                    CheckBoxStyle(
-                        colorOn: themeConfigurator
-                            .colorScheme(colorScheme)
-                            .primary,
-                        colorOff: themeConfigurator
-                            .colorScheme(colorScheme)
-                            .placeholder
-                    )
-                )
-                .labelsHidden()
-            
-            Text(Localization.rozetka_pay_form_save_card.description)
-                .font(
-                    themeConfigurator
-                        .typography
-                        .labelSmall
-                )
-                .foregroundColor(
-                    themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onSurface
-                )
-        }
-        .padding()
-    }
-    
-    struct CheckBoxStyle: ToggleStyle {
-        let colorOn: Color
-        let colorOff: Color
-        
-        func makeBody(configuration: Configuration) -> some View {
-            return Button(action: {
-                configuration.isOn.toggle()
-            }) {
-                Image(systemName: configuration.isOn ?
-                      "checkmark.square.fill" :
-                      "square"
-                )
-                    .resizable()
-                    .frame(width: 26, height: 26)
-                    .foregroundColor(
-                        configuration.isOn ? colorOn : colorOff
-                    )
-                    .overlay(
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.white)
-                            .opacity(configuration.isOn ? 1 : 0)
-                            .padding(4)
-                    )
-            }
-        }
-    }
 }
 
 //MARK: Private Methods
@@ -726,8 +653,6 @@ private extension CardInfoView {
             cardholderNameField: .optional
         ),
         themeConfigurator: RozetkaPayThemeConfigurator(),
-        isNeedToTokenizationCard: .constant(true),
-        isShowNeedToTokenizationCard: true,
         cardNumber: .constant("424242"),
         cvv: .constant(nil),
         expiryDate: .constant(nil),

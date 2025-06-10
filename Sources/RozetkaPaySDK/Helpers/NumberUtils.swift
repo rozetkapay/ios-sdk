@@ -23,6 +23,10 @@ extension Double {
         let amount = Double(self * 100).nextUp
         return Int64(amount)
     }
+    
+    func convertToInt64() -> Int64 {
+        return Int64(self)
+    }
 }
 
 extension Int64 {
@@ -31,10 +35,17 @@ extension Int64 {
         return Double(self)/100.0
     }
     
+    func currencyFormatAmount() -> Decimal {
+        return Decimal(self)/100.0
+    }
+    
     func currencyFormat() -> String {
         return (Double(self)/100.0).currencyFormat()
     }
     
+    func convertToCoinsAmount() -> Int64 {
+        return Double(self).convertToCoinsAmount()
+    }
 }
 
 

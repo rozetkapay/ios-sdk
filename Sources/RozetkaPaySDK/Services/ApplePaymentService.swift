@@ -16,14 +16,14 @@ final class ApplePaymentService: NSObject {
     private var onResultCallback: ApplePaymentCompletionHandler?
     
     private var config: ApplePayConfig
-    private var amountParameters: PaymentParameters.AmountParameters
-    private let orderId: String
+    private var amountParameters: AmountParameters
+    private let externalId: String
     
     //MARK: - Init
     init?(
-        orderId: String,
+        externalId: String,
         config: ApplePayConfig?,
-        amount: PaymentParameters.AmountParameters?
+        amount: AmountParameters?
     ) {
         guard let config = config,
               let amount = amount
@@ -32,7 +32,7 @@ final class ApplePaymentService: NSObject {
         }
         self.config = config
         self.amountParameters = amount
-        self.orderId = orderId
+        self.externalId = externalId
     }
 }
 
@@ -40,9 +40,10 @@ final class ApplePaymentService: NSObject {
 extension ApplePaymentService {
     
     func startPayment(onResultCallback: @escaping ApplePaymentCompletionHandler) {
+        paymentSummaryItems.removeAll()
         let amount = PKPaymentSummaryItem(
             label: Localization.rozetka_pay_payment_applepay_label_amount.description,
-            amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToMoney(coins: amountParameters.amount)),
+            amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToRawMoneyString(coins: amountParameters.amount)),
             type: .final
         )
         paymentSummaryItems.append(amount)
@@ -50,15 +51,15 @@ extension ApplePaymentService {
         if let _tax = amountParameters.tax.isNilOrEmptyValue {
             let tax = PKPaymentSummaryItem(
                 label: Localization.rozetka_pay_payment_applepay_label_tax.description,
-                amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToMoney(coins: _tax)),
+                amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToRawMoneyString(coins: _tax)),
                 type: .final
             )
             paymentSummaryItems.append(tax)
         }
         let total = PKPaymentSummaryItem(
             label: Localization.rozetka_pay_payment_applepay_label_total.description,
-            amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToMoney(coins: amountParameters.total)),
-            type: .pending
+            amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToRawMoneyString(coins: amountParameters.total)),
+            type: .final
         )
         paymentSummaryItems.append(total)
         
@@ -84,7 +85,7 @@ extension ApplePaymentService {
                 let paymentError = PaymentError(
                     code: ErrorResponseCode.applePayUnavailable.rawValue,
                     message: "Apple Pay payment controller unavailable",
-                    orderId: self.orderId,
+                    externalId: self.externalId,
                     type: ErrorResponseType.paymentError.rawValue
                 )
                 
@@ -125,7 +126,7 @@ extension ApplePaymentService: PKPaymentAuthorizationControllerDelegate {
             let errorModel = PaymentError(
                 code: ErrorResponseCode.applePayTokenError.rawValue,
                 message: "Failed to encode Apple Pay token",
-                orderId: self.orderId,
+                externalId: self.externalId,
                 type: ErrorResponseType.applePayError.rawValue
             )
             Logger.payByApplePay.error("🔴 ERROR: Failed to encode Apple Pay token")
@@ -141,7 +142,10 @@ extension ApplePaymentService: PKPaymentAuthorizationControllerDelegate {
         
         Logger.payByApplePay.info("✅ Success: Apple Pay is created")
         self.onResultCallback?(
-            .success(orderId: self.orderId, key: tokenBase64)
+            .success(
+                externalId: self.externalId,
+                key: tokenBase64
+            )
         )
     }
     
@@ -160,7 +164,7 @@ extension ApplePaymentService: PKPaymentAuthorizationControllerDelegate {
                     let errorModel = PaymentError(
                         code: ErrorResponseCode.applePayFailed.rawValue,
                         message: "Payment has not been completed",
-                        orderId: self.orderId,
+                        externalId: self.externalId,
                         type: ErrorResponseType.applePayError.rawValue
                     )
                     Logger.payByApplePay.error("🔴 ERROR: Payment has not been completed")

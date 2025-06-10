@@ -48,74 +48,89 @@ final class ThreeDSViewModel: ObservableObject {
     }
     
     func retry() {
-        guard !hasFinished else {
-            return
+        DispatchQueue.main.async {
+            guard !self.hasFinished else {
+                return
+            }
+            self.isLoading = false
+            self.error = nil
+            self.isError = false
+            self.isRetry = true
         }
-        self.isLoading = false
-        self.error = nil
-        self.isError = false
-        self.isRetry = true
     }
     
     func handleSuccess() {
-        guard !hasFinished else {
-            return
-        }
-        self.isLoading = false
-        self.error = nil
-        self.isError = false
-        self.hasFinished = true
-        
-        onResultCallback(
-            .success(
-                orderId: request.orderId,
-                paymentId: request.paymentId
-            )
-        )
-    }
-    
-    func handleFailure(_ error: Error? = nil,  message: String? = nil) {
-        guard !hasFinished else {
-            return
-        }
-        
-        self.isLoading = false
-        self.isError = true
-        
-        let paymentError = PaymentError(
-            code: ErrorResponseCode.threeDSRequired.rawValue,
-            message: message ?? error?.localizedDescription,
-            orderId: request.orderId,
-            paymentId: request.paymentId,
-            type: ErrorResponseType.paymentError.rawValue
-        )
-        self.error = paymentError
-    }
-    
-    func handleCancelled() {
-        guard !hasFinished else {
-            return
-        }
-        self.isLoading = false
-        self.isError = false
-
-        
-        if let error = error {
-            self.hasFinished = true
-            onResultCallback(
-                .failed(error: error)
-            )
-        }else {
+        DispatchQueue.main.async {
+            guard !self.hasFinished else {
+                return
+            }
+            self.isLoading = false
             self.error = nil
+            self.isError = false
             self.hasFinished = true
-            onResultCallback(
-                .cancelled(
-                    orderId: request.orderId,
-                    paymentId: request.paymentId
+            
+            self.onResultCallback(
+                .success(
+                    externalId: self.request.externalId,
+                    paymentId: self.request.paymentId,
+                    tokenizedCard: self.request.tokenizedCard,
+                    ordersPayments: self.request.ordersPayments
                 )
             )
         }
-       
+    }
+    
+    func handleFailure(_ error: Error? = nil,  message: String? = nil) {
+        DispatchQueue.main.async {
+            guard !self.hasFinished else {
+                return
+            }
+            
+            self.isLoading = false
+            self.isError = true
+            
+            let paymentError = PaymentError(
+                code: ErrorResponseCode.threeDSRequired.rawValue,
+                message: message ?? error?.localizedDescription,
+                externalId: self.request.externalId,
+                paymentId: self.request.paymentId,
+                type: ErrorResponseType.paymentError.rawValue
+            )
+            self.error = paymentError
+        }
+    }
+    
+    func handleCancelled() {
+        DispatchQueue.main.async {
+            guard !self.hasFinished else {
+                return
+            }
+            self.isLoading = false
+            self.isError = false
+            
+            
+            if let error = self.error {
+                self.hasFinished = true
+                self.onResultCallback(
+                    .failed(
+                        error: error,
+                        tokenizedCard: self.request.tokenizedCard,
+                        ordersPayments: self.request.ordersPayments
+                    )
+                )
+            }else {
+                self.error = nil
+                self.hasFinished = true
+                self.onResultCallback(
+                    .cancelled(
+                        externalId: self.request.externalId,
+                        paymentId: self.request.paymentId,
+                        tokenizedCard: self.request.tokenizedCard,
+                        ordersPayments: self.request.ordersPayments
+                    )
+                )
+            }
+        }
     }
     
     func makeURLRequest() -> URLRequest? {

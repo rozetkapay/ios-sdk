@@ -1,5 +1,5 @@
 //
-//  PaymentInfoRequestModel.swift
+//  CheckPaymentRequestModel.swift
 //  RozetkaPaySDK
 //
 //  Created by Ruslan Kasian Dev on 14.04.2025.
@@ -7,22 +7,22 @@
 import Foundation
 
 struct CheckPaymentRequestModel: Encodable {
-    let orderId: String
     let paymentId: String?
     let externalId: String
+    let tokenizedCard: TokenizedCard?
 
     private enum CodingKeys: String, CodingKey {
         case externalId = "external_id"
     }
 
     init(
-        orderId: String,
+        externalId: String,
         paymentId: String?,
-        externalId: String
+        tokenizedCard: TokenizedCard?
     ) {
-        self.orderId = orderId
         self.paymentId = paymentId
         self.externalId = externalId
+        self.tokenizedCard = tokenizedCard
     }
     
     func encode(to encoder: any Encoder) throws {

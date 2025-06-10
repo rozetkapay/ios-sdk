@@ -74,4 +74,24 @@ extension TokenizationError {
             )
         }
     }
+    
+    func convertToCreatePaymentResult(_ externalId: String?) -> CreatePaymentResult {
+        switch self {
+        case .cancelled:
+            return .cancelled(
+                    externalId: externalId,
+                    paymentId: nil
+                )
+        case let .failed(message, _):
+            let errorModel = PaymentError(
+                code: ErrorResponseCode.failedToVerifyCard.rawValue,
+                message: message,
+                externalId: externalId,
+                paymentId: nil,
+                type: ErrorResponseType.paymentError.rawValue
+            )
+            
+            return .failed(error: errorModel)
+        }
+    }
 }

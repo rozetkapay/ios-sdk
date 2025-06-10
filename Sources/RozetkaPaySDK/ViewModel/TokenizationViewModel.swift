@@ -28,9 +28,15 @@ final class TokenizationViewModel: BaseViewModel {
         
         setTestData()
     }
-    
-    //MARK: - overrides
-    override func loading(validModel: ValidationResultModel) {
+}
+
+
+    //MARK: - Methods
+extension TokenizationViewModel {
+    func startLoading() {
+        guard let validModel: ValidationResultModel = self.validateAll() else {
+            return
+        }
         let model = CardRequestModel(
             cardName: validModel.cardName,
             cardNumber: validModel.cardNumber,
@@ -43,8 +49,11 @@ final class TokenizationViewModel: BaseViewModel {
         tokenizeCard(key: client.key, model: model)
     }
     
+    func retryLoading() {
+        startLoading()
+    }
     
-    override func cancelled() {
+    func cancelled() {
         resetState()
         stopLoader()
         
@@ -53,7 +62,17 @@ final class TokenizationViewModel: BaseViewModel {
         )
     }
     
-    private func tokenizeCard(key: String, model: CardRequestModel) {
+    func resetState() {
+        DispatchQueue.main.async {
+            self.isError = false
+            self.errorMessage = nil
+        }
+    }
+}
+
+//MARK: - Private Methods
+private extension TokenizationViewModel {
+     func tokenizeCard(key: String, model: CardRequestModel) {
         resetState()
         startLoader()
         

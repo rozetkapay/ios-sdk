@@ -73,7 +73,7 @@ private extension ThreeDSView {
             viewModel.handleCancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            Image(systemName: "xmark")
+            DomainImages.xmark.image()
                 .foregroundColor(
                     viewModel
                         .themeConfigurator
