@@ -480,8 +480,7 @@ extension PayViewModel {
         let model = CheckPaymentRequestModel(
             externalId: externalId,
             paymentId: paymentId,
-            tokenizedCard: tokenizedCard,
-            
+            tokenizedCard: tokenizedCard
         )
         
         PayService.checkPayment(
