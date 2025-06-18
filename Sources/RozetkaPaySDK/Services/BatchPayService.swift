@@ -308,7 +308,7 @@ fileprivate enum BatchPayServiceEndpoint: APIConfiguration {
         case .createBatchPayment:
             return "/api/payments/batch/v1/new"
         case .checkBatchPayment:
-            return "/api/payments/batch/v1/status"
+            return "/api/payments/batch/v1/payment-status"
         }
     }
     
