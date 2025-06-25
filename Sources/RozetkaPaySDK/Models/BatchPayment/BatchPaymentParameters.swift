@@ -54,7 +54,6 @@ public struct BatchPaymentParameters: ParametersProtocol {
         amountParameters: AmountParameters,
         externalId: String,
         callbackUrl: String? = nil,
-        resultUrl: String? = nil,
         orders: [BatchOrder]
     ) {
         self.client = client
@@ -63,7 +62,7 @@ public struct BatchPaymentParameters: ParametersProtocol {
         self.paymentType = paymentType
         self.externalId = externalId
         self.callbackUrl = callbackUrl
-        self.resultUrl = resultUrl
+        self.resultUrl = EnvironmentProvider.environment.paymentsConfirmation3DsCallbackUrl
         self.orders = orders
     }
     
