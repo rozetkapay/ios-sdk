@@ -158,7 +158,7 @@ private extension PayService {
                 .complete(
                     externalId: model.externalId,
                     paymentId: model.paymentId ?? "Without paymentId",
-                    tokenizedCard: nil
+                    tokenizedCard: model.tokenizedCard
                 )
             )
             
