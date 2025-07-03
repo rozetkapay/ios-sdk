@@ -99,16 +99,21 @@ extension ApplePaymentService {
     
     private func createPayToken(from payment: PKPayment) -> String? {
         let paymentData = payment.token.paymentData
-        guard
-            let jsonObject = try? JSONSerialization.jsonObject(with: paymentData, options: []),
-            JSONSerialization.isValidJSONObject(jsonObject),
-            let jsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [])
-        else {
-            Logger.payByApplePay.error("🔴 ERROR: Failed to parse PKPayment token to JSON")
+        
+        guard !paymentData.isEmpty else {
+            Logger.payByApplePay.error("🔴 ERROR: Apple Pay paymentData is empty. Likely due to testing on Simulator or without valid Wallet setup.")
             return nil
         }
         
-        let base64Token = jsonData.base64EncodedString()
+        let base64Token = paymentData.base64EncodedString()
+        
+        guard !base64Token.isEmpty else {
+            Logger.payByApplePay.error("🔴 ERROR: Failed to encode Apple Pay token to Base64")
+            return nil
+        }
+        
+        Logger.payByApplePay.debug("✅ Apple Pay token successfully encoded: \(base64Token.prefix(5))... to Base64")
+      
         return base64Token
     }
     
