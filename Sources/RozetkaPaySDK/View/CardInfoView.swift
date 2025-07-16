@@ -31,10 +31,12 @@ public struct CardInfoView: View {
     private let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
     private let themeConfigurator: RozetkaPayThemeConfigurator
     
-    private var fieldRequirementCardName: FieldRequirement
-    private var fieldRequirementCardholderName: FieldRequirement
-    private var fieldRequirementEmail: FieldRequirement
-    
+    private let fieldRequirementCardName: FieldRequirement
+    private let fieldRequirementCardholderName: FieldRequirement
+    private let fieldRequirementEmail: FieldRequirement
+    private let isVisibleCardInfoTitle: Bool
+    private let cardInfoTitleText: String
+
     @State var detectedPaymentSystem: PaymentSystem?
     
     @Environment(\.colorScheme) var colorScheme
@@ -70,6 +72,8 @@ public struct CardInfoView: View {
         self.fieldRequirementCardName = viewParameters.cardNameField
         self.fieldRequirementCardholderName = viewParameters.cardholderNameField
         self.fieldRequirementEmail = viewParameters.emailField
+        self.isVisibleCardInfoTitle = viewParameters.isVisibleCardInfoTitle
+        self.cardInfoTitleText = viewParameters.stringResources.cardFormTitle
         ///
         self._cardNumber = cardNumber
         self._cvv = cvv
@@ -90,35 +94,38 @@ public struct CardInfoView: View {
     
     public var body: some View {
         Group {
-            if fieldRequirementCardName.isShow {
+            if fieldRequirementCardName.isVisible {
                 VStack(spacing: 16) {
                     cardNameView
                 }
             }
-            HStack{
-                Text(Localization.rozetka_pay_form_card_info_title.description)
-                    .font(
-                        themeConfigurator
-                            .typography
-                            .subtitle
-                    )
-                    .bold()
-                    .foregroundColor(
-                        themeConfigurator
-                            .colorScheme(colorScheme)
-                            .subtitle
-                    )
-                    .padding(.top, 16)
-                Spacer()
+            if isVisibleCardInfoTitle {
+                HStack{
+                    Text(cardInfoTitleText)
+                        
+                        .font(
+                            themeConfigurator
+                                .typography
+                                .subtitle
+                        )
+                        .bold()
+                        .foregroundColor(
+                            themeConfigurator
+                                .colorScheme(colorScheme)
+                                .subtitle
+                        )
+                        .padding(.top, 16)
+                    Spacer()
+                }
             }
             VStack(spacing: 16) {
                 cardDetailsView
                 
-                if fieldRequirementCardholderName.isShow {
+                if fieldRequirementCardholderName.isVisible {
                     cardHolderNameView
                 }
                 
-                if fieldRequirementEmail.isShow {
+                if fieldRequirementEmail.isVisible {
                     emailView
                 }
             }
@@ -647,7 +654,7 @@ private extension CardInfoView {
 //MARK: Preview
 #Preview {
     CardInfoView(
-        viewParameters: TokenizationViewParameters(
+        viewParameters: TokenizationContentViewParameters(
             cardNameField: .optional,
             emailField: .required,
             cardholderNameField: .optional

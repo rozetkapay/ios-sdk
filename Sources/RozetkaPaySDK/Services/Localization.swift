@@ -56,11 +56,11 @@ public enum Localization: String {
     case rozetka_pay_form_validation_email_incorrect
     
     
-    var description: String {
+    public var description: String {
         return Localization.localizedString(forKey: self.rawValue)
     }
     
-    func description(with parameters: [String]) -> String {
+    public func description(with parameters: [String]) -> String {
         var result = self.description
         
         for index in 0..<parameters.count{

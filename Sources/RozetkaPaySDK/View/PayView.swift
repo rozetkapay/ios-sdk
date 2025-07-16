@@ -9,7 +9,7 @@ import SwiftUI
 import PassKit
 
 public struct PayView: View {
-   
+    
     //MARK: - Properties
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
@@ -39,7 +39,7 @@ public struct PayView: View {
             )
         )
     }
-
+    
     //MARK: - Body
     public var body: some View {
         NavigationView {
@@ -179,55 +179,61 @@ private extension PayView {
                             .themeConfigurator
                             .colorScheme(colorScheme)
                             .title
-                            
+                        
                     )
                     .padding(.bottom, 20)
                 Spacer()
             }
         }
     }
-
+    
     private var footerView: some View {
         CardInfoFooterView()
-        .padding(.top, 20)
+            .padding(.top, 20)
     }
     
     private var cardPayButton: some View {
         Button(action: {
             viewModel.startPayByCard()
         }) {
-            Text(Localization.rozetka_pay_payment_pay_button.description(with: [
-                viewModel.getAmountWithCurrency()
-            ]))
-                .font(
-                    viewModel
-                        .themeConfigurator
-                        .typography
-                        .labelLarge
-                )
-                .bold()
-                .frame(maxWidth: .infinity)
-                .padding()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onPrimary
-                    
-                )
-                .background(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .primary
-                )
-                .cornerRadius(
-                    viewModel
-                        .themeConfigurator
-                        .sizes
-                        .buttonCornerRadius
-                )
+            Text(
+                Localization.rozetka_pay_payment_pay_button.description(with: [
+                    viewModel.getAmountWithCurrency()
+                ])
+            )
+            .font(
+                viewModel
+                    .themeConfigurator
+                    .typography
+                    .labelLarge
+            )
+            .bold()
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onPrimary
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .frame(height:
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonFrameHeight
+        )
+        .background(
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .primary
+        )
+        .cornerRadius(
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonCornerRadius
+        )
         .padding(.top, 20)
     }
     
@@ -240,21 +246,33 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .applePayButtonStyle
         )
-        .frame(height: 50)
+        .frame(height:
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonFrameHeight
+        )
         .cornerRadius(
             viewModel
                 .themeConfigurator
                 .sizes
-                .buttonCornerRadius)
+                .buttonCornerRadius
+        )
         .padding(.top, 20)
-        .padding(.bottom, viewModel.viewParameters.cardNameField.isShow ? 16 : 0)
+        .padding(.bottom,
+            viewModel
+                .viewParameters
+                .cardNameField
+                .isVisible ? 16 : 0
+        )
         .clipShape(
             RoundedRectangle(
                 cornerRadius:
                     viewModel
-                    .themeConfigurator
-                    .sizes
-                    .buttonCornerRadius)
+                        .themeConfigurator
+                        .sizes
+                        .buttonCornerRadius
+            )
         )
     }
 }
@@ -275,24 +293,24 @@ private extension PayView {
 #Preview {
     PayView(
         paymentParameters: PaymentParameters(
-        client: ClientAuthParameters(token: "test", widgetKey: "test"),
-        paymentType: .regular(
-            RegularPayment(
-                viewParameters: PaymentViewParameters(
-                    cardNameField: .none,
-                    emailField: .required,
-                    cardholderNameField: .required
-                ),
-                isAllowTokenization: true,
-                applePayConfig: nil
-        )),
-        amountParameters: AmountParameters(
-            amount: 10000,
-            currencyCode: "UAH"
+            client: ClientAuthParameters(token: "test", widgetKey: "test"),
+            paymentType: .regular(
+                RegularPayment(
+                    viewParameters: PaymentViewParameters(
+                        cardNameField: .none,
+                        emailField: .required,
+                        cardholderNameField: .required
+                    ),
+                    isAllowTokenization: true,
+                    applePayConfig: nil
+                )),
+            amountParameters: AmountParameters(
+                amount: 10000,
+                currencyCode: "UAH"
+            ),
+            externalId: "test"
         ),
-        externalId: "test"
-    ),
-    onResultCallback: {
-        _ in
-    })
+        onResultCallback: {
+            _ in
+        })
 }

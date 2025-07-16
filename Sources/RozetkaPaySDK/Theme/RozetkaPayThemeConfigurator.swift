@@ -9,17 +9,20 @@ import PassKit
 import SwiftUI
 
 public struct RozetkaPayThemeConfigurator {
+    let mode: ThemeMode
     let lightColorScheme: DomainColorScheme
     let darkColorScheme: DomainColorScheme
     let sizes: DomainSizes
     let typography: DomainTypography
     
     public init(
+        mode: ThemeMode = .system,
         lightColorScheme: DomainColorScheme = RozetkaPayDomainThemeDefaults.lightColors(),
         darkColorScheme: DomainColorScheme = RozetkaPayDomainThemeDefaults.darkColors(),
         sizes: DomainSizes = RozetkaPayDomainThemeDefaults.sizes(),
         typography: DomainTypography = RozetkaPayDomainThemeDefaults.typography()
     ) {
+        self.mode = mode
         self.lightColorScheme = lightColorScheme
         self.darkColorScheme = darkColorScheme
         self.sizes = sizes
@@ -29,15 +32,29 @@ public struct RozetkaPayThemeConfigurator {
 
 extension RozetkaPayThemeConfigurator {
     func colorScheme(_ sheme: ColorScheme = .light) -> DomainColorScheme {
-        switch sheme {
+        switch mode {
         case .dark:
             return self.darkColorScheme
         case .light:
             return self.lightColorScheme
-        @unknown default:
-            return self.lightColorScheme
+        case .system:
+            switch sheme {
+            case .dark:
+                return self.darkColorScheme
+            case .light:
+                return self.lightColorScheme
+            @unknown default:
+                return self.lightColorScheme
+            }
+            
         }
     }
+}
+
+public enum ThemeMode {
+    case system
+    case light
+    case dark
 }
 
 public struct RozetkaPayDomainThemeDefaults {
@@ -110,6 +127,7 @@ public struct RozetkaPayDomainThemeDefaults {
         sheetCornerRadius: CGFloat = 20,
         componentCornerRadius: CGFloat = 16,
         buttonCornerRadius: CGFloat = 16,
+        buttonFrameHeight: CGFloat = 50,
         textFieldFrameHeight: CGFloat = 22,
         borderWidth: CGFloat = 1
     ) -> DomainSizes {
@@ -118,6 +136,7 @@ public struct RozetkaPayDomainThemeDefaults {
             sheetCornerRadius: sheetCornerRadius,
             componentCornerRadius: componentCornerRadius,
             buttonCornerRadius: buttonCornerRadius,
+            buttonFrameHeight: buttonFrameHeight,
             textFieldFrameHeight: textFieldFrameHeight,
             borderWidth: borderWidth
         )

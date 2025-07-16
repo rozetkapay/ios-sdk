@@ -184,52 +184,58 @@ private extension TokenizationView {
     ///
     var footerView: some View {
         CardInfoFooterView()
-        .padding(.top, 20)
+            .padding(.top, 20)
     }
     
     ///
-    var mainButton: some View {
-       Button(action: {
-           viewModel.startLoading()
-       }) {
-           Text(Localization.rozetka_pay_form_save_card.description)
-               .font(
-                   viewModel
-                       .themeConfigurator
-                       .typography
-                       .labelLarge
-               )
-               .bold()
-               .frame(maxWidth: .infinity)
-               .padding()
-               .foregroundColor(
-                   viewModel
-                       .themeConfigurator
-                       .colorScheme(colorScheme)
-                       .onPrimary
-                   
-               )
-               .background(
-                   viewModel
-                       .themeConfigurator
-                       .colorScheme(colorScheme)
-                       .primary
-               )
-               .cornerRadius(
-                   viewModel
-                       .themeConfigurator
-                       .sizes
-                       .buttonCornerRadius
-               )
-       }
-       .padding(.top, 20)
-   }
+    private var mainButton: some View {
+        Button(action: {
+            viewModel.startLoading()
+        }) {
+            Text(
+                Localization.rozetka_pay_form_save_card.description
+            )
+            .font(
+                viewModel
+                    .themeConfigurator
+                    .typography
+                    .labelLarge
+            )
+            .bold()
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onPrimary
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(height:
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonFrameHeight
+        )
+        .background(
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .primary
+        )
+        .cornerRadius(
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonCornerRadius
+        )
+        .padding(.top, 20)
+    }
 }
 
 
 //MARK: Private Methods
 private extension TokenizationView {
-
+    
     func hideKeyboard() {
         UIApplication.shared.sendAction(
             #selector(UIResponder.resignFirstResponder),
@@ -247,6 +253,6 @@ private extension TokenizationView {
             client: ClientWidgetParameters(widgetKey: "test")
         ),
         onResultCallback: {
-        _ in
-    })
+            _ in
+        })
 }

@@ -1,24 +1,26 @@
 //
-//  TokenizationViewModel.swift
+//  TokenizationContentViewModel.swift
+//  RozetkaPaySDK
 //
+//  Created by Ruslan Kasian Dev on 11.07.2025.
 //
-//  Created by Ruslan Kasian Dev on 20.08.2024.
-//
-
 import SwiftUI
 
-final class TokenizationViewModel: BaseViewModel {
+final class TokenizationContentViewModel: BaseViewModel {
     
     //MARK: - Properties
-    private let onResultCallback: (TokenizationResultCompletionHandler)?
+    private let onResultCallback: (TokenizationContentResultCompletionHandler)?
+    private let stateUICallback: (TokenizationContentUIStateCompletionHandler)?
     
     //MARK: - Init
     init(
-        parameters: TokenizationParameters,
+        parameters: TokenizationContentParameters,
         provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
-        onResultCallback: @escaping TokenizationResultCompletionHandler
+        onResultCallback: @escaping TokenizationContentResultCompletionHandler,
+        stateUICallback: @escaping TokenizationContentUIStateCompletionHandler
     ) {
         self.onResultCallback = onResultCallback
+        self.stateUICallback = stateUICallback
         super.init(
             client: parameters.client,
             viewParameters: parameters.viewParameters,
@@ -32,7 +34,7 @@ final class TokenizationViewModel: BaseViewModel {
 
 
     //MARK: - Methods
-extension TokenizationViewModel {
+extension TokenizationContentViewModel {
     func startLoading() {
         guard let validModel: ValidationResultModel = self.validateAll() else {
             return
@@ -48,37 +50,21 @@ extension TokenizationViewModel {
         )
         tokenizeCard(key: client.key, model: model)
     }
-    
-    func retryLoading() {
-        startLoading()
-    }
-    
-    func cancelled() {
-        resetState()
-        stopLoader()
-        
-        onResultCallback?(
-            .cancelled
-        )
-    }
-    
-    func resetState() {
-        DispatchQueue.main.async {
-            self.isError = false
-            self.errorMessage = nil
-        }
-    }
 }
 
 //MARK: - Private Methods
-private extension TokenizationViewModel {
+private extension TokenizationContentViewModel {
      func tokenizeCard(key: String, model: CardRequestModel) {
-        resetState()
-        startLoader()
+     
+         self.stateUICallback?(
+            .startLoading
+         )
         
         TokenizationService.tokenizeCard(key: key, model: model) { [weak self] result in
             DispatchQueue.main.async {
-                self?.stopLoader()
+                self?.stateUICallback?(
+                    .stopLoading
+                )
                 
                 switch result {
                 case .complete(let success):
@@ -90,15 +76,13 @@ private extension TokenizationViewModel {
                         .complete(tokenizedCard: successModel)
                     )
                 case .failed(let error):
-                    switch error {
-                    case .cancelled:
-                        self?.cancelled()
-                    case let .failed(message, _):
-                        self?.isError = true
-                        self?.errorMessage = message
-                    }
+                    self?.onResultCallback?(
+                        .failed(error: error)
+                    )
                 case .cancelled:
-                    self?.cancelled()
+                    self?.onResultCallback?(
+                        .cancelled
+                    )
                 }
             }
         }

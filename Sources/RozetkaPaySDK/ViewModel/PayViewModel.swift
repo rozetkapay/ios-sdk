@@ -298,11 +298,18 @@ extension PayViewModel {
                 guard let self else { return }
                 DispatchQueue.main.async {
                     switch result {
-                    case .success(let successModel):
+                    case .complete(let successModel):
                         self.createPayment(from: successModel)
-                    case .failure(let error):
+                    case .failed(let error):
                         self.processPaymentResult(
                             error.convertToCreatePaymentResult(self.externalId)
+                        )
+                    case .cancelled:
+                        self.processPaymentResult(
+                            .cancelled(
+                                externalId: self.externalId,
+                                paymentId: nil
+                            )
                         )
                     }
                 }
