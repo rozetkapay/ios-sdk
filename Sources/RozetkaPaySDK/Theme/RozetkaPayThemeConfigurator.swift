@@ -31,20 +31,39 @@ public struct RozetkaPayThemeConfigurator {
 }
 
 extension RozetkaPayThemeConfigurator {
-    func colorScheme(_ sheme: ColorScheme = .light) -> DomainColorScheme {
+    func colorScheme(_ scheme: ColorScheme = .light) -> DomainColorScheme {
         switch mode {
         case .dark:
             return self.darkColorScheme
         case .light:
             return self.lightColorScheme
         case .system:
-            switch sheme {
+            switch scheme {
             case .dark:
                 return self.darkColorScheme
             case .light:
                 return self.lightColorScheme
             @unknown default:
                 return self.lightColorScheme
+            }
+            
+        }
+    }
+    
+    func colorScheme(_ scheme: ColorScheme = .light) -> UIUserInterfaceStyle {
+        switch mode {
+        case .dark:
+            return .dark
+        case .light:
+            return .light
+        case .system:
+            switch scheme {
+            case .dark:
+                return .dark
+            case .light:
+                return .light
+            @unknown default:
+                return .light
             }
             
         }
@@ -128,8 +147,10 @@ public struct RozetkaPayDomainThemeDefaults {
         componentCornerRadius: CGFloat = 16,
         buttonCornerRadius: CGFloat = 16,
         buttonFrameHeight: CGFloat = 50,
+        applePayButtonFrameHeight: CGFloat = 50,
         textFieldFrameHeight: CGFloat = 22,
-        borderWidth: CGFloat = 1
+        borderWidth: CGFloat = 1,
+        mainButtonTopPadding: CGFloat = 16
     ) -> DomainSizes {
         
         return DomainSizes(
@@ -137,8 +158,10 @@ public struct RozetkaPayDomainThemeDefaults {
             componentCornerRadius: componentCornerRadius,
             buttonCornerRadius: buttonCornerRadius,
             buttonFrameHeight: buttonFrameHeight,
+            applePayButtonFrameHeight: applePayButtonFrameHeight,
             textFieldFrameHeight: textFieldFrameHeight,
-            borderWidth: borderWidth
+            borderWidth: borderWidth,
+            mainButtonTopPadding: mainButtonTopPadding
         )
     }
     

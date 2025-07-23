@@ -1,27 +1,31 @@
 //
-//  TokenizationContentView.swift
+//  TokenizationFormView.swift
 //  RozetkaPaySDK
 //
 //  Created by Ruslan Kasian Dev on 10.07.2025.
 //
 import SwiftUI
 
-public struct TokenizationContentView<Content: View>: View {
+public struct TokenizationFormView<Content: View>: View {
     
     //MARK: - Properties
     @Environment(\.colorScheme) var colorScheme
-    @StateObject var viewModel: TokenizationContentViewModel
+    @StateObject var viewModel: TokenizationFormViewModel
     private let cardFormFooterEmbeddedContent: (() -> Content)
+    
+    private var isFooterEmpty: Bool {
+        return Content.self == EmptyView.self
+    }
     
     //MARK: - Init
     public init(
-        parameters: TokenizationContentParameters,
-        onResultCallback: @escaping TokenizationContentResultCompletionHandler,
-        stateUICallback: @escaping TokenizationContentUIStateCompletionHandler,
+        parameters: TokenizationFormParameters,
+        onResultCallback: @escaping TokenizationFormResultCompletionHandler,
+        stateUICallback: @escaping TokenizationFormUIStateCompletionHandler,
         @ViewBuilder cardFormFooterEmbeddedContent: @escaping () -> Content = { EmptyView() }
     ) {
         self._viewModel = StateObject(
-            wrappedValue: TokenizationContentViewModel(
+            wrappedValue: TokenizationFormViewModel(
                 parameters: parameters,
                 onResultCallback: onResultCallback,
                 stateUICallback: stateUICallback
@@ -37,18 +41,25 @@ public struct TokenizationContentView<Content: View>: View {
 }
 
 //MARK: UI
-private extension TokenizationContentView {
+private extension TokenizationFormView {
     
     var mainView: some View {
-        VStack {
+        VStack(spacing: 0) {
             cardInfoView
-            cardFormFooterEmbeddedContent()
+                .padding(.top, viewModel.vStackSpacing)
+            if !isFooterEmpty {
+                cardFormFooterEmbeddedContent()
+                    .padding(.top, viewModel.vStackSpacing)
+            }
             mainButton
+                .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
             if viewModel.viewParameters.isVisibleCardInfoLegalView {
                 legalView
+                    .padding(.top, viewModel.vStackSpacing)
             }
             Spacer()
         }
+        .background(.clear)
         .padding()
         .onTapGesture {
             hideKeyboard()
@@ -73,12 +84,11 @@ private extension TokenizationContentView {
             errorMessageCardholderName: $viewModel.errorMessageCardholderName,
             errorMessageEmail: $viewModel.errorMessageEmail
         )
-        
+       
     }
     ///
     var legalView: some View {
-        CardInfoFooterView()
-        .padding(.top, 20)
+        CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
     }
     
     ///
@@ -87,10 +97,10 @@ private extension TokenizationContentView {
             viewModel.startLoading()
         }) {
             Text(
-               viewModel
-                .viewParameters
-                .stringResources
-                .buttonTitle
+                viewModel
+                    .viewParameters
+                    .stringResources
+                    .buttonTitle
             )
             .font(
                 viewModel
@@ -108,10 +118,10 @@ private extension TokenizationContentView {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(height:
-            viewModel
-                .themeConfigurator
-                .sizes
-                .buttonFrameHeight
+                viewModel
+            .themeConfigurator
+            .sizes
+            .buttonFrameHeight
         )
         .background(
             viewModel
@@ -125,14 +135,13 @@ private extension TokenizationContentView {
                 .sizes
                 .buttonCornerRadius
         )
-        .padding(.top, 20)
     }
 }
 
 
 //MARK: Private Methods
-private extension TokenizationContentView {
-
+private extension TokenizationFormView {
+    
     func hideKeyboard() {
         UIApplication.shared.sendAction(
             #selector(UIResponder.resignFirstResponder),
@@ -145,12 +154,14 @@ private extension TokenizationContentView {
 
 //MARK: Preview
 #Preview {
-    TokenizationContentView(
-        parameters: TokenizationContentParameters(
-            client: ClientWidgetParameters(widgetKey: "test")
+    TokenizationFormView(
+        
+        parameters: TokenizationFormParameters(
+            client: ClientWidgetParameters(widgetKey: "test"),
+            themeConfigurator: RozetkaPayThemeConfigurator(mode: .dark)
         ),
         onResultCallback: {
-        _ in
+            _ in
         }, stateUICallback: {
             _ in
         }

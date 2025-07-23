@@ -27,6 +27,8 @@ public struct CardInfoView: View {
     @Binding var errorMessageCardholderName: String?
     @Binding var errorMessageEmail: String?
     
+    @Environment(\.colorScheme) var colorScheme
+    
     //MARK: - Properties
     private let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
     private let themeConfigurator: RozetkaPayThemeConfigurator
@@ -39,10 +41,8 @@ public struct CardInfoView: View {
 
     @State var detectedPaymentSystem: PaymentSystem?
     
-    @Environment(\.colorScheme) var colorScheme
-    
-    private var paymentSystemLogoName: String {
-        detectedPaymentSystem?.logoName ?? PaymentSystem.defaultLogoName
+    private var paymentSystemLogo: DomainImages {
+        detectedPaymentSystem?.logo ?? PaymentSystem.defaultLogo
     }
     
     //MARK: - Init
@@ -102,7 +102,6 @@ public struct CardInfoView: View {
             if isVisibleCardInfoTitle {
                 HStack{
                     Text(cardInfoTitleText)
-                        
                         .font(
                             themeConfigurator
                                 .typography
@@ -129,7 +128,6 @@ public struct CardInfoView: View {
                     emailView
                 }
             }
-            
         }
         .onChange(of: cardNumber) { newValue in
             self.detectedPaymentSystem = self.detectPaymentSystem(newValue)
@@ -146,6 +144,7 @@ private extension CardInfoView {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
+                    appearance: themeConfigurator.colorScheme(colorScheme),
                     placeholder: Localization.rozetka_pay_form_optional_card_name.description,
                     placeholderFont: themeConfigurator
                         .typography
@@ -155,6 +154,9 @@ private extension CardInfoView {
                         .placeholder
                         .toUIColor(),
                     text: $cardName,
+                    textFont: themeConfigurator
+                        .typography
+                        .inputUI,
                     textColor: errorMessageCardName.isNilOrEmpty ?
                     themeConfigurator
                         .colorScheme(colorScheme)
@@ -198,7 +200,6 @@ private extension CardInfoView {
                 )
                 
                 if let errorMessage = errorMessageCardName.isNilOrEmptyValue {
-                    
                     HStack{
                         Text(errorMessage)
                             .font(
@@ -224,6 +225,7 @@ private extension CardInfoView {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
+                    appearance: themeConfigurator.colorScheme(colorScheme),
                     placeholder: Localization.rozetka_pay_form_cardholder_name.description,
                     placeholderFont: themeConfigurator
                         .typography
@@ -233,6 +235,9 @@ private extension CardInfoView {
                         .placeholder
                         .toUIColor(),
                     text: $cardholderName,
+                    textFont: themeConfigurator
+                        .typography
+                        .inputUI,
                     textColor: errorMessageCardholderName.isNilOrEmpty ?
                     themeConfigurator
                         .colorScheme(colorScheme)
@@ -300,6 +305,7 @@ private extension CardInfoView {
         VStack(spacing: 0) {
             VStack(spacing: 2){
                 InputTextFieldRepresentable(
+                    appearance: themeConfigurator.colorScheme(colorScheme),
                     placeholder: Localization.rozetka_pay_form_email.description,
                     placeholderFont: themeConfigurator
                         .typography
@@ -309,6 +315,9 @@ private extension CardInfoView {
                         .placeholder
                         .toUIColor(),
                     text: $email,
+                    textFont: themeConfigurator
+                        .typography
+                        .inputUI,
                     textColor: errorMessageEmail.isNilOrEmpty ?
                     themeConfigurator
                         .colorScheme(colorScheme)
@@ -375,6 +384,7 @@ private extension CardInfoView {
     var cardNumberView: some View {
         HStack {
             InputTextFieldRepresentable(
+                appearance: themeConfigurator.colorScheme(colorScheme),
                 placeholder: Localization.rozetka_pay_form_card_number.description,
                 placeholderFont: themeConfigurator
                     .typography
@@ -384,6 +394,9 @@ private extension CardInfoView {
                     .placeholder
                     .toUIColor(),
                 text: $cardNumber,
+                textFont: themeConfigurator
+                    .typography
+                    .inputUI,
                 textColor:
                     errorMessageCardNumber.isNilOrEmpty ?
                 themeConfigurator
@@ -432,10 +445,7 @@ private extension CardInfoView {
                     ]
                 )
             )
-            Image(
-                paymentSystemLogoName,
-                bundle: .module
-            )
+            paymentSystemLogo.image(themeConfigurator.colorScheme(colorScheme))
             .resizable()
             .frame(width: 36, height: 22)
             .padding(.trailing)
@@ -462,6 +472,7 @@ private extension CardInfoView {
     var expDateView: some View {
         HStack {
             InputTextFieldRepresentable(
+                appearance: themeConfigurator.colorScheme(colorScheme),
                 placeholder: Localization.rozetka_pay_form_exp_date.description,
                 placeholderFont: themeConfigurator
                     .typography
@@ -471,6 +482,9 @@ private extension CardInfoView {
                     .placeholder
                     .toUIColor(),
                 text: $expiryDate,
+                textFont: themeConfigurator
+                    .typography
+                    .inputUI,
                 textColor:
                     errorMessageExpiryDate.isNilOrEmpty ?
                 themeConfigurator
@@ -526,6 +540,7 @@ private extension CardInfoView {
     ///
     var cvvView: some View {
         InputTextFieldRepresentable(
+            appearance: themeConfigurator.colorScheme(colorScheme),
             placeholder: Localization.rozetka_pay_form_cvv.description,
             placeholderFont: themeConfigurator
                 .typography
@@ -535,6 +550,9 @@ private extension CardInfoView {
                 .placeholder
                 .toUIColor(),
             text: $cvv,
+            textFont: themeConfigurator
+                .typography
+                .inputUI,
             textColor:
                 errorMessageCvv.isNilOrEmpty ?
             themeConfigurator
@@ -654,7 +672,7 @@ private extension CardInfoView {
 //MARK: Preview
 #Preview {
     CardInfoView(
-        viewParameters: TokenizationContentViewParameters(
+        viewParameters: TokenizationFormViewParameters(
             cardNameField: .optional,
             emailField: .required,
             cardholderNameField: .optional

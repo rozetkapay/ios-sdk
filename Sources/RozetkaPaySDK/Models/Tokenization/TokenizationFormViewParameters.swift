@@ -1,12 +1,12 @@
 //
-//  TokenizationContentViewParameters.swift
+//  TokenizationFormViewParameters.swift
 //  RozetkaPaySDK
 //
 //  Created by Ruslan Kasian Dev on 11.07.2025.
 //
 import Foundation
 
-public struct TokenizationContentViewParameters: ViewParametersProtocol {
+public struct TokenizationFormViewParameters: ViewParametersProtocol {
     public let cardNameField: FieldRequirement
     public let emailField: FieldRequirement
     public let cardholderNameField: FieldRequirement

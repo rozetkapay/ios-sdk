@@ -11,36 +11,30 @@ import SwiftUI
 public struct InputTextFieldRepresentable: UIViewRepresentable {
     @Binding private var text: String?
     
-    private var placeholder: String?
-    private var placeholderFont: UIFont
-    private var placeholderColor: UIColor
-    private var isSecure: Bool
-    private var contentType: UITextContentType?
-    private var rightViewMode: UITextField.ViewMode
-    private var passwordRules: UITextInputPasswordRules?
-    private var keyboardType: UIKeyboardType
-    private var textFont: UIFont
-    private var textColor: UIColor
-    private var backgroundColor: UIColor
-    private var textField: InsetTextField = InsetTextField()
+    private let appearance: UIUserInterfaceStyle
+    private let placeholder: String?
+    private let placeholderFont: UIFont
+    private let placeholderColor: UIColor
+    private let isSecure: Bool
+    private let contentType: UITextContentType?
+    private let rightViewMode: UITextField.ViewMode
+    private let passwordRules: UITextInputPasswordRules?
+    private let keyboardType: UIKeyboardType
+    private let textFont: UIFont
+    private let textColor: UIColor
+    private let backgroundColor: UIColor
+    private let textField: InsetTextField = InsetTextField()
     
-    private var maxLength: Int
-    private var isRequired: Bool
-    private var validators: ValidatorsComposer?
-    private var validationTextFieldResult: ValidationTextFieldResult?
-    private var textMasking: TextMasking?
+    private let maxLength: Int
+    private let isRequired: Bool
+    private let validators: ValidatorsComposer?
+    private let validationTextFieldResult: ValidationTextFieldResult?
+    private let textMasking: TextMasking?
     
-    private var clearButton: UIButton = {
-        let btn = UIButton(type: .system)
-        if let image = DomainImages.xmarkCircle.image() {
-            btn.setImage(image, for: .normal)
-            btn.frame = CGRect(origin: .zero, size: image.size)
-            btn.tintColor = .gray
-        }
-        return btn
-    }()
+    private let clearButton: UIButton
     
     public init(
+        appearance: UIUserInterfaceStyle,
         placeholder: String? = nil,
         placeholderFont: UIFont = UIFont.systemFont(ofSize: 16),
         placeholderColor: UIColor = UIColor.gray,
@@ -59,6 +53,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         validationTextFieldResult: ValidationTextFieldResult? = nil,
         textMasking: TextMasking? = nil
     ) {
+        self.appearance = appearance
         self.placeholder = placeholder
         self.placeholderFont = placeholderFont
         self.placeholderColor = placeholderColor
@@ -76,13 +71,23 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         self.validators = validators
         self.validationTextFieldResult = validationTextFieldResult
         self.textMasking = textMasking
+        
+        self.clearButton =  {
+            let btn = UIButton(type: .system)
+            if let image = DomainImages.xmarkCircle.image(appearance) {
+                btn.setImage(image, for: .normal)
+                btn.frame = CGRect(origin: .zero, size: image.size)
+                btn.tintColor = .gray
+            }
+            return btn
+        }()
     }
     
     public func makeUIView(context: Context) -> UITextField {
         if rightViewMode != .never {
             configureClearButton()
             textField.rightViewMode = self.rightViewMode
-            textField.rightView = self.clearButton
+            textField.rightView = clearButton
         }
         textField.delegate = context.coordinator
         textField.textContentType = self.contentType
@@ -145,19 +150,19 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         
         if isSecure {
             clearButton.setImage(
-                DomainImages.eye.image(),
+                DomainImages.eye.image(appearance),
                 for: .normal
             )
             action = UIAction { _ in
                 self.textField.isSecureTextEntry.toggle()
                 self.clearButton.setImage(
                     self.textField.isSecureTextEntry ?
-                    DomainImages.eye.image() :
-                    DomainImages.eyeSlash.image(),
+                    DomainImages.eye.image(appearance) :
+                    DomainImages.eyeSlash.image(appearance),
                     for: .normal)
             }
         } else {
-            clearButton.setImage(DomainImages.xmarkCircle.image(), for: .normal)
+            clearButton.setImage(DomainImages.xmarkCircle.image(appearance), for: .normal)
             action = UIAction { _ in
                 if self.textField.delegate?.textFieldShouldClear?(self.textField) ?? true {
                     self.textField.text = nil

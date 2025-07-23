@@ -43,13 +43,13 @@ public struct PayView: View {
     //MARK: - Body
     public var body: some View {
         NavigationView {
-            if viewModel.isLoading {
-                loadingView
-            }else if viewModel.isError {
-                errorView
-            }else {
-                mainView
-            }
+            contentView
+                .background(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .surface
+                )
         }
         .fullScreenCover(isPresented:  $viewModel.isThreeDSConfirmationPresented) {
             threeDSView
@@ -64,16 +64,33 @@ public struct PayView: View {
 //MARK: UI
 private extension PayView {
     
+    @ViewBuilder
+    private var contentView: some View {
+        if viewModel.isLoading {
+            loadingView
+        } else if viewModel.isError {
+            errorView
+        } else {
+            mainView
+        }
+    }
+    
     var mainView: some View {
-        VStack {
+        VStack(spacing: viewModel.vStackSpacing) {
             headerView
             applePayButton
             cardInfoView
             cardPayButton
             footerView
-            LegalTextView()
+            LegalTextView(themeConfigurator: viewModel.themeConfigurator)
             Spacer()
         }
+        .background(
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .surface
+        )
         .padding()
         .navigationBarItems(leading: closeButton)
         .onTapGesture {
@@ -88,14 +105,7 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .surface.opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView(
-                tintColor: viewModel.themeConfigurator.colorScheme(colorScheme).primary,
-                textFont: viewModel.themeConfigurator.typography.body,
-                textColorDark: viewModel.themeConfigurator.darkColorScheme.onSurface,
-                textColorWhite: viewModel.themeConfigurator.lightColorScheme.onSurface,
-                backgroundColorDark: viewModel.themeConfigurator.darkColorScheme.surface,
-                backgroundColorWhite: viewModel.themeConfigurator.lightColorScheme.surface
-            )
+            LoadingView (themeConfigurator: viewModel.themeConfigurator)
         }
     }
     
@@ -148,22 +158,27 @@ private extension PayView {
     }
     
     ///
-    private var closeButton: some View {
+    var closeButton: some View {
         Button(action: {
             viewModel.cancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            DomainImages.xmark.image()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .appBarIcon
-                )
+            DomainImages.xmark.image(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+            )
+            .renderingMode(.template)
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .appBarIcon
+            )
         }
     }
     
-    private var headerView: some View {
+    var headerView: some View {
         VStack(alignment: .leading) {
             HStack{
                 Text(Localization.rozetka_pay_payment_title.description)
@@ -188,7 +203,7 @@ private extension PayView {
     }
     
     private var footerView: some View {
-        CardInfoFooterView()
+        CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
             .padding(.top, 20)
     }
     
@@ -217,10 +232,10 @@ private extension PayView {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(height:
-            viewModel
-                .themeConfigurator
-                .sizes
-                .buttonFrameHeight
+                viewModel
+            .themeConfigurator
+            .sizes
+            .buttonFrameHeight
         )
         .background(
             viewModel
@@ -234,7 +249,7 @@ private extension PayView {
                 .sizes
                 .buttonCornerRadius
         )
-        .padding(.top, 20)
+        .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
     }
     
     private var applePayButton: some View {
@@ -246,11 +261,12 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .applePayButtonStyle
         )
-        .frame(height:
-            viewModel
+        .frame(
+            height:
+                viewModel
                 .themeConfigurator
                 .sizes
-                .buttonFrameHeight
+                .applePayButtonFrameHeight
         )
         .cornerRadius(
             viewModel
@@ -260,18 +276,18 @@ private extension PayView {
         )
         .padding(.top, 20)
         .padding(.bottom,
-            viewModel
-                .viewParameters
-                .cardNameField
-                .isVisible ? 16 : 0
+                 viewModel
+            .viewParameters
+            .cardNameField
+            .isVisible ? 16 : 0
         )
         .clipShape(
             RoundedRectangle(
                 cornerRadius:
                     viewModel
-                        .themeConfigurator
-                        .sizes
-                        .buttonCornerRadius
+                    .themeConfigurator
+                    .sizes
+                    .buttonCornerRadius
             )
         )
     }

@@ -29,19 +29,31 @@ public struct TokenizationView: View {
     //MARK: - Body
     public var body: some View {
         NavigationView {
-            if viewModel.isLoading {
-                loadingView
-            }else if viewModel.isError {
-                errorView
-            }else {
-                mainView
-            }
+            contentView
+                .background(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .surface
+                )
         }
     }
 }
 
 //MARK: UI
 private extension TokenizationView {
+    
+    @ViewBuilder
+    private var contentView: some View {
+        if viewModel.isLoading {
+            loadingView
+        } else if viewModel.isError {
+            errorView
+        } else {
+            mainView
+        }
+        
+    }
     
     ///
     var headerView: some View {
@@ -69,13 +81,20 @@ private extension TokenizationView {
     }
     
     var mainView: some View {
-        VStack {
+        VStack(spacing: 0) {
             headerView
+                .padding(.top, viewModel.vStackSpacing)
             cardInfoView
+                .padding(.top, viewModel.vStackSpacing)
             mainButton
-            footerView
+                .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
+            if viewModel.viewParameters.isVisibleCardInfoLegalView {
+                legalView
+                    .padding(.top, viewModel.vStackSpacing)
+            }
             Spacer()
         }
+//        .background(.clear)
         .padding()
         .navigationBarItems(leading: closeButton)
         .onTapGesture {
@@ -92,43 +111,7 @@ private extension TokenizationView {
                 .surface
                 .opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView(
-                tintColor:
-                    viewModel
-                    .themeConfigurator
-                    .colorScheme(colorScheme)
-                    .primary
-                ,
-                textFont:
-                    viewModel
-                    .themeConfigurator
-                    .typography
-                    .body
-                ,
-                textColorDark:
-                    viewModel
-                    .themeConfigurator
-                    .darkColorScheme
-                    .onSurface
-                ,
-                textColorWhite:
-                    viewModel
-                    .themeConfigurator
-                    .lightColorScheme
-                    .onSurface
-                ,
-                backgroundColorDark:
-                    viewModel
-                    .themeConfigurator
-                    .darkColorScheme
-                    .surface
-                ,
-                backgroundColorWhite:
-                    viewModel
-                    .themeConfigurator
-                    .lightColorScheme
-                    .surface
-            )
+            LoadingView (themeConfigurator: viewModel.themeConfigurator)
         }
     }
     ///
@@ -172,18 +155,23 @@ private extension TokenizationView {
             viewModel.cancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            DomainImages.xmark.image()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .appBarIcon
-                )
+            DomainImages.xmark.image(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+            )
+            .renderingMode(.template)
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .appBarIcon
+            )
         }
     }
     ///
-    var footerView: some View {
-        CardInfoFooterView()
+    var legalView: some View {
+        CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
             .padding(.top, 20)
     }
     

@@ -1,19 +1,19 @@
 //
-//  TokenizationContentParameters.swift
+//  TokenizationFormParameters.swift
 //  RozetkaPaySDK
 //
 //  Created by Ruslan Kasian Dev on 11.07.2025.
 //
 import Foundation
 
-public struct TokenizationContentParameters: ParametersProtocol {
+public struct TokenizationFormParameters: ParametersProtocol {
     public let client: ClientAuthParametersProtocol
     public let viewParameters: ViewParametersProtocol
     public let themeConfigurator: RozetkaPayThemeConfigurator
     
     public init(
         client: ClientWidgetParameters,
-        viewParameters: TokenizationContentViewParameters = TokenizationContentViewParameters(),
+        viewParameters: TokenizationFormViewParameters = TokenizationFormViewParameters(),
         themeConfigurator: RozetkaPayThemeConfigurator = RozetkaPayThemeConfigurator()
     ) {
         self.client = client

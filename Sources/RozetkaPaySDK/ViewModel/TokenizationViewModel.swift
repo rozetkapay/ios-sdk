@@ -11,6 +11,7 @@ final class TokenizationViewModel: BaseViewModel {
     
     //MARK: - Properties
     private let onResultCallback: (TokenizationResultCompletionHandler)?
+    let vStackSpacing: CGFloat = 16
     
     //MARK: - Init
     init(

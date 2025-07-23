@@ -1,23 +1,24 @@
 //
-//  TokenizationContentViewModel.swift
+//  TokenizationFormViewModel.swift
 //  RozetkaPaySDK
 //
 //  Created by Ruslan Kasian Dev on 11.07.2025.
 //
 import SwiftUI
 
-final class TokenizationContentViewModel: BaseViewModel {
+final class TokenizationFormViewModel: BaseViewModel {
     
     //MARK: - Properties
-    private let onResultCallback: (TokenizationContentResultCompletionHandler)?
-    private let stateUICallback: (TokenizationContentUIStateCompletionHandler)?
+    private let onResultCallback: (TokenizationFormResultCompletionHandler)?
+    private let stateUICallback: (TokenizationFormUIStateCompletionHandler)?
+    let vStackSpacing: CGFloat = 16
     
     //MARK: - Init
     init(
-        parameters: TokenizationContentParameters,
+        parameters: TokenizationFormParameters,
         provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
-        onResultCallback: @escaping TokenizationContentResultCompletionHandler,
-        stateUICallback: @escaping TokenizationContentUIStateCompletionHandler
+        onResultCallback: @escaping TokenizationFormResultCompletionHandler,
+        stateUICallback: @escaping TokenizationFormUIStateCompletionHandler
     ) {
         self.onResultCallback = onResultCallback
         self.stateUICallback = stateUICallback
@@ -34,7 +35,7 @@ final class TokenizationContentViewModel: BaseViewModel {
 
 
     //MARK: - Methods
-extension TokenizationContentViewModel {
+extension TokenizationFormViewModel {
     func startLoading() {
         guard let validModel: ValidationResultModel = self.validateAll() else {
             return
@@ -53,7 +54,7 @@ extension TokenizationContentViewModel {
 }
 
 //MARK: - Private Methods
-private extension TokenizationContentViewModel {
+private extension TokenizationFormViewModel {
      func tokenizeCard(key: String, model: CardRequestModel) {
      
          self.stateUICallback?(

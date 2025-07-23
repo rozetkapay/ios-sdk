@@ -8,6 +8,16 @@
 import SwiftUI
 
 struct LegalTextView: UIViewRepresentable {
+    
+    //MARK: - Properties
+    @Environment(\.colorScheme) var colorScheme
+    let themeConfigurator: RozetkaPayThemeConfigurator
+    
+    //MARK: - Init
+    public init(themeConfigurator: RozetkaPayThemeConfigurator) {
+        self.themeConfigurator = themeConfigurator
+    }
+    
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
         if let agreementLink = URL(string: RozetkaPayConfig.LEGAL_PUBLIC_CONTRACT_LINK.description),
@@ -35,12 +45,13 @@ struct LegalTextView: UIViewRepresentable {
             textView.linkTextAttributes = convertToOptionalNSAttributedStringKeyDictionary(linkAttributes)
             textView.attributedText = attributedString
         }
-        textView.font = .systemFont(ofSize: 10)
-        textView.textColor = UIColor.systemGray
+        textView.font = themeConfigurator.typography.legalTextUI
+        textView.textColor = themeConfigurator.colorScheme(colorScheme).placeholder.toUIColor()
         textView.textAlignment = .center
         textView.isSelectable = true
         textView.isUserInteractionEnabled = true
         textView.isEditable = false
+        textView.backgroundColor = .clear
         
         func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
             guard let input = input else { return nil }

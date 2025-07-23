@@ -31,6 +31,8 @@ final class PayViewModel:  BaseViewModel {
     }
     
     //MARK: - Properties
+    let vStackSpacing: CGFloat = 16
+    
     private var initialPaymentType: InitialPaymentType
     private let initialMode: InitialPaymentMode
     
@@ -385,7 +387,8 @@ private extension PayViewModel {
     
     
     func processPaymentResult(_ result: CreatePaymentResult,_ tokenizedCard: TokenizedCard? = nil) {
-        self.stopLoader()
+        resetState()
+        stopLoader()
         
         DispatchQueue.main.async {
             switch result {
@@ -413,6 +416,8 @@ private extension PayViewModel {
                     tokenizedCard: tokenizedCard
                 )
                 self.isThreeDSConfirmationPresented = true
+                self.isError = false
+                self.errorMessage = nil
             case let .failed(error):
                 if error.code == .transactionAlreadyPaid {
                     self.onResultCallback?(
@@ -426,7 +431,8 @@ private extension PayViewModel {
     }
     
     func processBatchPaymentResult(_ result: CreateBatchPaymentResult, _ tokenizedCard: TokenizedCard?) {
-        self.stopLoader()
+        resetState()
+        stopLoader()
        
         DispatchQueue.main.async {
             switch result {
@@ -452,6 +458,8 @@ private extension PayViewModel {
                 )
                 
                 self.isThreeDSConfirmationPresented = true
+                self.isError = false
+                self.errorMessage = nil
             case let .failed(batchExternalId, error):
                 if error.code == .transactionAlreadyPaid {
                     self.onBatchResultCallback?(

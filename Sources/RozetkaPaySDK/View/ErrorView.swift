@@ -65,10 +65,15 @@ private extension ErrorView {
     
     ///
     var imageView: some View {
-        DomainImages.payError.image()
-            .resizable()
-            .frame(width: 200, height: 200)
-            .padding()
+        
+        DomainImages.payError.image(
+            themeConfigurator
+                .colorScheme(colorScheme)
+        )
+        
+        .resizable()
+        .frame(width: 200, height: 200)
+        .padding()
         
     }
     
@@ -136,7 +141,7 @@ private extension ErrorView {
                 .sizes
                 .buttonCornerRadius
         )
-       
+        
     }
     
     ///
@@ -160,9 +165,9 @@ private extension ErrorView {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(height:
-            themeConfigurator
-                .sizes
-                .buttonFrameHeight
+                themeConfigurator
+            .sizes
+            .buttonFrameHeight
         )
         .background(
             themeConfigurator
@@ -180,7 +185,7 @@ private extension ErrorView {
 //MARK: - Preview
 #Preview {
     ErrorView(
-        themeConfigurator: RozetkaPayThemeConfigurator(),
+        themeConfigurator: RozetkaPayThemeConfigurator(mode: .system),
         errorMessage: "test \n test",
         onCancel: { print("Cancel tapped") },
         onRetry: { print("Retry tapped") }
