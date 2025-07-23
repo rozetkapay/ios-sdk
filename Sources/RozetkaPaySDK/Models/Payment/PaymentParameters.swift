@@ -36,6 +36,9 @@ public struct PaymentParameters: ParametersProtocol {
     /// Optional URL that will be called after the payment is finished.
     let callbackUrl: String?
     
+    /// Optional URL that will be called after the payment is finished.
+    let resultUrl: String?
+    
     /// Creates a new instance of `PaymentParameters`.
     public init(
         client: ClientAuthParameters,
@@ -53,6 +56,7 @@ public struct PaymentParameters: ParametersProtocol {
         self.paymentType = paymentType
         self.externalId = externalId
         self.callbackUrl = callbackUrl
+        self.resultUrl = EnvironmentProvider.environment.paymentsConfirmation3DsCallbackUrl
     }
     
     var applePaymentService: ApplePaymentService? {

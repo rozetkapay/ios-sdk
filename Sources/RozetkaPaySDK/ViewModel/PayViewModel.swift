@@ -72,7 +72,7 @@ final class PayViewModel:  BaseViewModel {
         
         self.externalId = parameters.externalId
         self.callbackUrl = parameters.callbackUrl
-        self.resultUrl = nil
+        self.resultUrl = parameters.resultUrl
         self.isNeedToReturnTokenizationCard = parameters.paymentType.isNeedToReturnTokenizationCard
         
         self.paymentType = parameters.paymentType
@@ -199,6 +199,7 @@ private extension PayViewModel {
             currency: self.amountParameters.currencyCode,
             externalId: self.externalId,
             callbackUrl: self.callbackUrl,
+            resultUrl: self.resultUrl,
             customer: Customer(paymentMethod: paymentMethod)
         )
     }
