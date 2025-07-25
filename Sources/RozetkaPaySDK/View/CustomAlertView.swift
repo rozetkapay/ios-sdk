@@ -32,7 +32,7 @@ struct CustomAlertView: View {
                 .foregroundColor(item.type.textColor)
                 .padding(.top, 16)
 
-            Button("OK") {
+            Button(Localization.rozetka_pay_custom_alert_view_ok_button.description) {
                 onDismiss()
             }
             .frame(maxWidth: .infinity)

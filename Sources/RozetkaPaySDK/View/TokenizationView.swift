@@ -74,7 +74,6 @@ private extension TokenizationView {
                             .title
                         
                     )
-                    .padding(.bottom, 20)
                 Spacer()
             }
         }
@@ -83,18 +82,15 @@ private extension TokenizationView {
     var mainView: some View {
         VStack(spacing: 0) {
             headerView
-                .padding(.top, viewModel.vStackSpacing)
             cardInfoView
-                .padding(.top, viewModel.vStackSpacing)
+                .padding(.top, viewModel.getVStackSpacing())
             mainButton
-                .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
             if viewModel.viewParameters.isVisibleCardInfoLegalView {
                 legalView
-                    .padding(.top, viewModel.vStackSpacing)
+                    
             }
             Spacer()
         }
-//        .background(.clear)
         .padding()
         .navigationBarItems(leading: closeButton)
         .onTapGesture {
@@ -172,7 +168,7 @@ private extension TokenizationView {
     ///
     var legalView: some View {
         CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
-            .padding(.top, 20)
+            .padding(.top, viewModel.themeConfigurator.sizes.cardInfoLegalViewTopPadding)
     }
     
     ///
@@ -216,7 +212,7 @@ private extension TokenizationView {
                 .sizes
                 .buttonCornerRadius
         )
-        .padding(.top, 20)
+        .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
     }
 }
 

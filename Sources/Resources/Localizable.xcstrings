@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "OK" : {
-
-    },
     "rozetka_pay_common_button_cancel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -85,6 +82,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Операція виконується…"
+          }
+        }
+      }
+    },
+    "rozetka_pay_custom_alert_view_ok_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
@@ -442,6 +456,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Зачекайте, будь ласка…"
+          }
+        }
+      }
+    },
+    "rozetka_pay_payment_devider_label_text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or pay using card"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Або оплатіть карткою"
           }
         }
       }

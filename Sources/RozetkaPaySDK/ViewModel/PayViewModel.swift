@@ -9,6 +9,14 @@ import PassKit
 
 final class PayViewModel:  BaseViewModel {
     
+    //MARK: - Constants & Defaults
+    
+    private enum Constants {
+        static let vStackSpacing: CGFloat = 16
+    }
+    
+    //MARK: - Enums
+    
     private enum InitialPaymentType {
         case applePay
         case card
@@ -31,7 +39,6 @@ final class PayViewModel:  BaseViewModel {
     }
     
     //MARK: - Properties
-    let vStackSpacing: CGFloat = 16
     
     private var initialPaymentType: InitialPaymentType
     private let initialMode: InitialPaymentMode
@@ -136,8 +143,17 @@ final class PayViewModel:  BaseViewModel {
     }
 }
 
-//MARK: -
+//MARK: - Methods
 extension PayViewModel {
+    
+    func getVStackSpacing() -> CGFloat {
+        return Constants.vStackSpacing
+    }
+    
+    func getIsAllowApplePay() -> Bool {
+        return isAllowApplePay
+    }
+    
     func getThreeDSModel() -> ThreeDSRequest? {
         return threeDSModel
     }
@@ -190,7 +206,7 @@ extension PayViewModel {
     }
 }
 
-//MARK: -
+//MARK: - Private Methods
 private extension PayViewModel {
     
     func buildPaymentModel(paymentMethod: PaymentMethod) -> PaymentRequestModel {

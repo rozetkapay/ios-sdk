@@ -15,7 +15,9 @@ public struct DomainSizes {
     private let applePayButtonFrameHeightDp: Int
     private let textFieldFrameHeightDp: Int
     private let borderWidthDp: Int
+    private let cardInfoTopPaddingDp: Int
     private let mainButtonTopPaddingDp: Int
+    private let cardInfoLegalViewTopPaddingDp: Int
 
     public var sheetCornerRadius: CGFloat {
         return CGFloat(sheetCornerRadiusDp)
@@ -43,8 +45,16 @@ public struct DomainSizes {
         return CGFloat(borderWidthDp)
     }
 
+    public var cardInfoTopPadding: CGFloat {
+        return CGFloat(cardInfoTopPaddingDp)
+    }
+    
     public var mainButtonTopPadding: CGFloat {
         return CGFloat(mainButtonTopPaddingDp)
+    }
+    
+    public var cardInfoLegalViewTopPadding: CGFloat {
+        return CGFloat(cardInfoLegalViewTopPaddingDp)
     }
     
     public init(
@@ -55,7 +65,9 @@ public struct DomainSizes {
         applePayButtonFrameHeight: CGFloat,
         textFieldFrameHeight: CGFloat,
         borderWidth: CGFloat,
-        mainButtonTopPadding: CGFloat
+        cardInfoTopPadding: CGFloat,
+        mainButtonTopPadding: CGFloat,
+        cardInfoLegalViewTopPadding: CGFloat
     ) {
         self.sheetCornerRadiusDp = Int(sheetCornerRadius)
         self.componentCornerRadiusDp = Int(componentCornerRadius)
@@ -64,6 +76,8 @@ public struct DomainSizes {
         self.applePayButtonFrameHeightDp = Int(applePayButtonFrameHeight)
         self.textFieldFrameHeightDp = Int(textFieldFrameHeight)
         self.borderWidthDp = Int(borderWidth)
+        self.cardInfoTopPaddingDp = Int(cardInfoTopPadding)
         self.mainButtonTopPaddingDp = Int(mainButtonTopPadding)
+        self.cardInfoLegalViewTopPaddingDp = Int(cardInfoLegalViewTopPadding)
     }
 }

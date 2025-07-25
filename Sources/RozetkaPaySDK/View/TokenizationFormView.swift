@@ -46,16 +46,15 @@ private extension TokenizationFormView {
     var mainView: some View {
         VStack(spacing: 0) {
             cardInfoView
-                .padding(.top, viewModel.vStackSpacing)
+               
             if !isFooterEmpty {
                 cardFormFooterEmbeddedContent()
-                    .padding(.top, viewModel.vStackSpacing)
+                    .padding(.top, viewModel.getVStackSpacing())
             }
             mainButton
-                .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
             if viewModel.viewParameters.isVisibleCardInfoLegalView {
                 legalView
-                    .padding(.top, viewModel.vStackSpacing)
+                    .padding(.top, viewModel.getVStackSpacing())
             }
             Spacer()
         }
@@ -84,7 +83,6 @@ private extension TokenizationFormView {
             errorMessageCardholderName: $viewModel.errorMessageCardholderName,
             errorMessageEmail: $viewModel.errorMessageEmail
         )
-       
     }
     ///
     var legalView: some View {
@@ -135,6 +133,7 @@ private extension TokenizationFormView {
                 .sizes
                 .buttonCornerRadius
         )
+        .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
     }
 }
 

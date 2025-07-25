@@ -150,7 +150,9 @@ public struct RozetkaPayDomainThemeDefaults {
         applePayButtonFrameHeight: CGFloat = 50,
         textFieldFrameHeight: CGFloat = 22,
         borderWidth: CGFloat = 1,
-        mainButtonTopPadding: CGFloat = 16
+        cardInfoTopPadding: CGFloat = 0,
+        mainButtonTopPadding: CGFloat = 28,
+        cardInfoLegalViewTopPadding: CGFloat = 28
     ) -> DomainSizes {
         
         return DomainSizes(
@@ -161,7 +163,9 @@ public struct RozetkaPayDomainThemeDefaults {
             applePayButtonFrameHeight: applePayButtonFrameHeight,
             textFieldFrameHeight: textFieldFrameHeight,
             borderWidth: borderWidth,
-            mainButtonTopPadding: mainButtonTopPadding
+            cardInfoTopPadding: cardInfoTopPadding,
+            mainButtonTopPadding: mainButtonTopPadding,
+            cardInfoLegalViewTopPadding: cardInfoLegalViewTopPadding
         )
     }
     

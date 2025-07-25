@@ -8,10 +8,14 @@ import SwiftUI
 
 final class TokenizationFormViewModel: BaseViewModel {
     
+    //MARK: - Constants & Defaults
+    private enum Constants {
+        static let vStackSpacing: CGFloat = 16
+    }
+    
     //MARK: - Properties
     private let onResultCallback: (TokenizationFormResultCompletionHandler)?
     private let stateUICallback: (TokenizationFormUIStateCompletionHandler)?
-    let vStackSpacing: CGFloat = 16
     
     //MARK: - Init
     init(
@@ -34,8 +38,12 @@ final class TokenizationFormViewModel: BaseViewModel {
 }
 
 
-    //MARK: - Methods
+//MARK: - Methods
 extension TokenizationFormViewModel {
+    func getVStackSpacing() -> CGFloat {
+        return Constants.vStackSpacing
+    }
+    
     func startLoading() {
         guard let validModel: ValidationResultModel = self.validateAll() else {
             return
@@ -54,12 +62,13 @@ extension TokenizationFormViewModel {
 }
 
 //MARK: - Private Methods
+
 private extension TokenizationFormViewModel {
-     func tokenizeCard(key: String, model: CardRequestModel) {
-     
-         self.stateUICallback?(
+    func tokenizeCard(key: String, model: CardRequestModel) {
+        
+        self.stateUICallback?(
             .startLoading
-         )
+        )
         
         TokenizationService.tokenizeCard(key: key, model: model) { [weak self] result in
             DispatchQueue.main.async {

@@ -9,9 +9,13 @@ import SwiftUI
 
 final class TokenizationViewModel: BaseViewModel {
     
+    //MARK: - Constants & Defaults
+    private enum Constants {
+        static let vStackSpacing: CGFloat = 16
+    }
+    
     //MARK: - Properties
     private let onResultCallback: (TokenizationResultCompletionHandler)?
-    let vStackSpacing: CGFloat = 16
     
     //MARK: - Init
     init(
@@ -32,8 +36,12 @@ final class TokenizationViewModel: BaseViewModel {
 }
 
 
-    //MARK: - Methods
+//MARK: - Methods
 extension TokenizationViewModel {
+    func getVStackSpacing() -> CGFloat {
+        return Constants.vStackSpacing
+    }
+    
     func startLoading() {
         guard let validModel: ValidationResultModel = self.validateAll() else {
             return
@@ -73,7 +81,7 @@ extension TokenizationViewModel {
 
 //MARK: - Private Methods
 private extension TokenizationViewModel {
-     func tokenizeCard(key: String, model: CardRequestModel) {
+    func tokenizeCard(key: String, model: CardRequestModel) {
         resetState()
         startLoader()
         

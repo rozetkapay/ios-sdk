@@ -14,8 +14,10 @@ public struct PayView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: PayViewModel
+//    @State private var isScrollEnabled: Bool = true
+    @State private var contentHeight: CGFloat = .zero
     
-    //MARK: - Init
+    //MARK: - Inits
     public init(
         paymentParameters: PaymentParameters,
         onResultCallback: @escaping PaymentResultCompletionHandler
@@ -76,14 +78,21 @@ private extension PayView {
     }
     
     var mainView: some View {
-        VStack(spacing: viewModel.vStackSpacing) {
-            headerView
-            applePayButton
-            cardInfoView
-            cardPayButton
-            footerView
-            LegalTextView(themeConfigurator: viewModel.themeConfigurator)
-            Spacer()
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: viewModel.getVStackSpacing()) {
+                    headerView
+
+                    if viewModel.getIsAllowApplePay() {
+                        applePayView
+                    }
+
+                    cardInfoView
+                    cardPayButton
+                    footerView
+                }
+                .padding()
+            }
         }
         .background(
             viewModel
@@ -91,12 +100,12 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .surface
         )
-        .padding()
         .navigationBarItems(leading: closeButton)
         .onTapGesture {
             hideKeyboard()
         }
     }
+    
     ///
     var loadingView: some View {
         ZStack {
@@ -196,18 +205,25 @@ private extension PayView {
                             .title
                         
                     )
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 0)
                 Spacer()
             }
         }
     }
     
-    private var footerView: some View {
-        CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
-            .padding(.top, 20)
+    var footerView: some View {
+        VStack(spacing: viewModel.getVStackSpacing()) {
+            CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
+            LegalTextView(themeConfigurator: viewModel.themeConfigurator)
+        }
+        .padding(.top,
+                 viewModel
+            .themeConfigurator
+            .sizes.cardInfoLegalViewTopPadding
+        )
     }
     
-    private var cardPayButton: some View {
+    var cardPayButton: some View {
         Button(action: {
             viewModel.startPayByCard()
         }) {
@@ -252,7 +268,17 @@ private extension PayView {
         .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
     }
     
-    private var applePayButton: some View {
+    var applePayView: some View {
+        VStack(alignment: .leading, spacing: viewModel.getVStackSpacing()) {
+            applePayButton
+            LabeledDivider(
+                label: Localization.rozetka_pay_payment_devider_label_text.description,
+                viewModel.themeConfigurator
+            )
+        }
+    }
+    
+    var applePayButton: some View {
         ApplePayButton(
             action: viewModel.startPayByApplePay,
             paymentButtonStyle:
@@ -274,13 +300,7 @@ private extension PayView {
                 .sizes
                 .buttonCornerRadius
         )
-        .padding(.top, 20)
-        .padding(.bottom,
-                 viewModel
-            .viewParameters
-            .cardNameField
-            .isVisible ? 16 : 0
-        )
+        
         .clipShape(
             RoundedRectangle(
                 cornerRadius:
@@ -313,9 +333,9 @@ private extension PayView {
             paymentType: .regular(
                 RegularPayment(
                     viewParameters: PaymentViewParameters(
-                        cardNameField: .none,
-                        emailField: .required,
-                        cardholderNameField: .required
+                        cardNameField: .optional,
+                        emailField: .optional,
+                        cardholderNameField: .optional
                     ),
                     isAllowTokenization: true,
                     applePayConfig: nil
