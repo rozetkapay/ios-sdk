@@ -8,11 +8,6 @@ import SwiftUI
 
 final class TokenizationFormViewModel: BaseViewModel {
     
-    //MARK: - Constants & Defaults
-    private enum Constants {
-        static let vStackSpacing: CGFloat = 16
-    }
-    
     //MARK: - Properties
     private let onResultCallback: (TokenizationFormResultCompletionHandler)?
     private let stateUICallback: (TokenizationFormUIStateCompletionHandler)?
@@ -40,9 +35,6 @@ final class TokenizationFormViewModel: BaseViewModel {
 
 //MARK: - Methods
 extension TokenizationFormViewModel {
-    func getVStackSpacing() -> CGFloat {
-        return Constants.vStackSpacing
-    }
     
     func startLoading() {
         guard let validModel: ValidationResultModel = self.validateAll() else {

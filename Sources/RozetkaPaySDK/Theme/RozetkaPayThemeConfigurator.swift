@@ -151,6 +151,7 @@ public struct RozetkaPayDomainThemeDefaults {
         textFieldFrameHeight: CGFloat = 22,
         borderWidth: CGFloat = 1,
         cardInfoTopPadding: CGFloat = 0,
+        cardFormFooterEmbeddedContentTopPadding: CGFloat = 16,
         mainButtonTopPadding: CGFloat = 28,
         cardInfoLegalViewTopPadding: CGFloat = 28
     ) -> DomainSizes {
@@ -164,6 +165,7 @@ public struct RozetkaPayDomainThemeDefaults {
             textFieldFrameHeight: textFieldFrameHeight,
             borderWidth: borderWidth,
             cardInfoTopPadding: cardInfoTopPadding,
+            cardFormFooterEmbeddedContentTopPadding: cardFormFooterEmbeddedContentTopPadding,
             mainButtonTopPadding: mainButtonTopPadding,
             cardInfoLegalViewTopPadding: cardInfoLegalViewTopPadding
         )

@@ -16,6 +16,7 @@ public struct DomainSizes {
     private let textFieldFrameHeightDp: Int
     private let borderWidthDp: Int
     private let cardInfoTopPaddingDp: Int
+    private let cardFormFooterEmbeddedContentTopPaddingDp: Int
     private let mainButtonTopPaddingDp: Int
     private let cardInfoLegalViewTopPaddingDp: Int
 
@@ -53,6 +54,10 @@ public struct DomainSizes {
         return CGFloat(mainButtonTopPaddingDp)
     }
     
+    public var cardFormFooterEmbeddedContentTopPadding: CGFloat {
+        return CGFloat(cardFormFooterEmbeddedContentTopPaddingDp)
+    }
+    
     public var cardInfoLegalViewTopPadding: CGFloat {
         return CGFloat(cardInfoLegalViewTopPaddingDp)
     }
@@ -66,6 +71,7 @@ public struct DomainSizes {
         textFieldFrameHeight: CGFloat,
         borderWidth: CGFloat,
         cardInfoTopPadding: CGFloat,
+        cardFormFooterEmbeddedContentTopPadding: CGFloat,
         mainButtonTopPadding: CGFloat,
         cardInfoLegalViewTopPadding: CGFloat
     ) {
@@ -77,6 +83,7 @@ public struct DomainSizes {
         self.textFieldFrameHeightDp = Int(textFieldFrameHeight)
         self.borderWidthDp = Int(borderWidth)
         self.cardInfoTopPaddingDp = Int(cardInfoTopPadding)
+        self.cardFormFooterEmbeddedContentTopPaddingDp = Int(cardFormFooterEmbeddedContentTopPadding)
         self.mainButtonTopPaddingDp = Int(mainButtonTopPadding)
         self.cardInfoLegalViewTopPaddingDp = Int(cardInfoLegalViewTopPadding)
     }

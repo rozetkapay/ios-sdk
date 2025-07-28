@@ -218,8 +218,9 @@ private extension PayView {
         }
         .padding(.top,
                  viewModel
-            .themeConfigurator
-            .sizes.cardInfoLegalViewTopPadding
+                    .themeConfigurator
+                    .sizes
+                    .cardInfoLegalViewTopPadding
         )
     }
     

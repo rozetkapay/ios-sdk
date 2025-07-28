@@ -125,15 +125,13 @@ public struct CardInfoView: View {
                 }
                 cardDetailsView
             }
-            VStack(spacing: Constants.vStackSpacing) {
-                
-                if fieldRequirementCardholderName.isVisible {
-                    cardHolderNameView
-                }
-                
-                if fieldRequirementEmail.isVisible {
-                    emailView
-                }
+            
+            if fieldRequirementCardholderName.isVisible {
+                cardHolderNameView
+            }
+            
+            if fieldRequirementEmail.isVisible {
+                emailView
             }
         }
         .padding(.top, themeConfigurator.sizes.cardInfoTopPadding)

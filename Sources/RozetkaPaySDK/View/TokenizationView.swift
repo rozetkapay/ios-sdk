@@ -83,11 +83,9 @@ private extension TokenizationView {
         VStack(spacing: 0) {
             headerView
             cardInfoView
-                .padding(.top, viewModel.getVStackSpacing())
             mainButton
             if viewModel.viewParameters.isVisibleCardInfoLegalView {
                 legalView
-                    
             }
             Spacer()
         }
@@ -143,7 +141,7 @@ private extension TokenizationView {
             errorMessageCardholderName: $viewModel.errorMessageCardholderName,
             errorMessageEmail: $viewModel.errorMessageEmail
         )
-        
+        .padding(.top, viewModel.getVStackSpacing())
     }
     ///
     var closeButton: some View {
@@ -168,7 +166,12 @@ private extension TokenizationView {
     ///
     var legalView: some View {
         CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
-            .padding(.top, viewModel.themeConfigurator.sizes.cardInfoLegalViewTopPadding)
+            .padding(.top,
+                     viewModel
+                        .themeConfigurator
+                        .sizes
+                        .cardInfoLegalViewTopPadding
+            )
     }
     
     ///
@@ -212,7 +215,12 @@ private extension TokenizationView {
                 .sizes
                 .buttonCornerRadius
         )
-        .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
+        .padding(.top,
+                 viewModel
+                    .themeConfigurator
+                    .sizes
+                    .mainButtonTopPadding
+        )
     }
 }
 

@@ -46,15 +46,19 @@ private extension TokenizationFormView {
     var mainView: some View {
         VStack(spacing: 0) {
             cardInfoView
-               
+            
             if !isFooterEmpty {
                 cardFormFooterEmbeddedContent()
-                    .padding(.top, viewModel.getVStackSpacing())
+                    .padding(.top,
+                             viewModel
+                        .themeConfigurator
+                        .sizes
+                        .cardFormFooterEmbeddedContentTopPadding
+                    )
             }
             mainButton
             if viewModel.viewParameters.isVisibleCardInfoLegalView {
                 legalView
-                    .padding(.top, viewModel.getVStackSpacing())
             }
             Spacer()
         }
@@ -87,6 +91,12 @@ private extension TokenizationFormView {
     ///
     var legalView: some View {
         CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
+            .padding(.top,
+                     viewModel
+                .themeConfigurator
+                .sizes
+                .cardInfoLegalViewTopPadding
+            )
     }
     
     ///
@@ -133,7 +143,12 @@ private extension TokenizationFormView {
                 .sizes
                 .buttonCornerRadius
         )
-        .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
+        .padding(.top,
+                 viewModel
+            .themeConfigurator
+            .sizes
+            .mainButtonTopPadding
+        )
     }
 }
 
@@ -157,7 +172,7 @@ private extension TokenizationFormView {
         
         parameters: TokenizationFormParameters(
             client: ClientWidgetParameters(widgetKey: "test"),
-            themeConfigurator: RozetkaPayThemeConfigurator(mode: .dark)
+            themeConfigurator: RozetkaPayThemeConfigurator(mode: .light)
         ),
         onResultCallback: {
             _ in
