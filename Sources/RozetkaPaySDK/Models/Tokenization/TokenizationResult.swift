@@ -7,5 +7,10 @@
 
 import Foundation
 
-public typealias TokenizationResultCompletionHandler = (TokenizationResult) -> Void
-public typealias TokenizationResult = Result<TokenizedCard, TokenizationError>
+public typealias TokenizationResultCompletionHandler =  (TokenizationResult) -> Void
+
+public enum TokenizationResult: Error, Decodable {
+    case complete(tokenizedCard: TokenizedCard)
+    case failed(error: TokenizationError)
+    case cancelled
+}

@@ -9,6 +9,14 @@ import PassKit
 
 final class PayViewModel:  BaseViewModel {
     
+    //MARK: - Constants & Defaults
+    
+    private enum Constants {
+        static let vStackSpacing: CGFloat = 16
+    }
+    
+    //MARK: - Enums
+    
     private enum InitialPaymentType {
         case applePay
         case card
@@ -31,6 +39,7 @@ final class PayViewModel:  BaseViewModel {
     }
     
     //MARK: - Properties
+    
     private var initialPaymentType: InitialPaymentType
     private let initialMode: InitialPaymentMode
     
@@ -70,7 +79,7 @@ final class PayViewModel:  BaseViewModel {
         
         self.externalId = parameters.externalId
         self.callbackUrl = parameters.callbackUrl
-        self.resultUrl = nil
+        self.resultUrl = parameters.resultUrl
         self.isNeedToReturnTokenizationCard = parameters.paymentType.isNeedToReturnTokenizationCard
         
         self.paymentType = parameters.paymentType
@@ -134,8 +143,17 @@ final class PayViewModel:  BaseViewModel {
     }
 }
 
-//MARK: -
+//MARK: - Methods
 extension PayViewModel {
+    
+    func getVStackSpacing() -> CGFloat {
+        return Constants.vStackSpacing
+    }
+    
+    func getIsAllowApplePay() -> Bool {
+        return isAllowApplePay
+    }
+    
     func getThreeDSModel() -> ThreeDSRequest? {
         return threeDSModel
     }
@@ -188,7 +206,7 @@ extension PayViewModel {
     }
 }
 
-//MARK: -
+//MARK: - Private Methods
 private extension PayViewModel {
     
     func buildPaymentModel(paymentMethod: PaymentMethod) -> PaymentRequestModel {
@@ -197,6 +215,7 @@ private extension PayViewModel {
             currency: self.amountParameters.currencyCode,
             externalId: self.externalId,
             callbackUrl: self.callbackUrl,
+            resultUrl: self.resultUrl,
             customer: Customer(paymentMethod: paymentMethod)
         )
     }
@@ -298,11 +317,18 @@ extension PayViewModel {
                 guard let self else { return }
                 DispatchQueue.main.async {
                     switch result {
-                    case .success(let successModel):
+                    case .complete(let successModel):
                         self.createPayment(from: successModel)
-                    case .failure(let error):
+                    case .failed(let error):
                         self.processPaymentResult(
                             error.convertToCreatePaymentResult(self.externalId)
+                        )
+                    case .cancelled:
+                        self.processPaymentResult(
+                            .cancelled(
+                                externalId: self.externalId,
+                                paymentId: nil
+                            )
                         )
                     }
                 }
@@ -378,7 +404,8 @@ private extension PayViewModel {
     
     
     func processPaymentResult(_ result: CreatePaymentResult,_ tokenizedCard: TokenizedCard? = nil) {
-        self.stopLoader()
+        resetState()
+        stopLoader()
         
         DispatchQueue.main.async {
             switch result {
@@ -406,6 +433,8 @@ private extension PayViewModel {
                     tokenizedCard: tokenizedCard
                 )
                 self.isThreeDSConfirmationPresented = true
+                self.isError = false
+                self.errorMessage = nil
             case let .failed(error):
                 if error.code == .transactionAlreadyPaid {
                     self.onResultCallback?(
@@ -419,7 +448,8 @@ private extension PayViewModel {
     }
     
     func processBatchPaymentResult(_ result: CreateBatchPaymentResult, _ tokenizedCard: TokenizedCard?) {
-        self.stopLoader()
+        resetState()
+        stopLoader()
        
         DispatchQueue.main.async {
             switch result {
@@ -445,6 +475,8 @@ private extension PayViewModel {
                 )
                 
                 self.isThreeDSConfirmationPresented = true
+                self.isError = false
+                self.errorMessage = nil
             case let .failed(batchExternalId, error):
                 if error.code == .transactionAlreadyPaid {
                     self.onBatchResultCallback?(

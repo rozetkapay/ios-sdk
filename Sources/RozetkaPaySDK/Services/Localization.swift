@@ -29,6 +29,7 @@ public enum Localization: String {
     case rozetka_pay_payment_legal_text
     case rozetka_pay_payment_legal_text_part_1
     case rozetka_pay_payment_legal_text_part_2
+    case rozetka_pay_payment_devider_label_text
     
     case rozetka_pay_payment_confirmation_3ds_loading
     
@@ -55,12 +56,13 @@ public enum Localization: String {
     case rozetka_pay_form_validation_field_empty
     case rozetka_pay_form_validation_email_incorrect
     
+    case  rozetka_pay_custom_alert_view_ok_button
     
-    var description: String {
+    public var description: String {
         return Localization.localizedString(forKey: self.rawValue)
     }
     
-    func description(with parameters: [String]) -> String {
+    public func description(with parameters: [String]) -> String {
         var result = self.description
         
         for index in 0..<parameters.count{

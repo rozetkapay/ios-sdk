@@ -24,6 +24,7 @@ struct PaymentRequestModel: Encodable {
     let currency: String
     let externalId: String
     let callbackUrl: String?
+    let resultUrl: String?
     let mode: String
     let customer: Customer
 
@@ -32,6 +33,7 @@ struct PaymentRequestModel: Encodable {
         case currency
         case externalId = "external_id"
         case callbackUrl = "callback_url"
+        case resultUrl = "result_url"
         case mode
         case customer
     }
@@ -41,6 +43,7 @@ struct PaymentRequestModel: Encodable {
         currency: String,
         externalId: String,
         callbackUrl: String? = nil,
+        resultUrl: String? = nil,
         mode: String = PaymentApiConstants.modeDirect,
         customer: Customer
     ) {
@@ -48,6 +51,7 @@ struct PaymentRequestModel: Encodable {
         self.currency = currency
         self.externalId = externalId
         self.callbackUrl = callbackUrl
+        self.resultUrl = resultUrl
         self.mode = mode
         self.customer = customer
     }

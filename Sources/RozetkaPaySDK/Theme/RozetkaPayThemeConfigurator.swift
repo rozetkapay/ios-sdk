@@ -9,17 +9,20 @@ import PassKit
 import SwiftUI
 
 public struct RozetkaPayThemeConfigurator {
+    let mode: ThemeMode
     let lightColorScheme: DomainColorScheme
     let darkColorScheme: DomainColorScheme
     let sizes: DomainSizes
     let typography: DomainTypography
     
     public init(
+        mode: ThemeMode = .system,
         lightColorScheme: DomainColorScheme = RozetkaPayDomainThemeDefaults.lightColors(),
         darkColorScheme: DomainColorScheme = RozetkaPayDomainThemeDefaults.darkColors(),
         sizes: DomainSizes = RozetkaPayDomainThemeDefaults.sizes(),
         typography: DomainTypography = RozetkaPayDomainThemeDefaults.typography()
     ) {
+        self.mode = mode
         self.lightColorScheme = lightColorScheme
         self.darkColorScheme = darkColorScheme
         self.sizes = sizes
@@ -28,16 +31,49 @@ public struct RozetkaPayThemeConfigurator {
 }
 
 extension RozetkaPayThemeConfigurator {
-    func colorScheme(_ sheme: ColorScheme = .light) -> DomainColorScheme {
-        switch sheme {
+    func colorScheme(_ scheme: ColorScheme = .light) -> DomainColorScheme {
+        switch mode {
         case .dark:
             return self.darkColorScheme
         case .light:
             return self.lightColorScheme
-        @unknown default:
-            return self.lightColorScheme
+        case .system:
+            switch scheme {
+            case .dark:
+                return self.darkColorScheme
+            case .light:
+                return self.lightColorScheme
+            @unknown default:
+                return self.lightColorScheme
+            }
+            
         }
     }
+    
+    func colorScheme(_ scheme: ColorScheme = .light) -> UIUserInterfaceStyle {
+        switch mode {
+        case .dark:
+            return .dark
+        case .light:
+            return .light
+        case .system:
+            switch scheme {
+            case .dark:
+                return .dark
+            case .light:
+                return .light
+            @unknown default:
+                return .light
+            }
+            
+        }
+    }
+}
+
+public enum ThemeMode {
+    case system
+    case light
+    case dark
 }
 
 public struct RozetkaPayDomainThemeDefaults {
@@ -110,16 +146,28 @@ public struct RozetkaPayDomainThemeDefaults {
         sheetCornerRadius: CGFloat = 20,
         componentCornerRadius: CGFloat = 16,
         buttonCornerRadius: CGFloat = 16,
+        buttonFrameHeight: CGFloat = 50,
+        applePayButtonFrameHeight: CGFloat = 50,
         textFieldFrameHeight: CGFloat = 22,
-        borderWidth: CGFloat = 1
+        borderWidth: CGFloat = 1,
+        cardInfoTopPadding: CGFloat = 0,
+        cardFormFooterEmbeddedContentTopPadding: CGFloat = 16,
+        mainButtonTopPadding: CGFloat = 28,
+        cardInfoLegalViewTopPadding: CGFloat = 28
     ) -> DomainSizes {
         
         return DomainSizes(
             sheetCornerRadius: sheetCornerRadius,
             componentCornerRadius: componentCornerRadius,
             buttonCornerRadius: buttonCornerRadius,
+            buttonFrameHeight: buttonFrameHeight,
+            applePayButtonFrameHeight: applePayButtonFrameHeight,
             textFieldFrameHeight: textFieldFrameHeight,
-            borderWidth: borderWidth
+            borderWidth: borderWidth,
+            cardInfoTopPadding: cardInfoTopPadding,
+            cardFormFooterEmbeddedContentTopPadding: cardFormFooterEmbeddedContentTopPadding,
+            mainButtonTopPadding: mainButtonTopPadding,
+            cardInfoLegalViewTopPadding: cardInfoLegalViewTopPadding
         )
     }
     

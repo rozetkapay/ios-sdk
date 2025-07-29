@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "PCIDSS_legal_dark.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

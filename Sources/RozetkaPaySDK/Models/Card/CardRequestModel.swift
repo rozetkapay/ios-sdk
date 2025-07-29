@@ -11,8 +11,8 @@ import UIKit
 public struct CardRequestModel: Encodable {
     public  let cardName: String?
     private let cardNumber: String
-    private let cardExpMonth: Int
-    private let cardExpYear: Int
+    public let cardExpMonth: Int
+    public let cardExpYear: Int
     private let cardCvv: String
     private let cardholderName: String?
 

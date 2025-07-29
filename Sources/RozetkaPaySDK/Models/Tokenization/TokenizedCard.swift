@@ -10,6 +10,7 @@ import Foundation
 public struct TokenizedCard: Codable {
     public let token: String
     public var name: String?
+    public var expiry: String?
     public let cardInfo: CardInfo?
 
     public struct CardInfo: Codable {
@@ -54,4 +55,34 @@ public struct TokenizedCard: Codable {
         self.name = name
     }
 
+    mutating func setup(expiry: String) {
+        self.expiry = expiry
+    }
+}
+
+extension TokenizedCard: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        """
+        TokenizedCard(
+            token: \(token),
+            name: \(name ?? "nil"),
+            expiry: \(expiry ?? "nil"),
+            cardInfo: \(cardInfo?.debugDescription ?? "nil")
+        )
+        """
+    }
+}
+
+extension TokenizedCard.CardInfo: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        """
+        CardInfo(
+            maskedNumber: \(maskedNumber ?? "nil"),
+            paymentSystem: \(paymentSystem ?? "nil"),
+            bank: \(bank ?? "nil"),
+            isoA3Code: \(isoA3Code ?? "nil"),
+            cardType: \(cardType ?? "nil")
+        )
+        """
+    }
 }

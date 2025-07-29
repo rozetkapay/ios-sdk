@@ -137,7 +137,10 @@ public struct DomainTypographyDefaults {
     }
     
     public static var titleUI: UIFont {
-        DomainTypographyDefaults.defaultFontUI.withSize(22).withWeight(.semibold)
+        DomainTypographyDefaults
+            .defaultFontUI
+            .withSize(22)
+            .withWeight(.semibold)
     }
     
     /// Subtitle text style
@@ -148,7 +151,10 @@ public struct DomainTypographyDefaults {
     }
     
     public static var subtitleUI: UIFont {
-        DomainTypographyDefaults.defaultFontUI.withSize(16).withWeight(.semibold)
+        DomainTypographyDefaults
+            .defaultFontUI
+            .withSize(16)
+            .withWeight(.semibold)
     }
     
     /// Body text style
@@ -159,7 +165,10 @@ public struct DomainTypographyDefaults {
     }
     
     public static var bodyUI: UIFont {
-        DomainTypographyDefaults.defaultFontUI.withSize(16).withWeight(.regular)
+        DomainTypographyDefaults
+            .defaultFontUI
+            .withSize(16)
+            .withWeight(.regular)
     }
     
     /// Small label text style
@@ -170,7 +179,10 @@ public struct DomainTypographyDefaults {
     }
     
     public static var labelSmallUI: UIFont {
-        DomainTypographyDefaults.defaultFontUI.withSize(14).withWeight(.regular)
+        DomainTypographyDefaults
+            .defaultFontUI
+            .withSize(14)
+            .withWeight(.regular)
     }
     
     /// Large label text style
@@ -181,7 +193,10 @@ public struct DomainTypographyDefaults {
     }
     
     public static var labelLargeUI: UIFont {
-        DomainTypographyDefaults.defaultFontUI.withSize(18).withWeight(.semibold)
+        DomainTypographyDefaults
+            .defaultFontUI
+            .withSize(18)
+            .withWeight(.semibold)
     }
     
     /// Input text style
@@ -192,17 +207,24 @@ public struct DomainTypographyDefaults {
     }
     
     public static var inputUI: UIFont {
-        DomainTypographyDefaults.defaultFontUI.withSize(16).withWeight(.regular)
+        DomainTypographyDefaults
+            .defaultFontUI
+            .withSize(16)
+            .withWeight(.regular)
     }
     
     /// Legal text style
     public static var legalText: Font {
-        DomainTypographyDefaults.defaultFont
+        DomainTypographyDefaults
+            .defaultFont
             .weight(.regular)
             .size(9)
     }
     
     public static var legalTextUI: UIFont {
-        DomainTypographyDefaults.defaultFontUI.withSize(9).withWeight(.regular)
+        DomainTypographyDefaults
+            .defaultFontUI
+            .withSize(9)
+            .withWeight(.regular)
     }
 }
