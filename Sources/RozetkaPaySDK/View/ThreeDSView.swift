@@ -36,23 +36,34 @@ struct ThreeDSView: View {
                 onResultCallback: wrappedCallback
             )
         )
-
+        
     }
-
+    
     var body: some View {
         NavigationView {
-            if viewModel.isLoading {
-                loadingView
-            }else if viewModel.isError {
-                errorView
-            }else {
-                mainView
-            }
+            contentView
+                .background(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .surface
+                )
         }
     }
 }
 
 private extension ThreeDSView {
+    
+    @ViewBuilder
+    private var contentView: some View {
+        if viewModel.isLoading {
+            loadingView
+        } else if viewModel.isError {
+            errorView
+        } else {
+            mainView
+        }
+    }
     
     ///
     var mainView: some View {
@@ -73,13 +84,18 @@ private extension ThreeDSView {
             viewModel.handleCancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            DomainImages.xmark.image()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .appBarIcon
-                )
+            DomainImages.xmark.image(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+            )
+            .renderingMode(.template)
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .appBarIcon
+            )
         }
     }
     
@@ -91,14 +107,7 @@ private extension ThreeDSView {
                 .colorScheme(colorScheme)
                 .surface.opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView(
-                tintColor: viewModel.themeConfigurator.colorScheme(colorScheme).primary,
-                textFont: viewModel.themeConfigurator.typography.body,
-                textColorDark: viewModel.themeConfigurator.darkColorScheme.onSurface,
-                textColorWhite: viewModel.themeConfigurator.lightColorScheme.onSurface,
-                backgroundColorDark: viewModel.themeConfigurator.darkColorScheme.surface,
-                backgroundColorWhite: viewModel.themeConfigurator.lightColorScheme.surface
-            )
+            LoadingView (themeConfigurator: viewModel.themeConfigurator)
         }
     }
     

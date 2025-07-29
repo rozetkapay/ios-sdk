@@ -29,19 +29,31 @@ public struct TokenizationView: View {
     //MARK: - Body
     public var body: some View {
         NavigationView {
-            if viewModel.isLoading {
-                loadingView
-            }else if viewModel.isError {
-                errorView
-            }else {
-                mainView
-            }
+            contentView
+                .background(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .surface
+                )
         }
     }
 }
 
 //MARK: UI
 private extension TokenizationView {
+    
+    @ViewBuilder
+    private var contentView: some View {
+        if viewModel.isLoading {
+            loadingView
+        } else if viewModel.isError {
+            errorView
+        } else {
+            mainView
+        }
+        
+    }
     
     ///
     var headerView: some View {
@@ -62,18 +74,19 @@ private extension TokenizationView {
                             .title
                         
                     )
-                    .padding(.bottom, 20)
                 Spacer()
             }
         }
     }
     
     var mainView: some View {
-        VStack {
+        VStack(spacing: 0) {
             headerView
             cardInfoView
             mainButton
-            footerView
+            if viewModel.viewParameters.isVisibleCardInfoLegalView {
+                legalView
+            }
             Spacer()
         }
         .padding()
@@ -92,43 +105,7 @@ private extension TokenizationView {
                 .surface
                 .opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView(
-                tintColor:
-                    viewModel
-                    .themeConfigurator
-                    .colorScheme(colorScheme)
-                    .primary
-                ,
-                textFont:
-                    viewModel
-                    .themeConfigurator
-                    .typography
-                    .body
-                ,
-                textColorDark:
-                    viewModel
-                    .themeConfigurator
-                    .darkColorScheme
-                    .onSurface
-                ,
-                textColorWhite:
-                    viewModel
-                    .themeConfigurator
-                    .lightColorScheme
-                    .onSurface
-                ,
-                backgroundColorDark:
-                    viewModel
-                    .themeConfigurator
-                    .darkColorScheme
-                    .surface
-                ,
-                backgroundColorWhite:
-                    viewModel
-                    .themeConfigurator
-                    .lightColorScheme
-                    .surface
-            )
+            LoadingView (themeConfigurator: viewModel.themeConfigurator)
         }
     }
     ///
@@ -164,7 +141,7 @@ private extension TokenizationView {
             errorMessageCardholderName: $viewModel.errorMessageCardholderName,
             errorMessageEmail: $viewModel.errorMessageEmail
         )
-        
+        .padding(.top, viewModel.getVStackSpacing())
     }
     ///
     var closeButton: some View {
@@ -172,64 +149,85 @@ private extension TokenizationView {
             viewModel.cancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            DomainImages.xmark.image()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .appBarIcon
-                )
+            DomainImages.xmark.image(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+            )
+            .renderingMode(.template)
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .appBarIcon
+            )
         }
     }
     ///
-    var footerView: some View {
-        CardInfoFooterView()
-        .padding(.top, 20)
+    var legalView: some View {
+        CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
+            .padding(.top,
+                     viewModel
+                        .themeConfigurator
+                        .sizes
+                        .cardInfoLegalViewTopPadding
+            )
     }
     
     ///
-    var mainButton: some View {
-       Button(action: {
-           viewModel.startLoading()
-       }) {
-           Text(Localization.rozetka_pay_form_save_card.description)
-               .font(
-                   viewModel
-                       .themeConfigurator
-                       .typography
-                       .labelLarge
-               )
-               .bold()
-               .frame(maxWidth: .infinity)
-               .padding()
-               .foregroundColor(
-                   viewModel
-                       .themeConfigurator
-                       .colorScheme(colorScheme)
-                       .onPrimary
-                   
-               )
-               .background(
-                   viewModel
-                       .themeConfigurator
-                       .colorScheme(colorScheme)
-                       .primary
-               )
-               .cornerRadius(
-                   viewModel
-                       .themeConfigurator
-                       .sizes
-                       .buttonCornerRadius
-               )
-       }
-       .padding(.top, 20)
-   }
+    private var mainButton: some View {
+        Button(action: {
+            viewModel.startLoading()
+        }) {
+            Text(
+                Localization.rozetka_pay_form_save_card.description
+            )
+            .font(
+                viewModel
+                    .themeConfigurator
+                    .typography
+                    .labelLarge
+            )
+            .bold()
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onPrimary
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(height:
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonFrameHeight
+        )
+        .background(
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .primary
+        )
+        .cornerRadius(
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonCornerRadius
+        )
+        .padding(.top,
+                 viewModel
+                    .themeConfigurator
+                    .sizes
+                    .mainButtonTopPadding
+        )
+    }
 }
 
 
 //MARK: Private Methods
 private extension TokenizationView {
-
+    
     func hideKeyboard() {
         UIApplication.shared.sendAction(
             #selector(UIResponder.resignFirstResponder),
@@ -247,6 +245,6 @@ private extension TokenizationView {
             client: ClientWidgetParameters(widgetKey: "test")
         ),
         onResultCallback: {
-        _ in
-    })
+            _ in
+        })
 }

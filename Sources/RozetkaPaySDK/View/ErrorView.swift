@@ -65,10 +65,15 @@ private extension ErrorView {
     
     ///
     var imageView: some View {
-        DomainImages.payError.image()
-            .resizable()
-            .frame(width: 200, height: 200)
-            .padding()
+        
+        DomainImages.payError.image(
+            themeConfigurator
+                .colorScheme(colorScheme)
+        )
+        
+        .resizable()
+        .frame(width: 200, height: 200)
+        .padding()
         
     }
     
@@ -92,12 +97,11 @@ private extension ErrorView {
         VStack(spacing: 16) {
             secondButton
             mainButton
-                .padding(.horizontal, 20)
         }
     }
     
     ///
-    var mainButton: some View {
+    private var mainButton: some View {
         Button(action: {
             if isButtonRetryEnabled {
                 onRetry()
@@ -106,64 +110,83 @@ private extension ErrorView {
             }
         }) {
             Text(isButtonRetryEnabled ? Localization.rozetka_pay_common_button_retry.description :
-                Localization.rozetka_pay_common_button_cancel.description
+                    Localization.rozetka_pay_common_button_cancel.description
             )
-                .font(
-                    themeConfigurator
-                        .typography
-                        .labelLarge
-                )
-                .bold()
-                .frame(maxWidth: .infinity)
-                .padding()
-                .foregroundColor(
-                    themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onPrimary
-                    
-                )
-                .background(
-                    themeConfigurator
-                        .colorScheme(colorScheme)
-                        .primary
-                )
-                .cornerRadius(
-                    themeConfigurator
-                        .sizes
-                        .buttonCornerRadius
-                )
+            .font(
+                themeConfigurator
+                    .typography
+                    .labelLarge
+            )
+            .bold()
+            .foregroundColor(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onPrimary
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(.top, 20)
+        .frame(height:
+                themeConfigurator
+            .sizes
+            .buttonFrameHeight
+        )
+        .background(
+            
+            themeConfigurator
+                .colorScheme(colorScheme)
+                .primary
+        )
+        .cornerRadius(
+            themeConfigurator
+                .sizes
+                .buttonCornerRadius
+        )
+        
     }
     
     ///
-    var secondButton: some View {
+    private var secondButton: some View {
         Button(action: {
             onCancel()
         }) {
-            Text(Localization.rozetka_pay_common_button_cancel.description)
-                .font(
-                    themeConfigurator
-                        .typography
-                        .labelLarge
-                )
-                .bold()
-                .foregroundColor(
-                    themeConfigurator
-                        .colorScheme(colorScheme)
-                        .primary
-                    
-                )
+            Text(Localization.rozetka_pay_common_button_cancel.description
+            )
+            .font(
+                themeConfigurator
+                    .typography
+                    .labelLarge
+            )
+            .bold()
+            .foregroundColor(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .primary
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(.top, 20)
+        .frame(height:
+                themeConfigurator
+            .sizes
+            .buttonFrameHeight
+        )
+        .background(
+            themeConfigurator
+                .colorScheme(colorScheme)
+                .onPrimary
+        )
+        .cornerRadius(
+            themeConfigurator
+                .sizes
+                .buttonCornerRadius
+        )
     }
 }
 
 //MARK: - Preview
 #Preview {
     ErrorView(
-        themeConfigurator: RozetkaPayThemeConfigurator(),
-        errorMessage: "test",
+        themeConfigurator: RozetkaPayThemeConfigurator(mode: .system),
+        errorMessage: "test \n test",
         onCancel: { print("Cancel tapped") },
         onRetry: { print("Retry tapped") }
     )

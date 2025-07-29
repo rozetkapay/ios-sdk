@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "OK" : {
-
-    },
     "rozetka_pay_common_button_cancel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -85,6 +82,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Операція виконується…"
+          }
+        }
+      }
+    },
+    "rozetka_pay_custom_alert_view_ok_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
@@ -446,6 +460,23 @@
         }
       }
     },
+    "rozetka_pay_payment_devider_label_text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or pay using card"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Або оплатіть карткою"
+          }
+        }
+      }
+    },
     "rozetka_pay_payment_error_apple_pay" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -520,13 +551,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Натискаючи кнопку «Оплатити», Ви підтверджуєте, що ознайомились з %1 від %2 та приймаєте його умови (приєднуєтеся до його умов), надаєте згоду на виконання разової платіжної операції та надаєте відмову від отримання повідомлення про здійснену операції з використанням платіжної картки."
+            "value" : "Натискаючи кнопку «Оплатити» щодо оплати замовлення на користь отримувача, користувач підтверджує, що надає інформацію для формування платіжної інструкції та свою згоду на виконання платіжної операції, а також приймає (акцептує) умови %1 RozetkaPay (%2)"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Натискаючи кнопку «Оплатити», Ви підтверджуєте, що ознайомились з %1 від %2 та приймаєте його умови (приєднуєтеся до його умов), надаєте згоду на виконання разової платіжної операції та надаєте відмову від отримання повідомлення про здійснену операції з використанням платіжної картки."
+            "value" : "Натискаючи кнопку «Оплатити» щодо оплати замовлення на користь отримувача, користувач підтверджує, що надає інформацію для формування платіжної інструкції та свою згоду на виконання платіжної операції, а також приймає (акцептує) умови %1 RozetkaPay (%2)"
           }
         }
       }
@@ -537,13 +568,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Публічним договором"
+            "value" : "публічного договору"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Публічним договором"
+            "value" : "публічного договору"
           }
         }
       }
@@ -554,13 +585,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ТОВ «ФК «ЕВО»"
+            "value" : "детальніше →"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ТОВ «ФК «ЕВО»"
+            "value" : "детальніше →"
           }
         }
       }

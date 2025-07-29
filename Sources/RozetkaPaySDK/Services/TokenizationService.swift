@@ -20,7 +20,9 @@ open class TokenizationService {
                 Logger.tokenizedCard.info("✅ Success: TokenizedCard is success")
                 
                 result(
-                    .success(response.convertToTokenizedCard())
+                    .complete(
+                        tokenizedCard: response.convertToTokenizedCard()
+                    )
                 )
                 
             } catch let apiError as APIError<TokenizationError> {
@@ -34,7 +36,7 @@ open class TokenizationService {
                     Logger.tokenizedCard.error("🔴 ERROR: Error tokenizeCard: \n message:\(message ?? "") \n errorDescription: \(errorDescription ?? "")")
                 }
                 result(
-                    .failure(errorResult)
+                    .failed(error: errorResult)
                 )
             } catch {
                 Logger.tokenizedCard.error("🔴 ERROR: Error tokenizeCard request: \(error.localizedDescription)")
@@ -44,7 +46,7 @@ open class TokenizationService {
                     errorDescription: error.localizedDescription
                 )
                 result(
-                    .failure(errorResult)
+                    .failed(error: errorResult)
                 )
             }
         }

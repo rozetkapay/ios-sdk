@@ -9,6 +9,12 @@ import SwiftUI
 
 public struct CardInfoView: View {
     
+    //MARK: - Constants & Defaults
+    private enum Constants {
+        static let vStackSpacing: CGFloat = 16
+        static let cardInfoTitleBottomSpacing: CGFloat = 10
+    }
+    
     //MARK: - Properties
     ///
     @Binding var cardNumber: String?
@@ -27,20 +33,22 @@ public struct CardInfoView: View {
     @Binding var errorMessageCardholderName: String?
     @Binding var errorMessageEmail: String?
     
+    @Environment(\.colorScheme) var colorScheme
+    
     //MARK: - Properties
     private let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
     private let themeConfigurator: RozetkaPayThemeConfigurator
     
-    private var fieldRequirementCardName: FieldRequirement
-    private var fieldRequirementCardholderName: FieldRequirement
-    private var fieldRequirementEmail: FieldRequirement
+    private let fieldRequirementCardName: FieldRequirement
+    private let fieldRequirementCardholderName: FieldRequirement
+    private let fieldRequirementEmail: FieldRequirement
+    private let isVisibleCardInfoTitle: Bool
+    private let cardInfoTitleText: String
     
     @State var detectedPaymentSystem: PaymentSystem?
     
-    @Environment(\.colorScheme) var colorScheme
-    
-    private var paymentSystemLogoName: String {
-        detectedPaymentSystem?.logoName ?? PaymentSystem.defaultLogoName
+    private var paymentSystemLogo: DomainImages {
+        detectedPaymentSystem?.logo ?? PaymentSystem.defaultLogo
     }
     
     //MARK: - Init
@@ -70,6 +78,8 @@ public struct CardInfoView: View {
         self.fieldRequirementCardName = viewParameters.cardNameField
         self.fieldRequirementCardholderName = viewParameters.cardholderNameField
         self.fieldRequirementEmail = viewParameters.emailField
+        self.isVisibleCardInfoTitle = viewParameters.isVisibleCardInfoTitle
+        self.cardInfoTitleText = viewParameters.stringResources.cardFormTitle
         ///
         self._cardNumber = cardNumber
         self._cvv = cvv
@@ -89,41 +99,42 @@ public struct CardInfoView: View {
     }
     
     public var body: some View {
-        Group {
-            if fieldRequirementCardName.isShow {
-                VStack(spacing: 16) {
-                    cardNameView
-                }
-            }
-            HStack{
-                Text(Localization.rozetka_pay_form_card_info_title.description)
-                    .font(
-                        themeConfigurator
-                            .typography
-                            .subtitle
-                    )
-                    .bold()
-                    .foregroundColor(
-                        themeConfigurator
-                            .colorScheme(colorScheme)
-                            .subtitle
-                    )
-                    .padding(.top, 16)
-                Spacer()
-            }
-            VStack(spacing: 16) {
-                cardDetailsView
-                
-                if fieldRequirementCardholderName.isShow {
-                    cardHolderNameView
-                }
-                
-                if fieldRequirementEmail.isShow {
-                    emailView
-                }
+        VStack(spacing: Constants.vStackSpacing) {
+            if fieldRequirementCardName.isVisible {
+                cardNameView
             }
             
+            VStack(spacing: Constants.cardInfoTitleBottomSpacing) {
+                if isVisibleCardInfoTitle {
+                    HStack{
+                        Text(cardInfoTitleText)
+                            .font(
+                                themeConfigurator
+                                    .typography
+                                    .subtitle
+                            )
+                            .bold()
+                            .foregroundColor(
+                                themeConfigurator
+                                    .colorScheme(colorScheme)
+                                    .subtitle
+                            )
+                            .padding(.top, 16)
+                        Spacer()
+                    }
+                }
+                cardDetailsView
+            }
+            
+            if fieldRequirementCardholderName.isVisible {
+                cardHolderNameView
+            }
+            
+            if fieldRequirementEmail.isVisible {
+                emailView
+            }
         }
+        .padding(.top, themeConfigurator.sizes.cardInfoTopPadding)
         .onChange(of: cardNumber) { newValue in
             self.detectedPaymentSystem = self.detectPaymentSystem(newValue)
         }
@@ -136,78 +147,64 @@ private extension CardInfoView {
     
     ///
     var cardNameView: some View {
-        VStack(spacing: 0) {
-            VStack(spacing: 2){
-                InputTextFieldRepresentable(
-                    placeholder: Localization.rozetka_pay_form_optional_card_name.description,
-                    placeholderFont: themeConfigurator
-                        .typography
-                        .inputUI,
-                    placeholderColor: themeConfigurator
-                        .colorScheme(colorScheme)
-                        .placeholder
-                        .toUIColor(),
-                    text: $cardName,
-                    textColor: errorMessageCardName.isNilOrEmpty ?
+        VStack(spacing: 0){
+            InputTextFieldRepresentable(
+                appearance: themeConfigurator.colorScheme(colorScheme),
+                placeholder: Localization.rozetka_pay_form_optional_card_name.description,
+                placeholderFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                placeholderColor: themeConfigurator
+                    .colorScheme(colorScheme)
+                    .placeholder
+                    .toUIColor(),
+                text: $cardName,
+                textFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                textColor: errorMessageCardName.isNilOrEmpty ?
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onComponent
+                    .toUIColor()
+                :
                     themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onComponent
-                        .toUIColor()
-                    :
-                        themeConfigurator
-                        .colorScheme(
-                            colorScheme
-                        )
-                        .error
-                        .toUIColor(),
-                    contentType: .name,
-                    keyboardType: .default,
-                    isRequired: fieldRequirementCardName.isRequired,
-                    validators: ValidatorsComposer(validators: [
-                        CardNameValidator()
-                    ]),
-                    validationTextFieldResult: { result in
-                        switch result {
-                        case .valid:
-                            errorMessageCardName = nil
-                        case let .error(message):
-                            errorMessageCardName = message
-                        }
-                    }
-                )
-                .frame(
-                    height: themeConfigurator.sizes.textFieldFrameHeight
-                )
-                .padding()
-                .background(
-                    themeConfigurator
-                        .colorScheme(colorScheme)
-                        .componentSurface
-                )
-                .cornerRadius(
-                    themeConfigurator
-                        .sizes
-                        .componentCornerRadius
-                )
-                
-                if let errorMessage = errorMessageCardName.isNilOrEmptyValue {
-                    
-                    HStack{
-                        Text(errorMessage)
-                            .font(
-                                themeConfigurator
-                                    .typography
-                                    .labelSmall
-                            )
-                            .foregroundColor(
-                                themeConfigurator
-                                    .colorScheme(colorScheme)
-                                    .error
-                            )
-                            .padding()
-                        Spacer()
+                    .colorScheme(
+                        colorScheme
+                    )
+                    .error
+                    .toUIColor(),
+                contentType: .name,
+                keyboardType: .default,
+                isRequired: fieldRequirementCardName.isRequired,
+                validators: ValidatorsComposer(validators: [
+                    CardNameValidator()
+                ]),
+                validationTextFieldResult: { result in
+                    switch result {
+                    case .valid:
+                        errorMessageCardName = nil
+                    case let .error(message):
+                        errorMessageCardName = message
                     }
                 }
+            )
+            .frame(
+                height: themeConfigurator.sizes.textFieldFrameHeight
+            )
+            .padding()
+            .background(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .componentSurface
+            )
+            .cornerRadius(
+                themeConfigurator
+                    .sizes
+                    .componentCornerRadius
+            )
+            if let errorMessage = errorMessageCardName.isNilOrEmptyValue {
+                FieldErrorView(message: errorMessage, themeConfigurator)
             }
         }
     }
@@ -215,75 +212,62 @@ private extension CardInfoView {
     ///
     var cardHolderNameView: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 2){
-                InputTextFieldRepresentable(
-                    placeholder: Localization.rozetka_pay_form_cardholder_name.description,
-                    placeholderFont: themeConfigurator
-                        .typography
-                        .inputUI,
-                    placeholderColor: themeConfigurator
-                        .colorScheme(colorScheme)
-                        .placeholder
-                        .toUIColor(),
-                    text: $cardholderName,
-                    textColor: errorMessageCardholderName.isNilOrEmpty ?
+            InputTextFieldRepresentable(
+                appearance: themeConfigurator.colorScheme(colorScheme),
+                placeholder: Localization.rozetka_pay_form_cardholder_name.description,
+                placeholderFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                placeholderColor: themeConfigurator
+                    .colorScheme(colorScheme)
+                    .placeholder
+                    .toUIColor(),
+                text: $cardholderName,
+                textFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                textColor: errorMessageCardholderName.isNilOrEmpty ?
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onComponent
+                    .toUIColor()
+                :
                     themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onComponent
-                        .toUIColor()
-                    :
-                        themeConfigurator
-                        .colorScheme(
-                            colorScheme
-                        )
-                        .error
-                        .toUIColor(),
-                    contentType: .name,
-                    keyboardType: .default,
-                    isRequired: fieldRequirementCardholderName.isRequired,
-                    validators: ValidatorsComposer(validators: [
-                        CardholderNameValidator()
-                    ]),
-                    validationTextFieldResult: { result in
-                        switch result {
-                        case .valid:
-                            errorMessageCardholderName = nil
-                        case let .error(message):
-                            errorMessageCardholderName = message
-                        }
-                    }
-                )
-                .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
-                .padding()
-                .background(
-                    themeConfigurator
-                        .colorScheme(colorScheme)
-                        .componentSurface
-                )
-                .cornerRadius(
-                    themeConfigurator
-                        .sizes
-                        .componentCornerRadius
-                )
-                
-                if let errorMessage = errorMessageCardholderName.isNilOrEmptyValue {
-                    
-                    HStack{
-                        Text(errorMessage)
-                            .font(
-                                themeConfigurator
-                                    .typography
-                                    .labelSmall
-                            )
-                            .foregroundColor(
-                                themeConfigurator
-                                    .colorScheme(colorScheme)
-                                    .error
-                            )
-                            .padding()
-                        Spacer()
+                    .colorScheme(
+                        colorScheme
+                    )
+                    .error
+                    .toUIColor(),
+                contentType: .name,
+                keyboardType: .default,
+                isRequired: fieldRequirementCardholderName.isRequired,
+                validators: ValidatorsComposer(validators: [
+                    CardholderNameValidator()
+                ]),
+                validationTextFieldResult: { result in
+                    switch result {
+                    case .valid:
+                        errorMessageCardholderName = nil
+                    case let .error(message):
+                        errorMessageCardholderName = message
                     }
                 }
+            )
+            .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
+            .padding()
+            .background(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .componentSurface
+            )
+            .cornerRadius(
+                themeConfigurator
+                    .sizes
+                    .componentCornerRadius
+            )
+            
+            if let errorMessage = errorMessageCardholderName.isNilOrEmptyValue {
+                FieldErrorView(message: errorMessage, themeConfigurator)
             }
         }
     }
@@ -291,75 +275,62 @@ private extension CardInfoView {
     ///
     var emailView: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 2){
-                InputTextFieldRepresentable(
-                    placeholder: Localization.rozetka_pay_form_email.description,
-                    placeholderFont: themeConfigurator
-                        .typography
-                        .inputUI,
-                    placeholderColor: themeConfigurator
-                        .colorScheme(colorScheme)
-                        .placeholder
-                        .toUIColor(),
-                    text: $email,
-                    textColor: errorMessageEmail.isNilOrEmpty ?
+            InputTextFieldRepresentable(
+                appearance: themeConfigurator.colorScheme(colorScheme),
+                placeholder: Localization.rozetka_pay_form_email.description,
+                placeholderFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                placeholderColor: themeConfigurator
+                    .colorScheme(colorScheme)
+                    .placeholder
+                    .toUIColor(),
+                text: $email,
+                textFont: themeConfigurator
+                    .typography
+                    .inputUI,
+                textColor: errorMessageEmail.isNilOrEmpty ?
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onComponent
+                    .toUIColor()
+                :
                     themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onComponent
-                        .toUIColor()
-                    :
-                        themeConfigurator
-                        .colorScheme(
-                            colorScheme
-                        )
-                        .error
-                        .toUIColor(),
-                    contentType: .emailAddress,
-                    keyboardType: .emailAddress,
-                    isRequired: fieldRequirementEmail.isRequired,
-                    validators: ValidatorsComposer(validators: [
-                        EmailValidator()
-                    ]),
-                    validationTextFieldResult: { result in
-                        switch result {
-                        case .valid:
-                            errorMessageEmail = nil
-                        case let .error(message):
-                            errorMessageEmail = message
-                        }
-                    }
-                )
-                .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
-                .padding()
-                .background(
-                    themeConfigurator
-                        .colorScheme(colorScheme)
-                        .componentSurface
-                )
-                .cornerRadius(
-                    themeConfigurator
-                        .sizes
-                        .componentCornerRadius
-                )
-                
-                if let errorMessage = errorMessageEmail.isNilOrEmptyValue {
-                    
-                    HStack{
-                        Text(errorMessage)
-                            .font(
-                                themeConfigurator
-                                    .typography
-                                    .labelSmall
-                            )
-                            .foregroundColor(
-                                themeConfigurator
-                                    .colorScheme(colorScheme)
-                                    .error
-                            )
-                            .padding()
-                        Spacer()
+                    .colorScheme(
+                        colorScheme
+                    )
+                    .error
+                    .toUIColor(),
+                contentType: .emailAddress,
+                keyboardType: .emailAddress,
+                isRequired: fieldRequirementEmail.isRequired,
+                validators: ValidatorsComposer(validators: [
+                    EmailValidator()
+                ]),
+                validationTextFieldResult: { result in
+                    switch result {
+                    case .valid:
+                        errorMessageEmail = nil
+                    case let .error(message):
+                        errorMessageEmail = message
                     }
                 }
+            )
+            .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
+            .padding()
+            .background(
+                themeConfigurator
+                    .colorScheme(colorScheme)
+                    .componentSurface
+            )
+            .cornerRadius(
+                themeConfigurator
+                    .sizes
+                    .componentCornerRadius
+            )
+            
+            if let errorMessage = errorMessageEmail.isNilOrEmptyValue {
+                FieldErrorView(message: errorMessage, themeConfigurator)
             }
         }
     }
@@ -368,6 +339,7 @@ private extension CardInfoView {
     var cardNumberView: some View {
         HStack {
             InputTextFieldRepresentable(
+                appearance: themeConfigurator.colorScheme(colorScheme),
                 placeholder: Localization.rozetka_pay_form_card_number.description,
                 placeholderFont: themeConfigurator
                     .typography
@@ -377,6 +349,9 @@ private extension CardInfoView {
                     .placeholder
                     .toUIColor(),
                 text: $cardNumber,
+                textFont: themeConfigurator
+                    .typography
+                    .inputUI,
                 textColor:
                     errorMessageCardNumber.isNilOrEmpty ?
                 themeConfigurator
@@ -425,13 +400,10 @@ private extension CardInfoView {
                     ]
                 )
             )
-            Image(
-                paymentSystemLogoName,
-                bundle: .module
-            )
-            .resizable()
-            .frame(width: 36, height: 22)
-            .padding(.trailing)
+            paymentSystemLogo.image(themeConfigurator.colorScheme(colorScheme))
+                .resizable()
+                .frame(width: 36, height: 22)
+                .padding(.trailing)
         }
         .background(
             themeConfigurator
@@ -455,6 +427,7 @@ private extension CardInfoView {
     var expDateView: some View {
         HStack {
             InputTextFieldRepresentable(
+                appearance: themeConfigurator.colorScheme(colorScheme),
                 placeholder: Localization.rozetka_pay_form_exp_date.description,
                 placeholderFont: themeConfigurator
                     .typography
@@ -464,6 +437,9 @@ private extension CardInfoView {
                     .placeholder
                     .toUIColor(),
                 text: $expiryDate,
+                textFont: themeConfigurator
+                    .typography
+                    .inputUI,
                 textColor:
                     errorMessageExpiryDate.isNilOrEmpty ?
                 themeConfigurator
@@ -519,6 +495,7 @@ private extension CardInfoView {
     ///
     var cvvView: some View {
         InputTextFieldRepresentable(
+            appearance: themeConfigurator.colorScheme(colorScheme),
             placeholder: Localization.rozetka_pay_form_cvv.description,
             placeholderFont: themeConfigurator
                 .typography
@@ -528,6 +505,9 @@ private extension CardInfoView {
                 .placeholder
                 .toUIColor(),
             text: $cvv,
+            textFont: themeConfigurator
+                .typography
+                .inputUI,
             textColor:
                 errorMessageCvv.isNilOrEmpty ?
             themeConfigurator
@@ -610,22 +590,7 @@ private extension CardInfoView {
             if let errorMessage = errorMessageExpiryDate.isNilOrEmptyValue ??
                 errorMessageCardNumber.isNilOrEmptyValue ??
                 errorMessageCvv.isNilOrEmptyValue {
-                
-                HStack{
-                    Text(errorMessage)
-                        .font(
-                            themeConfigurator
-                                .typography
-                                .labelSmall
-                        )
-                        .foregroundColor(
-                            themeConfigurator
-                                .colorScheme(colorScheme)
-                                .error
-                        )
-                        .padding()
-                    Spacer()
-                }
+                FieldErrorView(message: errorMessage, themeConfigurator)
             }
         }
     }
@@ -647,7 +612,7 @@ private extension CardInfoView {
 //MARK: Preview
 #Preview {
     CardInfoView(
-        viewParameters: TokenizationViewParameters(
+        viewParameters: TokenizationFormViewParameters(
             cardNameField: .optional,
             emailField: .required,
             cardholderNameField: .optional

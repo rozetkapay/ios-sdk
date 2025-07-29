@@ -12,11 +12,11 @@ public enum FieldRequirement {
     case optional
     case required
     
-    var isShow: Bool {
+    public var isVisible: Bool {
         return self != .none
     }
     
-    var isRequired: Bool {
+    public var isRequired: Bool {
         return self == .required
     }
 }

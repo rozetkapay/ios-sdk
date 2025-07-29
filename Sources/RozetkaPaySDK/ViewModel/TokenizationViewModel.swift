@@ -9,6 +9,11 @@ import SwiftUI
 
 final class TokenizationViewModel: BaseViewModel {
     
+    //MARK: - Constants & Defaults
+    private enum Constants {
+        static let vStackSpacing: CGFloat = 16
+    }
+    
     //MARK: - Properties
     private let onResultCallback: (TokenizationResultCompletionHandler)?
     
@@ -31,8 +36,12 @@ final class TokenizationViewModel: BaseViewModel {
 }
 
 
-    //MARK: - Methods
+//MARK: - Methods
 extension TokenizationViewModel {
+    func getVStackSpacing() -> CGFloat {
+        return Constants.vStackSpacing
+    }
+    
     func startLoading() {
         guard let validModel: ValidationResultModel = self.validateAll() else {
             return
@@ -58,7 +67,7 @@ extension TokenizationViewModel {
         stopLoader()
         
         onResultCallback?(
-            .failure(.cancelled)
+            .cancelled
         )
     }
     
@@ -72,7 +81,7 @@ extension TokenizationViewModel {
 
 //MARK: - Private Methods
 private extension TokenizationViewModel {
-     func tokenizeCard(key: String, model: CardRequestModel) {
+    func tokenizeCard(key: String, model: CardRequestModel) {
         resetState()
         startLoader()
         
@@ -81,14 +90,15 @@ private extension TokenizationViewModel {
                 self?.stopLoader()
                 
                 switch result {
-                case .success(let success):
+                case .complete(let success):
                     self?.isError = false
                     var successModel = success
                     successModel.setup(name: model.cardName)
+                    successModel.setup(expiry: "\(model.cardExpMonth)/\(model.cardExpYear)")
                     self?.onResultCallback?(
-                        .success(successModel)
+                        .complete(tokenizedCard: successModel)
                     )
-                case .failure(let error):
+                case .failed(let error):
                     switch error {
                     case .cancelled:
                         self?.cancelled()
@@ -96,6 +106,8 @@ private extension TokenizationViewModel {
                         self?.isError = true
                         self?.errorMessage = message
                     }
+                case .cancelled:
+                    self?.cancelled()
                 }
             }
         }

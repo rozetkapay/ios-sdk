@@ -9,13 +9,15 @@ import SwiftUI
 import PassKit
 
 public struct PayView: View {
-   
+    
     //MARK: - Properties
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: PayViewModel
+//    @State private var isScrollEnabled: Bool = true
+    @State private var contentHeight: CGFloat = .zero
     
-    //MARK: - Init
+    //MARK: - Inits
     public init(
         paymentParameters: PaymentParameters,
         onResultCallback: @escaping PaymentResultCompletionHandler
@@ -39,17 +41,17 @@ public struct PayView: View {
             )
         )
     }
-
+    
     //MARK: - Body
     public var body: some View {
         NavigationView {
-            if viewModel.isLoading {
-                loadingView
-            }else if viewModel.isError {
-                errorView
-            }else {
-                mainView
-            }
+            contentView
+                .background(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .surface
+                )
         }
         .fullScreenCover(isPresented:  $viewModel.isThreeDSConfirmationPresented) {
             threeDSView
@@ -64,22 +66,46 @@ public struct PayView: View {
 //MARK: UI
 private extension PayView {
     
-    var mainView: some View {
-        VStack {
-            headerView
-            applePayButton
-            cardInfoView
-            cardPayButton
-            footerView
-            LegalTextView()
-            Spacer()
+    @ViewBuilder
+    private var contentView: some View {
+        if viewModel.isLoading {
+            loadingView
+        } else if viewModel.isError {
+            errorView
+        } else {
+            mainView
         }
-        .padding()
+    }
+    
+    var mainView: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: viewModel.getVStackSpacing()) {
+                    headerView
+
+                    if viewModel.getIsAllowApplePay() {
+                        applePayView
+                    }
+
+                    cardInfoView
+                    cardPayButton
+                    footerView
+                }
+                .padding()
+            }
+        }
+        .background(
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .surface
+        )
         .navigationBarItems(leading: closeButton)
         .onTapGesture {
             hideKeyboard()
         }
     }
+    
     ///
     var loadingView: some View {
         ZStack {
@@ -88,14 +114,7 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .surface.opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView(
-                tintColor: viewModel.themeConfigurator.colorScheme(colorScheme).primary,
-                textFont: viewModel.themeConfigurator.typography.body,
-                textColorDark: viewModel.themeConfigurator.darkColorScheme.onSurface,
-                textColorWhite: viewModel.themeConfigurator.lightColorScheme.onSurface,
-                backgroundColorDark: viewModel.themeConfigurator.darkColorScheme.surface,
-                backgroundColorWhite: viewModel.themeConfigurator.lightColorScheme.surface
-            )
+            LoadingView (themeConfigurator: viewModel.themeConfigurator)
         }
     }
     
@@ -148,22 +167,27 @@ private extension PayView {
     }
     
     ///
-    private var closeButton: some View {
+    var closeButton: some View {
         Button(action: {
             viewModel.cancelled()
             presentationMode.wrappedValue.dismiss()
         }) {
-            DomainImages.xmark.image()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .appBarIcon
-                )
+            DomainImages.xmark.image(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+            )
+            .renderingMode(.template)
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .appBarIcon
+            )
         }
     }
     
-    private var headerView: some View {
+    var headerView: some View {
         VStack(alignment: .leading) {
             HStack{
                 Text(Localization.rozetka_pay_payment_title.description)
@@ -179,59 +203,83 @@ private extension PayView {
                             .themeConfigurator
                             .colorScheme(colorScheme)
                             .title
-                            
+                        
                     )
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 0)
                 Spacer()
             }
         }
     }
-
-    private var footerView: some View {
-        CardInfoFooterView()
-        .padding(.top, 20)
+    
+    var footerView: some View {
+        VStack(spacing: viewModel.getVStackSpacing()) {
+            CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
+            LegalTextView(themeConfigurator: viewModel.themeConfigurator)
+        }
+        .padding(.top,
+                 viewModel
+                    .themeConfigurator
+                    .sizes
+                    .cardInfoLegalViewTopPadding
+        )
     }
     
-    private var cardPayButton: some View {
+    var cardPayButton: some View {
         Button(action: {
             viewModel.startPayByCard()
         }) {
-            Text(Localization.rozetka_pay_payment_pay_button.description(with: [
-                viewModel.getAmountWithCurrency()
-            ]))
-                .font(
-                    viewModel
-                        .themeConfigurator
-                        .typography
-                        .labelLarge
-                )
-                .bold()
-                .frame(maxWidth: .infinity)
-                .padding()
-                .foregroundColor(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .onPrimary
-                    
-                )
-                .background(
-                    viewModel
-                        .themeConfigurator
-                        .colorScheme(colorScheme)
-                        .primary
-                )
-                .cornerRadius(
-                    viewModel
-                        .themeConfigurator
-                        .sizes
-                        .buttonCornerRadius
-                )
+            Text(
+                Localization.rozetka_pay_payment_pay_button.description(with: [
+                    viewModel.getAmountWithCurrency()
+                ])
+            )
+            .font(
+                viewModel
+                    .themeConfigurator
+                    .typography
+                    .labelLarge
+            )
+            .bold()
+            .foregroundColor(
+                viewModel
+                    .themeConfigurator
+                    .colorScheme(colorScheme)
+                    .onPrimary
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .padding(.top, 20)
+        .frame(height:
+                viewModel
+            .themeConfigurator
+            .sizes
+            .buttonFrameHeight
+        )
+        .background(
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .primary
+        )
+        .cornerRadius(
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonCornerRadius
+        )
+        .padding(.top, viewModel.themeConfigurator.sizes.mainButtonTopPadding)
     }
     
-    private var applePayButton: some View {
+    var applePayView: some View {
+        VStack(alignment: .leading, spacing: viewModel.getVStackSpacing()) {
+            applePayButton
+            LabeledDivider(
+                label: Localization.rozetka_pay_payment_devider_label_text.description,
+                viewModel.themeConfigurator
+            )
+        }
+    }
+    
+    var applePayButton: some View {
         ApplePayButton(
             action: viewModel.startPayByApplePay,
             paymentButtonStyle:
@@ -240,21 +288,28 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .applePayButtonStyle
         )
-        .frame(height: 50)
+        .frame(
+            height:
+                viewModel
+                .themeConfigurator
+                .sizes
+                .applePayButtonFrameHeight
+        )
         .cornerRadius(
             viewModel
                 .themeConfigurator
                 .sizes
-                .buttonCornerRadius)
-        .padding(.top, 20)
-        .padding(.bottom, viewModel.viewParameters.cardNameField.isShow ? 16 : 0)
+                .buttonCornerRadius
+        )
+        
         .clipShape(
             RoundedRectangle(
                 cornerRadius:
                     viewModel
                     .themeConfigurator
                     .sizes
-                    .buttonCornerRadius)
+                    .buttonCornerRadius
+            )
         )
     }
 }
@@ -275,24 +330,24 @@ private extension PayView {
 #Preview {
     PayView(
         paymentParameters: PaymentParameters(
-        client: ClientAuthParameters(token: "test", widgetKey: "test"),
-        paymentType: .regular(
-            RegularPayment(
-                viewParameters: PaymentViewParameters(
-                    cardNameField: .none,
-                    emailField: .required,
-                    cardholderNameField: .required
-                ),
-                isAllowTokenization: true,
-                applePayConfig: nil
-        )),
-        amountParameters: AmountParameters(
-            amount: 10000,
-            currencyCode: "UAH"
+            client: ClientAuthParameters(token: "test", widgetKey: "test"),
+            paymentType: .regular(
+                RegularPayment(
+                    viewParameters: PaymentViewParameters(
+                        cardNameField: .optional,
+                        emailField: .optional,
+                        cardholderNameField: .optional
+                    ),
+                    isAllowTokenization: true,
+                    applePayConfig: nil
+                )),
+            amountParameters: AmountParameters(
+                amount: 10000,
+                currencyCode: "UAH"
+            ),
+            externalId: "test"
         ),
-        externalId: "test"
-    ),
-    onResultCallback: {
-        _ in
-    })
+        onResultCallback: {
+            _ in
+        })
 }

@@ -61,19 +61,19 @@ enum PaymentSystem: String, Identifiable, CaseIterable {
     }
     
     /// The name of the logo image associated with the payment system.
-    var logoName: String {
+    var logo: DomainImages {
         switch self {
         case .visa:
-            return DomainImages.visa.name
+            return DomainImages.visa
         case .masterCard:
-            return DomainImages.mastercard.name
+            return DomainImages.mastercard
         case .prostir:
-            return DomainImages.prostir.name
+            return DomainImages.prostir
         }
     }
     
     /// The default logo name to be used when no specific payment system is identified.
-    static var defaultLogoName: String {
-        return DomainImages.card.name
+    static var defaultLogo: DomainImages {
+        return DomainImages.card
     }
 }

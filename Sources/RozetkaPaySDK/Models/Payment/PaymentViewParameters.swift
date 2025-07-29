@@ -11,7 +11,10 @@ public struct PaymentViewParameters: ViewParametersProtocol {
     public let cardNameField: FieldRequirement
     public let emailField: FieldRequirement
     public let cardholderNameField: FieldRequirement
-
+    public let isVisibleCardInfoTitle: Bool
+    public let isVisibleCardInfoLegalView: Bool
+    public var stringResources: StringResources
+    
     public init(
         cardNameField: FieldRequirement = .none,
         emailField: FieldRequirement = .none,
@@ -20,5 +23,11 @@ public struct PaymentViewParameters: ViewParametersProtocol {
         self.cardNameField = cardNameField
         self.emailField = emailField
         self.cardholderNameField = cardholderNameField
+        self.isVisibleCardInfoTitle = true
+        self.isVisibleCardInfoLegalView = true
+        self.stringResources = StringResources(
+            cardFormTitle: Localization.rozetka_pay_form_card_info_title.description,
+            buttonTitle: Localization.rozetka_pay_payment_pay_button.description
+        )
     }
 }
