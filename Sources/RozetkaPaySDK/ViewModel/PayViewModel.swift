@@ -187,8 +187,6 @@ extension PayViewModel {
         switch initialPaymentType {
         case .singleToken:
             self.startPayByTokenizedCard()
-        case .card:
-            self.startPayByCard()
         default:
             resetState()
             initialPaymentType = .unknown
