@@ -197,7 +197,12 @@ private extension PayView {
                             .typography
                             .title
                     )
-                    .bold()
+                    .lineSpacing(
+                        viewModel
+                            .themeConfigurator
+                            .typography
+                            .titleLineSpacing
+                    )
                     .foregroundColor(
                         viewModel
                             .themeConfigurator
@@ -239,7 +244,12 @@ private extension PayView {
                     .typography
                     .labelLarge
             )
-            .bold()
+            .lineSpacing(
+                viewModel
+                    .themeConfigurator
+                    .typography
+                    .labelLargeLineSpacing
+            )
             .foregroundColor(
                 viewModel
                     .themeConfigurator

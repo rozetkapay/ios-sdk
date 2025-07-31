@@ -172,39 +172,25 @@ public struct RozetkaPayDomainThemeDefaults {
     }
     
     public static func typography(
-        title: Font = DomainTypographyDefaults.title,
-        subtitle: Font = DomainTypographyDefaults.subtitle,
-        body: Font = DomainTypographyDefaults.body,
-        labelSmall: Font = DomainTypographyDefaults.labelSmall,
-        labelLarge: Font = DomainTypographyDefaults.labelLarge,
-        input: Font = DomainTypographyDefaults.input,
-        legalText: Font = DomainTypographyDefaults.legalText,
-        ///
-        titleUI: UIFont = DomainTypographyDefaults.titleUI,
-        subtitleUI: UIFont = DomainTypographyDefaults.subtitleUI,
-        bodyUI: UIFont = DomainTypographyDefaults.bodyUI,
-        labelSmallUI: UIFont = DomainTypographyDefaults.labelSmallUI,
-        labelLargeUI:UIFont =  DomainTypographyDefaults.labelLargeUI,
-        inputUI: UIFont = DomainTypographyDefaults.inputUI,
-        legalTextUI: UIFont = DomainTypographyDefaults.legalTextUI
-    
+        fontFamily: DomainTypography.FontFamily = DomainTypographyDefaults.defaultFontFamily,
+        titleTextStyle: DomainTextStyle = DomainTypographyDefaults.title,
+        subtitleTextStyle: DomainTextStyle = DomainTypographyDefaults.subtitle,
+        bodyTextStyle: DomainTextStyle = DomainTypographyDefaults.body,
+        labelSmallTextStyle: DomainTextStyle = DomainTypographyDefaults.labelSmall,
+        labelLargeTextStyle: DomainTextStyle = DomainTypographyDefaults.labelLarge,
+        inputTextStyle: DomainTextStyle = DomainTypographyDefaults.input,
+        legalTextTextStyle: DomainTextStyle = DomainTypographyDefaults.legalText
     ) -> DomainTypography {
         
         return DomainTypography(
-            title: title,
-            subtitle: subtitle,
-            body: body,
-            labelSmall: labelSmall,
-            labelLarge: labelLarge,
-            input: input,
-            legalText: legalText,
-            titleUI: titleUI,
-            subtitleUI: subtitleUI,
-            bodyUI: bodyUI,
-            labelSmallUI: labelSmallUI,
-            labelLargeUI: labelLargeUI,
-            inputUI: inputUI,
-            legalTextUI: legalTextUI
+            fontFamily: fontFamily,
+            titleTextStyle: titleTextStyle,
+            subtitleTextStyle: subtitleTextStyle,
+            bodyTextStyle: bodyTextStyle,
+            labelSmallTextStyle: labelSmallTextStyle,
+            labelLargeTextStyle: labelLargeTextStyle,
+            inputTextStyle: inputTextStyle,
+            legalTextTextStyle: legalTextTextStyle
         )
     }
     

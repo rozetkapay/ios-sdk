@@ -11,220 +11,299 @@ import UIKit
 // MARK: - DomainTypography Struct
 
 public struct DomainTypography {
-    private let titleDp: Font
-    private let subtitleDp: Font
-    private let bodyDp: Font
-    private let labelSmallDp: Font
-    private let labelLargeDp: Font
-    private let inputDp: Font
-    private let legalTextDp: Font
+    private let fontFamily: FontFamily
+    private let titleTextStyle: DomainTextStyle
+    private let subtitleTextStyle: DomainTextStyle
+    private let bodyTextStyle: DomainTextStyle
+    private let labelSmallTextStyle: DomainTextStyle
+    private let labelLargeTextStyle: DomainTextStyle
+    private let inputTextStyle: DomainTextStyle
+    private let legalTextTextStyle: DomainTextStyle
     
-    private let titleUIDp: UIFont
-    private let subtitleUIDp: UIFont
-    private let bodyUIDp: UIFont
-    private let labelSmallUIDp: UIFont
-    private let labelLargeUIDp: UIFont
-    private let inputUIDp: UIFont
-    private let legalTextUIDp: UIFont
-    
+    ///public
     public var title: Font {
-        return titleDp
+        return titleTextStyle.toFont(fontFamily)
     }
     
-    public  var subtitle: Font {
-        return subtitleDp
+    public var titleLineSpacing: CGFloat {
+        return titleTextStyle.lineSpacing
+    }
+    
+    public var subtitle: Font {
+        return subtitleTextStyle.toFont(fontFamily)
+    }
+    
+    public var subtitleLineSpacing: CGFloat {
+        return subtitleTextStyle.lineSpacing
     }
     
     public var body: Font {
-        return  bodyDp
+        return bodyTextStyle.toFont(fontFamily)
+    }
+    
+    public var bodyLineSpacing: CGFloat {
+        return bodyTextStyle.lineSpacing
     }
     
     public var labelSmall: Font {
-        return labelSmallDp
+        return labelSmallTextStyle.toFont(fontFamily)
+    }
+    
+    public var labelSmallLineSpacing: CGFloat {
+        return labelSmallTextStyle.lineSpacing
     }
     
     public var labelLarge: Font {
-        return labelLargeDp
+        return labelLargeTextStyle.toFont(fontFamily)
     }
     
-    public var input: Font {
-        return inputDp
+    public var labelLargeLineSpacing: CGFloat {
+        return labelLargeTextStyle.lineSpacing
     }
-    
-    public var legalText: Font {
-        return legalTextDp
-    }
-    
-    // UIKit fonts
-    public var titleUI: UIFont {
-       return titleUIDp
-    }
-    
-    public var subtitleUI: UIFont {
-        return subtitleUIDp
-    }
-    
-    public var bodyUI: UIFont {
-        return bodyUIDp
-    }
-    
-    public var labelSmallUI: UIFont {
-        return labelSmallUIDp
-    }
-    
-    public var labelLargeUI: UIFont {
-        return labelLargeUIDp
-    }
-    
+
     public var inputUI: UIFont {
-        return inputUIDp
+        return inputTextStyle.toFont(fontFamily)
     }
     
     public var legalTextUI: UIFont {
-        return legalTextUIDp
+        return legalTextTextStyle.toFont(fontFamily)
     }
     
+    public var legalTextUILineSpacing: CGFloat {
+        return legalTextTextStyle.lineSpacing
+    }
+    
+    ///FontFamily
+    public enum FontFamily {
+        case `default`
+        case serif
+        case monospace
+        case custom(name: String)
+    }
+
     public init(
-        ///Font
-        title: Font,
-        subtitle: Font,
-        body: Font,
-        labelSmall: Font,
-        labelLarge: Font,
-        input: Font,
-        legalText: Font,
-        ///UIFont
-        titleUI: UIFont,
-        subtitleUI: UIFont,
-        bodyUI: UIFont,
-        labelSmallUI: UIFont,
-        labelLargeUI: UIFont,
-        inputUI: UIFont,
-        legalTextUI: UIFont
+        fontFamily: FontFamily,
+        titleTextStyle: DomainTextStyle,
+        subtitleTextStyle: DomainTextStyle,
+        bodyTextStyle: DomainTextStyle,
+        labelSmallTextStyle: DomainTextStyle,
+        labelLargeTextStyle: DomainTextStyle,
+        inputTextStyle: DomainTextStyle,
+        legalTextTextStyle: DomainTextStyle
     ) {
-        self.titleDp = title
-        self.subtitleDp = subtitle
-        self.bodyDp = body
-        self.labelSmallDp = labelSmall
-        self.labelLargeDp = labelLarge
-        self.inputDp = input
-        self.legalTextDp = legalText
-        ///
-        self.titleUIDp = titleUI
-        self.subtitleUIDp = subtitleUI
-        self.bodyUIDp = bodyUI
-        self.labelSmallUIDp = labelSmallUI
-        self.labelLargeUIDp = labelLargeUI
-        self.inputUIDp = inputUI
-        self.legalTextUIDp = legalTextUI
+        self.fontFamily = fontFamily
+        self.titleTextStyle = titleTextStyle
+        self.subtitleTextStyle = subtitleTextStyle
+        self.bodyTextStyle = bodyTextStyle
+        self.labelSmallTextStyle = labelSmallTextStyle
+        self.labelLargeTextStyle = labelLargeTextStyle
+        self.inputTextStyle = inputTextStyle
+        self.legalTextTextStyle = legalTextTextStyle
+    }
+}
+
+public struct DomainTextStyle {
+    private let fontFamily: DomainTypography.FontFamily?
+    private let fontSizeDP: Int
+    private let lineHeightDp: Int
+    private let fontWeightDp: FontWeight
+
+    public var fontSize: CGFloat {
+        return CGFloat(fontSizeDP)
+    }
+    
+    public var lineSpacing: CGFloat {
+        return CGFloat(lineHeightDp - fontSizeDP)
+    }
+    
+    public var fontWeight: FontWeight {
+        return fontWeightDp
+    }
+    
+    public enum FontWeight: String {
+        case thin
+        case extraLight
+        case light
+        case normal
+        case medium
+        case semiBold
+        case bold
+        case extraBold
+        case black
+    }
+
+    public init(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat,
+        lineHeight: CGFloat,
+        fontWeight: FontWeight
+    ) {
+        self.fontFamily = fontFamily
+        self.fontSizeDP = Int(fontSize)
+        self.lineHeightDp = Int(lineHeight)
+        self.fontWeightDp = fontWeight
+    }
+
+    
+    func toFont(_ mainFontFamily: DomainTypography.FontFamily) -> Font {
+        var _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
+        
+        switch _fontFamily {
+        case .default:
+            return .system(size: fontSize, weight: fontWeight.toSwiftUIFontWeight(), design: .default)
+        case .serif:
+            return .system(size: fontSize, weight: fontWeight.toSwiftUIFontWeight(), design: .serif)
+        case .monospace:
+            return .system(size: fontSize, weight: fontWeight.toSwiftUIFontWeight(), design: .monospaced)
+        case .custom(let name):
+            return .custom(name, size: fontSize)
+        }
+    }
+
+    func toFont(_ mainFontFamily: DomainTypography.FontFamily) -> UIFont {
+        
+        var _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
+        
+        switch _fontFamily {
+        case .default:
+            return UIFont.systemFont(ofSize: fontSize, weight: fontWeight.toUIFontWeight())
+        case .monospace:
+            return UIFont.monospacedSystemFont(ofSize: fontSize, weight: fontWeight.toUIFontWeight())
+        case .serif:
+            let systemFont = UIFont.systemFont(ofSize: fontSize, weight: fontWeight.toUIFontWeight())
+            let descriptor = systemFont.fontDescriptor.withDesign(.serif) ?? systemFont.fontDescriptor
+            return UIFont(descriptor: descriptor, size: fontSize)
+            
+        case .custom(let name):
+            return UIFont(name: name, size: fontSize) ??
+            UIFont.systemFont(
+                ofSize: fontSize,
+                weight: fontWeight.toUIFontWeight()
+            )
+        }
+    }
+}
+
+extension DomainTextStyle.FontWeight {
+    func toSwiftUIFontWeight() -> Font.Weight {
+        switch self {
+        case .thin:
+            return .thin
+        case .extraLight:
+            return .ultraLight
+        case .light:
+            return .light
+        case .normal:
+            return .regular
+        case .medium:
+            return .medium
+        case .semiBold:
+            return .semibold
+        case .bold:
+            return .bold
+        case .extraBold:
+            return .heavy
+        case .black:
+            return .black
+        }
+    }
+
+    func toUIFontWeight() -> UIFont.Weight {
+        switch self {
+        case .thin:
+            return .thin
+        case .extraLight:
+            return .ultraLight
+        case .light:
+            return .light
+        case .normal:
+            return .regular
+        case .medium:
+            return .medium
+        case .semiBold:
+            return .semibold
+        case .bold:
+            return .bold
+        case .extraBold:
+            return .heavy
+        case .black:
+            return .black
+        }
     }
 }
 
 /// Default implementation of `DomainTypography` providing standard text styles.
 public struct DomainTypographyDefaults {
     
-    /// Default font family for all text styles in SwiftUI
-    private static let defaultFont = Font.system(.body, design: .default)
-    
-    /// Default font family for all text styles in UIKit
-    private static let defaultFontUI = UIFont.systemFont(ofSize: 16, weight: .regular)
+    public static let defaultFontFamily: DomainTypography.FontFamily = .default
     
     /// Title text style
-    public static var title: Font {
-        DomainTypographyDefaults.defaultFont
-            .weight(.semibold)
-            .size(22)
-    }
-    
-    public static var titleUI: UIFont {
-        DomainTypographyDefaults
-            .defaultFontUI
-            .withSize(22)
-            .withWeight(.semibold)
+    public static var title: DomainTextStyle {
+        DomainTextStyle(
+            fontFamily: defaultFontFamily,
+            fontSize: 22,
+            lineHeight: 28,
+            fontWeight: .semiBold
+        )
     }
     
     /// Subtitle text style
-    public static var subtitle: Font {
-        DomainTypographyDefaults.defaultFont
-            .weight(.medium)
-            .size(16)
-    }
-    
-    public static var subtitleUI: UIFont {
-        DomainTypographyDefaults
-            .defaultFontUI
-            .withSize(16)
-            .withWeight(.semibold)
+    public static var subtitle: DomainTextStyle {
+        DomainTextStyle(
+            fontFamily: defaultFontFamily,
+            fontSize: 16,
+            lineHeight: 22,
+            fontWeight: .medium
+        )
     }
     
     /// Body text style
-    public static var body: Font {
-        DomainTypographyDefaults.defaultFont
-            .weight(.regular)
-            .size(16)
-    }
-    
-    public static var bodyUI: UIFont {
-        DomainTypographyDefaults
-            .defaultFontUI
-            .withSize(16)
-            .withWeight(.regular)
+    public static var body: DomainTextStyle {
+        DomainTextStyle(
+            fontFamily: defaultFontFamily,
+            fontSize: 16,
+            lineHeight: 22,
+            fontWeight: .normal
+        )
     }
     
     /// Small label text style
-    public static var labelSmall: Font {
-        DomainTypographyDefaults.defaultFont
-            .weight(.regular)
-            .size(14)
-    }
-    
-    public static var labelSmallUI: UIFont {
-        DomainTypographyDefaults
-            .defaultFontUI
-            .withSize(14)
-            .withWeight(.regular)
+    public static var labelSmall: DomainTextStyle {
+        DomainTextStyle(
+            fontFamily: defaultFontFamily,
+            fontSize: 14,
+            lineHeight: 18,
+            fontWeight: .normal
+        )
     }
     
     /// Large label text style
-    public static var labelLarge: Font {
-        DomainTypographyDefaults.defaultFont
-            .weight(.semibold)
-            .size(18)
-    }
-    
-    public static var labelLargeUI: UIFont {
-        DomainTypographyDefaults
-            .defaultFontUI
-            .withSize(18)
-            .withWeight(.semibold)
+    public static var labelLarge: DomainTextStyle {
+        DomainTextStyle(
+            fontFamily: defaultFontFamily,
+            fontSize: 18,
+            lineHeight: 24,
+            fontWeight: .semiBold
+        )
     }
     
     /// Input text style
-    public static var input: Font {
-        DomainTypographyDefaults.defaultFont
-            .weight(.regular)
-            .size(16)
-    }
-    
-    public static var inputUI: UIFont {
-        DomainTypographyDefaults
-            .defaultFontUI
-            .withSize(16)
-            .withWeight(.regular)
+    public static var input: DomainTextStyle {
+        DomainTextStyle(
+            fontFamily: defaultFontFamily,
+            fontSize: 16,
+            lineHeight: 20,
+            fontWeight: .normal
+        )
     }
     
     /// Legal text style
-    public static var legalText: Font {
-        DomainTypographyDefaults
-            .defaultFont
-            .weight(.regular)
-            .size(9)
-    }
-    
-    public static var legalTextUI: UIFont {
-        DomainTypographyDefaults
-            .defaultFontUI
-            .withSize(9)
-            .withWeight(.regular)
+    public static var legalText: DomainTextStyle {
+        DomainTextStyle(
+            fontFamily: defaultFontFamily,
+            fontSize: 9,
+            lineHeight: 11,
+            fontWeight: .normal
+        )
     }
 }

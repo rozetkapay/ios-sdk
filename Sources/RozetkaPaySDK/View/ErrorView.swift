@@ -84,7 +84,11 @@ private extension ErrorView {
                 themeConfigurator
                     .typography
                     .body
-                
+            )
+            .lineSpacing(
+                themeConfigurator
+                    .typography
+                    .bodyLineSpacing
             )
             .multilineTextAlignment(.center)
             .padding(.horizontal)
@@ -117,7 +121,11 @@ private extension ErrorView {
                     .typography
                     .labelLarge
             )
-            .bold()
+            .lineSpacing(
+                themeConfigurator
+                    .typography
+                    .labelLargeLineSpacing
+            )
             .foregroundColor(
                 themeConfigurator
                     .colorScheme(colorScheme)
@@ -156,7 +164,11 @@ private extension ErrorView {
                     .typography
                     .labelLarge
             )
-            .bold()
+            .lineSpacing(
+                themeConfigurator
+                    .typography
+                    .labelLargeLineSpacing
+            )
             .foregroundColor(
                 themeConfigurator
                     .colorScheme(colorScheme)
