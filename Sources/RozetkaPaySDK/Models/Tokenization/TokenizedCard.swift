@@ -9,12 +9,13 @@ import Foundation
 
 public struct TokenizedCard: Codable {
     public let token: String
-    public var name: String?
-    public var expiry: String?
-    public let cardInfo: CardInfo?
+    public let name: String?
+    public let email: String?
+    public let cardInfo: CardInfo
 
     public struct CardInfo: Codable {
-        public let maskedNumber: String?
+        public let maskedNumber: String
+        public let expiresAt: String
         public let paymentSystem: String?
         public let bank: String?
         public let isoA3Code: String?
@@ -23,8 +24,10 @@ public struct TokenizedCard: Codable {
     
     init(
         token: String,
+        expiresAt: String,
+        maskedNumber: String,
         name: String? = nil,
-        maskedNumber: String? = nil,
+        email: String? = nil,
         paymentSystem: String? = nil,
         bank: String? = nil,
         isoA3Code: String? = nil,
@@ -32,31 +35,21 @@ public struct TokenizedCard: Codable {
     ) {
         self.token = token
         self.name = name
+        self.email = email
+
         var _paymentSystem = paymentSystem
         if _paymentSystem.isNilOrEmpty {
             _paymentSystem = ProvideCardPaymentSystemUseCase().invoke(cardNumberPrefix: maskedNumber)?.rawValue
         }
         
-        var _maskedNumber = maskedNumber
-        if let value = _maskedNumber?.isEmptyOrValue {
-            _maskedNumber = CardNumberMask().format(mask: value)
-        }
-        
         self.cardInfo = CardInfo(
-            maskedNumber: _maskedNumber,
+            maskedNumber: maskedNumber,
+            expiresAt: expiresAt,
             paymentSystem: _paymentSystem,
             bank: bank,
             isoA3Code: isoA3Code,
             cardType: cardType
         )
-    }
-    
-    mutating func setup(name: String?) {
-        self.name = name
-    }
-
-    mutating func setup(expiry: String) {
-        self.expiry = expiry
     }
 }
 
@@ -66,8 +59,8 @@ extension TokenizedCard: CustomDebugStringConvertible {
         TokenizedCard(
             token: \(token),
             name: \(name ?? "nil"),
-            expiry: \(expiry ?? "nil"),
-            cardInfo: \(cardInfo?.debugDescription ?? "nil")
+            email: \(email ?? "nil"),
+            cardInfo: \(cardInfo.debugDescription)
         )
         """
     }
@@ -77,7 +70,8 @@ extension TokenizedCard.CardInfo: CustomDebugStringConvertible {
     public var debugDescription: String {
         """
         CardInfo(
-            maskedNumber: \(maskedNumber ?? "nil"),
+            maskedNumber: \(maskedNumber),
+            expiresAt: \(expiresAt),
             paymentSystem: \(paymentSystem ?? "nil"),
             bank: \(bank ?? "nil"),
             isoA3Code: \(isoA3Code ?? "nil"),

@@ -33,6 +33,20 @@ struct TokenizationResponse: Decodable {
         }
     }
     
+    
+    private var cardExpMonth: Int {
+           Calendar.current.component(.month, from: expiresAt)
+       }
+       
+    private var cardExpYear: Int {
+           Calendar.current.component(.year, from: expiresAt) % 100
+       }
+    
+    private var cardExpiry: String {
+        "\(self.cardExpMonth)/\(self.cardExpYear)"
+    }
+    
+    
     private enum CodingKeys: String, CodingKey {
         case token = "token"
         case expiresAt = "expires_at"
@@ -64,10 +78,16 @@ struct TokenizationResponse: Decodable {
 }
 
 extension TokenizationResponse {
-    func convertToTokenizedCard() -> TokenizedCard {
+    func convertToTokenizedCard(
+        cardName: String? = nil,
+        cardEmail: String? = nil
+    ) -> TokenizedCard {
         return TokenizedCard(
             token:  self.token,
+            expiresAt: self.cardExpiry,
             maskedNumber: self.cardMask,
+            name: cardName,
+            email: cardEmail,
             bank: self.issuer.bank,
             isoA3Code: self.issuer.isoA3Code,
             cardType: self.issuer.cardType

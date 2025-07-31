@@ -91,12 +91,8 @@ private extension TokenizationViewModel {
                 
                 switch result {
                 case .complete(let success):
-                    self?.isError = false
-                    var successModel = success
-                    successModel.setup(name: model.cardName)
-                    successModel.setup(expiry: "\(model.cardExpMonth)/\(model.cardExpYear)")
                     self?.onResultCallback?(
-                        .complete(tokenizedCard: successModel)
+                        .complete(tokenizedCard: success)
                     )
                 case .failed(let error):
                     switch error {
