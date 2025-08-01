@@ -11,16 +11,41 @@ import UIKit
 // MARK: - DomainTypography Struct
 
 public struct DomainTypography {
-    private let fontFamily: FontFamily
-    private let titleTextStyle: DomainTextStyle
-    private let subtitleTextStyle: DomainTextStyle
-    private let bodyTextStyle: DomainTextStyle
-    private let labelSmallTextStyle: DomainTextStyle
-    private let labelLargeTextStyle: DomainTextStyle
-    private let inputTextStyle: DomainTextStyle
-    private let legalTextTextStyle: DomainTextStyle
+    private let fontFamilyDp: FontFamily
+    private let titleTextStyleDp: DomainTextStyle
+    private let subtitleTextStyleDp: DomainTextStyle
+    private let bodyTextStyleDp: DomainTextStyle
+    private let labelSmallTextStyleDp: DomainTextStyle
+    private let labelLargeTextStyleDp: DomainTextStyle
+    private let inputTextStyleDp: DomainTextStyle
+    private let legalTextTextStyleDp: DomainTextStyle
     
     ///public
+    public var fontFamily: FontFamily {
+        return fontFamilyDp
+    }
+    public var titleTextStyle: DomainTextStyle {
+        return titleTextStyle
+    }
+    public var subtitleTextStyle: DomainTextStyle {
+        return subtitleTextStyleDp
+    }
+    public var bodyTextStyle: DomainTextStyle {
+        return bodyTextStyleDp
+    }
+    public var labelSmallTextStyle: DomainTextStyle {
+        return labelSmallTextStyleDp
+    }
+    public var labelLargeTextStyle: DomainTextStyle {
+        return labelLargeTextStyleDp
+    }
+    public var inputTextStyle: DomainTextStyle {
+        return inputTextStyleDp
+    }
+    public var legalTextTextStyle: DomainTextStyle {
+        return legalTextTextStyleDp
+    }
+
     public var title: Font {
         return titleTextStyle.toFont(fontFamily)
     }
@@ -91,14 +116,14 @@ public struct DomainTypography {
         inputTextStyle: DomainTextStyle,
         legalTextTextStyle: DomainTextStyle
     ) {
-        self.fontFamily = fontFamily
-        self.titleTextStyle = titleTextStyle
-        self.subtitleTextStyle = subtitleTextStyle
-        self.bodyTextStyle = bodyTextStyle
-        self.labelSmallTextStyle = labelSmallTextStyle
-        self.labelLargeTextStyle = labelLargeTextStyle
-        self.inputTextStyle = inputTextStyle
-        self.legalTextTextStyle = legalTextTextStyle
+        self.fontFamilyDp = fontFamily
+        self.titleTextStyleDp = titleTextStyle
+        self.subtitleTextStyleDp = subtitleTextStyle
+        self.bodyTextStyleDp = bodyTextStyle
+        self.labelSmallTextStyleDp = labelSmallTextStyle
+        self.labelLargeTextStyleDp = labelLargeTextStyle
+        self.inputTextStyleDp = inputTextStyle
+        self.legalTextTextStyleDp = legalTextTextStyle
     }
 }
 
