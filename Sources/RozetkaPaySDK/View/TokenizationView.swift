@@ -59,21 +59,28 @@ private extension TokenizationView {
     var headerView: some View {
         VStack(alignment: .leading) {
             HStack{
-                Text(Localization.rozetka_pay_tokenization_title.description)
-                    .font(
-                        viewModel
-                            .themeConfigurator
-                            .typography
-                            .title
-                    )
-                    .bold()
-                    .foregroundColor(
-                        viewModel
-                            .themeConfigurator
-                            .colorScheme(colorScheme)
-                            .title
-                        
-                    )
+                Text(
+                    Localization.rozetka_pay_tokenization_title.description
+                )
+                .font(
+                    viewModel
+                        .themeConfigurator
+                        .typography
+                        .title
+                )
+                .lineSpacing(
+                    viewModel
+                        .themeConfigurator
+                        .typography
+                        .titleLineSpacing
+                )
+                .foregroundColor(
+                    viewModel
+                        .themeConfigurator
+                        .colorScheme(colorScheme)
+                        .title
+                    
+                )
                 Spacer()
             }
         }
@@ -188,7 +195,12 @@ private extension TokenizationView {
                     .typography
                     .labelLarge
             )
-            .bold()
+            .lineSpacing(
+                viewModel
+                    .themeConfigurator
+                    .typography
+                    .labelLargeLineSpacing
+            )
             .foregroundColor(
                 viewModel
                     .themeConfigurator

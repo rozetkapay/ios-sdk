@@ -29,6 +29,11 @@ struct FieldErrorView: View {
                     .typography
                     .labelSmall
             )
+            .lineSpacing(
+                themeConfigurator
+                    .typography
+                    .labelSmallLineSpacing
+            )
             .foregroundColor(
                 themeConfigurator
                     .colorScheme(colorScheme)

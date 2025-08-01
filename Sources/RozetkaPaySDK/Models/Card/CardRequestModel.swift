@@ -9,10 +9,10 @@
 import UIKit
 
 public struct CardRequestModel: Encodable {
-    public  let cardName: String?
+    private let cardName: String?
     private let cardNumber: String
-    public let cardExpMonth: Int
-    public let cardExpYear: Int
+    private let cardExpMonth: Int
+    private let cardExpYear: Int
     private let cardCvv: String
     private let cardholderName: String?
 
@@ -156,5 +156,13 @@ public struct CardRequestModel: Encodable {
         try container.encodeIfPresent(self.customerEmail, forKey: .customerEmail)
         try container.encodeIfPresent(self.deviceCountry, forKey: .deviceCountry)
         try container.encodeIfPresent(self.deviceCity, forKey: .deviceCity)
+    }
+    
+    func getCustomerEmail() -> String? {
+        customerEmail
+    }
+    
+    func getCardName() -> String? {
+        cardName
     }
 }

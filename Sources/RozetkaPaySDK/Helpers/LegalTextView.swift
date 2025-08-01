@@ -38,11 +38,16 @@ struct LegalTextView: UIViewRepresentable {
             let attributedString = Localization.rozetka_pay_payment_legal_text.description.attributed
             attributedString.replace("%1", attributedString: attributedString, with: agreementLinkString)
             attributedString.replace("%2", attributedString: attributedString, with: companyNameLinkString)
-            attributedString.addAttribute(
-                NSAttributedString.Key.foregroundColor,
-                value: UIColor.systemGray6,
-                range: NSRange(location: 0, length: attributedString.length)
-            )
+
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.lineSpacing = themeConfigurator.typography.legalTextUILineSpacing
+            paragraphStyle.alignment = .center
+
+            attributedString.addAttributes([
+                .foregroundColor: themeConfigurator.colorScheme(colorScheme).placeholder.toUIColor(),
+                .paragraphStyle: paragraphStyle,
+                .font: themeConfigurator.typography.legalTextUI
+            ], range: NSRange(location: 0, length: attributedString.length))
 
             let linkAttributes: [String : Any] = [
                 NSAttributedString.Key.foregroundColor.rawValue: UIColor.systemGray,
@@ -55,8 +60,6 @@ struct LegalTextView: UIViewRepresentable {
             textView.attributedText = attributedString
         }
 
-        textView.font = themeConfigurator.typography.legalTextUI
-        textView.textColor = themeConfigurator.colorScheme(colorScheme).placeholder.toUIColor()
         textView.textAlignment = .center
         textView.isSelectable = true
         textView.isUserInteractionEnabled = true

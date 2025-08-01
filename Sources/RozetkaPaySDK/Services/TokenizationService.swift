@@ -21,7 +21,10 @@ open class TokenizationService {
                 
                 result(
                     .complete(
-                        tokenizedCard: response.convertToTokenizedCard()
+                        tokenizedCard: response.convertToTokenizedCard(
+                            cardName: model.getCardName(),
+                            cardEmail: model.getCustomerEmail()
+                        )
                     )
                 )
                 

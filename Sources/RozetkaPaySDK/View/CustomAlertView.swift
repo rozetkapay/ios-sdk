@@ -16,7 +16,16 @@ struct CustomAlertView: View {
     var body: some View {
         VStack(spacing: 16) {
             Text(item.title)
-                .font(.headline)
+                .font(
+                    themeConfigurator
+                        .typography
+                        .title
+                )
+                .lineSpacing(
+                    themeConfigurator
+                        .typography
+                        .titleLineSpacing
+                )
                 .foregroundColor(item.type.textColor)
                 .padding(.top, 16)
             ZStack {
@@ -27,17 +36,39 @@ struct CustomAlertView: View {
                     .font(.title)
             }
             Text(item.message)
-                .font(.subheadline)
+                .font(
+                    themeConfigurator
+                        .typography
+                        .labelSmall
+                )
+                .lineSpacing(
+                    themeConfigurator
+                        .typography
+                        .labelSmallLineSpacing
+                )
                 .multilineTextAlignment(.center)
                 .foregroundColor(item.type.textColor)
                 .padding(.top, 16)
 
-            Button(Localization.rozetka_pay_custom_alert_view_ok_button.description) {
+            Button(
+                Localization
+                    .rozetka_pay_custom_alert_view_ok_button
+                    .description
+            ) {
                 onDismiss()
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .font(.headline)
+            .font(
+                themeConfigurator
+                    .typography
+                    .labelLarge
+            )
+            .lineSpacing(
+                themeConfigurator
+                    .typography
+                    .labelLargeLineSpacing
+            )
             .background(item.type.buttonColor)
             .foregroundColor(item.type.color)
             .cornerRadius(themeConfigurator.sizes.buttonCornerRadius)
