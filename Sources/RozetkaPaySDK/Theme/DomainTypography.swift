@@ -25,7 +25,7 @@ public struct DomainTypography {
         return fontFamilyDp
     }
     public var titleTextStyle: DomainTextStyle {
-        return titleTextStyle
+        return titleTextStyleDp
     }
     public var subtitleTextStyle: DomainTextStyle {
         return subtitleTextStyleDp
@@ -46,6 +46,7 @@ public struct DomainTypography {
         return legalTextTextStyleDp
     }
 
+    ///font and spacing
     public var title: Font {
         return titleTextStyle.toFont(fontFamily)
     }
