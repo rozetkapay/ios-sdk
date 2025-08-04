@@ -116,12 +116,6 @@ private extension TokenizationFormView {
                     .typography
                     .labelLarge
             )
-            .lineSpacing(
-                viewModel
-                    .themeConfigurator
-                    .typography
-                    .labelLargeLineSpacing
-            )
             .foregroundColor(
                 viewModel
                     .themeConfigurator

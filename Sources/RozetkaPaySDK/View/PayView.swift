@@ -14,7 +14,6 @@ public struct PayView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: PayViewModel
-//    @State private var isScrollEnabled: Bool = true
     @State private var contentHeight: CGFloat = .zero
     
     //MARK: - Inits
@@ -197,12 +196,6 @@ private extension PayView {
                             .typography
                             .title
                     )
-                    .lineSpacing(
-                        viewModel
-                            .themeConfigurator
-                            .typography
-                            .titleLineSpacing
-                    )
                     .foregroundColor(
                         viewModel
                             .themeConfigurator
@@ -243,12 +236,6 @@ private extension PayView {
                     .themeConfigurator
                     .typography
                     .labelLarge
-            )
-            .lineSpacing(
-                viewModel
-                    .themeConfigurator
-                    .typography
-                    .labelLargeLineSpacing
             )
             .foregroundColor(
                 viewModel

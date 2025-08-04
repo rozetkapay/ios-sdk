@@ -40,7 +40,6 @@ struct LegalTextView: UIViewRepresentable {
             attributedString.replace("%2", attributedString: attributedString, with: companyNameLinkString)
 
             let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.lineSpacing = themeConfigurator.typography.legalTextUILineSpacing
             paragraphStyle.alignment = .center
 
             attributedString.addAttributes([

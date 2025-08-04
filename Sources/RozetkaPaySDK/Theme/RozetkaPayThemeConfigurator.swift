@@ -173,15 +173,14 @@ public struct RozetkaPayDomainThemeDefaults {
     
     public static func typography(
         fontFamily: DomainTypography.FontFamily = DomainTypographyDefaults.defaultFontFamily,
-        titleTextStyle: DomainTextStyle = DomainTypographyDefaults.title,
-        subtitleTextStyle: DomainTextStyle = DomainTypographyDefaults.subtitle,
-        bodyTextStyle: DomainTextStyle = DomainTypographyDefaults.body,
-        labelSmallTextStyle: DomainTextStyle = DomainTypographyDefaults.labelSmall,
-        labelLargeTextStyle: DomainTextStyle = DomainTypographyDefaults.labelLarge,
-        inputTextStyle: DomainTextStyle = DomainTypographyDefaults.input,
-        legalTextTextStyle: DomainTextStyle = DomainTypographyDefaults.legalText
+        titleTextStyle: DomainTextStyle = DomainTypographyDefaults.title(),
+        subtitleTextStyle: DomainTextStyle = DomainTypographyDefaults.subtitle(),
+        bodyTextStyle: DomainTextStyle = DomainTypographyDefaults.body(),
+        labelSmallTextStyle: DomainTextStyle = DomainTypographyDefaults.labelSmall(),
+        labelLargeTextStyle: DomainTextStyle = DomainTypographyDefaults.labelLarge(),
+        inputTextStyle: DomainTextStyle = DomainTypographyDefaults.input(),
+        legalTextTextStyle: DomainTextStyle = DomainTypographyDefaults.legalText()
     ) -> DomainTypography {
-        
         return DomainTypography(
             fontFamily: fontFamily,
             titleTextStyle: titleTextStyle,
