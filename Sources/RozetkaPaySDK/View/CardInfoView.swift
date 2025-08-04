@@ -113,11 +113,6 @@ public struct CardInfoView: View {
                                     .typography
                                     .subtitle
                             )
-                            .lineSpacing(
-                                themeConfigurator
-                                    .typography
-                                    .subtitleLineSpacing
-                            )
                             .foregroundColor(
                                 themeConfigurator
                                     .colorScheme(colorScheme)

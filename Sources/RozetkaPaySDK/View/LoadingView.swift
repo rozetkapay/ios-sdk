@@ -33,11 +33,6 @@ struct LoadingView: View {
                         .typography
                         .body
                 )
-                .lineSpacing(
-                    themeConfigurator
-                        .typography
-                        .bodyLineSpacing
-                )
         }
         .padding(40)
         .background(

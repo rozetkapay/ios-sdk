@@ -68,12 +68,6 @@ private extension TokenizationView {
                         .typography
                         .title
                 )
-                .lineSpacing(
-                    viewModel
-                        .themeConfigurator
-                        .typography
-                        .titleLineSpacing
-                )
                 .foregroundColor(
                     viewModel
                         .themeConfigurator
@@ -195,12 +189,6 @@ private extension TokenizationView {
                     .typography
                     .labelLarge
             )
-            .lineSpacing(
-                viewModel
-                    .themeConfigurator
-                    .typography
-                    .labelLargeLineSpacing
-            )
             .foregroundColor(
                 viewModel
                     .themeConfigurator
@@ -258,5 +246,6 @@ private extension TokenizationView {
         ),
         onResultCallback: {
             _ in
-        })
+        }
+    )
 }

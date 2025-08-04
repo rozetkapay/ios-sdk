@@ -48,57 +48,34 @@ public struct DomainTypography {
 
     ///font and spacing
     public var title: Font {
+        let f: Font = titleTextStyle.toFont(fontFamily)
         return titleTextStyle.toFont(fontFamily)
-    }
-    
-    public var titleLineSpacing: CGFloat {
-        return titleTextStyle.lineSpacing
     }
     
     public var subtitle: Font {
         return subtitleTextStyle.toFont(fontFamily)
     }
     
-    public var subtitleLineSpacing: CGFloat {
-        return subtitleTextStyle.lineSpacing
-    }
-    
     public var body: Font {
         return bodyTextStyle.toFont(fontFamily)
-    }
-    
-    public var bodyLineSpacing: CGFloat {
-        return bodyTextStyle.lineSpacing
     }
     
     public var labelSmall: Font {
         return labelSmallTextStyle.toFont(fontFamily)
     }
     
-    public var labelSmallLineSpacing: CGFloat {
-        return labelSmallTextStyle.lineSpacing
-    }
-    
     public var labelLarge: Font {
         return labelLargeTextStyle.toFont(fontFamily)
     }
-    
-    public var labelLargeLineSpacing: CGFloat {
-        return labelLargeTextStyle.lineSpacing
-    }
 
     public var inputUI: UIFont {
-        return inputTextStyle.toFont(fontFamily)
+        return inputTextStyle.toUIFont(fontFamily)
     }
     
     public var legalTextUI: UIFont {
-        return legalTextTextStyle.toFont(fontFamily)
+        return legalTextTextStyle.toUIFont(fontFamily)
     }
-    
-    public var legalTextUILineSpacing: CGFloat {
-        return legalTextTextStyle.lineSpacing
-    }
-    
+  
     ///FontFamily
     public enum FontFamily {
         case `default`
@@ -131,15 +108,10 @@ public struct DomainTypography {
 public struct DomainTextStyle {
     private let fontFamily: DomainTypography.FontFamily?
     private let fontSizeDP: Int
-    private let lineHeightDp: Int
     private let fontWeightDp: FontWeight
 
     public var fontSize: CGFloat {
         return CGFloat(fontSizeDP)
-    }
-    
-    public var lineSpacing: CGFloat {
-        return CGFloat(lineHeightDp - fontSizeDP)
     }
     
     public var fontWeight: FontWeight {
@@ -161,15 +133,12 @@ public struct DomainTextStyle {
     public init(
         fontFamily: DomainTypography.FontFamily? = nil,
         fontSize: CGFloat,
-        lineHeight: CGFloat,
-        fontWeight: FontWeight
+        fontWeight: FontWeight = .normal
     ) {
         self.fontFamily = fontFamily
         self.fontSizeDP = Int(fontSize)
-        self.lineHeightDp = Int(lineHeight)
         self.fontWeightDp = fontWeight
     }
-
     
     func toFont(_ mainFontFamily: DomainTypography.FontFamily) -> Font {
         var _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
@@ -186,7 +155,7 @@ public struct DomainTextStyle {
         }
     }
 
-    func toFont(_ mainFontFamily: DomainTypography.FontFamily) -> UIFont {
+    func toUIFont(_ mainFontFamily: DomainTypography.FontFamily) -> UIFont {
         
         var _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
         
@@ -264,72 +233,94 @@ public struct DomainTypographyDefaults {
     public static let defaultFontFamily: DomainTypography.FontFamily = .default
     
     /// Title text style
-    public static var title: DomainTextStyle {
+    public static func title(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat = 22,
+        fontWeight: DomainTextStyle.FontWeight = .semiBold
+    ) -> DomainTextStyle {
         DomainTextStyle(
-            fontFamily: defaultFontFamily,
-            fontSize: 22,
-            lineHeight: 28,
-            fontWeight: .semiBold
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight
         )
     }
     
+    
     /// Subtitle text style
-    public static var subtitle: DomainTextStyle {
+    public static func subtitle(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat = 16,
+        fontWeight: DomainTextStyle.FontWeight = .medium
+    ) -> DomainTextStyle {
         DomainTextStyle(
-            fontFamily: defaultFontFamily,
-            fontSize: 16,
-            lineHeight: 22,
-            fontWeight: .medium
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight
         )
     }
     
     /// Body text style
-    public static var body: DomainTextStyle {
+    public static func body(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat = 16,
+        fontWeight: DomainTextStyle.FontWeight = .normal
+    ) -> DomainTextStyle {
         DomainTextStyle(
-            fontFamily: defaultFontFamily,
-            fontSize: 16,
-            lineHeight: 22,
-            fontWeight: .normal
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight
         )
     }
     
     /// Small label text style
-    public static var labelSmall: DomainTextStyle {
+    public static func labelSmall(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat = 14,
+        fontWeight: DomainTextStyle.FontWeight = .normal
+    ) -> DomainTextStyle {
         DomainTextStyle(
-            fontFamily: defaultFontFamily,
-            fontSize: 14,
-            lineHeight: 18,
-            fontWeight: .normal
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight
         )
     }
     
     /// Large label text style
-    public static var labelLarge: DomainTextStyle {
+    public static func labelLarge(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat = 18,
+        fontWeight: DomainTextStyle.FontWeight = .semiBold
+    ) -> DomainTextStyle {
         DomainTextStyle(
-            fontFamily: defaultFontFamily,
-            fontSize: 18,
-            lineHeight: 24,
-            fontWeight: .semiBold
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight
         )
     }
     
     /// Input text style
-    public static var input: DomainTextStyle {
+    public static func input(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat = 16,
+        fontWeight: DomainTextStyle.FontWeight = .normal
+    ) -> DomainTextStyle {
         DomainTextStyle(
-            fontFamily: defaultFontFamily,
-            fontSize: 16,
-            lineHeight: 20,
-            fontWeight: .normal
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight
         )
     }
-    
+   
     /// Legal text style
-    public static var legalText: DomainTextStyle {
+    public static func legalText(
+        fontFamily: DomainTypography.FontFamily? = nil,
+        fontSize: CGFloat = 9,
+        fontWeight: DomainTextStyle.FontWeight = .normal
+    ) -> DomainTextStyle {
         DomainTextStyle(
-            fontFamily: defaultFontFamily,
-            fontSize: 9,
-            lineHeight: 11,
-            fontWeight: .normal
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fontWeight: fontWeight
         )
     }
 }

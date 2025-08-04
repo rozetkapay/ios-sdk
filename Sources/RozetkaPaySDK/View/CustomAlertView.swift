@@ -21,11 +21,6 @@ struct CustomAlertView: View {
                         .typography
                         .title
                 )
-                .lineSpacing(
-                    themeConfigurator
-                        .typography
-                        .titleLineSpacing
-                )
                 .foregroundColor(item.type.textColor)
                 .padding(.top, 16)
             ZStack {
@@ -40,11 +35,6 @@ struct CustomAlertView: View {
                     themeConfigurator
                         .typography
                         .labelSmall
-                )
-                .lineSpacing(
-                    themeConfigurator
-                        .typography
-                        .labelSmallLineSpacing
                 )
                 .multilineTextAlignment(.center)
                 .foregroundColor(item.type.textColor)
@@ -63,11 +53,6 @@ struct CustomAlertView: View {
                 themeConfigurator
                     .typography
                     .labelLarge
-            )
-            .lineSpacing(
-                themeConfigurator
-                    .typography
-                    .labelLargeLineSpacing
             )
             .background(item.type.buttonColor)
             .foregroundColor(item.type.color)
@@ -120,7 +105,7 @@ extension View {
         item: CustomAlertItem(
             type: .custom(emoji: "😋"),
             title: "Oops!",
-            message: "Something went wrong"
+            message: "Something went wrong Something went wrong Something went wrong Something went wrong Something went wrong"
         ),
         onDismiss: {
         }
