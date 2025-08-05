@@ -48,7 +48,6 @@ public struct DomainTypography {
 
     ///font and spacing
     public var title: Font {
-        let f: Font = titleTextStyle.toFont(fontFamily)
         return titleTextStyle.toFont(fontFamily)
     }
     
@@ -130,6 +129,7 @@ public struct DomainTextStyle {
         case black
     }
 
+    //MARK: - Inits
     public init(
         fontFamily: DomainTypography.FontFamily? = nil,
         fontSize: CGFloat,
@@ -140,8 +140,42 @@ public struct DomainTextStyle {
         self.fontWeightDp = fontWeight
     }
     
+    public init(from uiFont: UIFont) {
+        self.fontSizeDP = Int(uiFont.pointSize)
+        
+        let traits = uiFont.fontDescriptor.object(forKey: .traits) as? [UIFontDescriptor.TraitKey: Any]
+        let weightValue = traits?[.weight] as? CGFloat ?? 0.0
+        self.fontWeightDp = FontWeight.from(weightValue: weightValue)
+        
+        let systemFonts = [
+            "SF Pro",
+            "SF UI",
+            "San Francisco",
+            ".SFUI",
+            ".SFUIText",
+            ".SFPro"
+        ]
+        let family = uiFont.familyName
+        let isSystemFont = systemFonts.contains {
+            family.contains($0) || uiFont.fontName.contains($0)
+        }
+        
+        if isSystemFont {
+            self.fontFamily = .default
+        } else if uiFont.fontName.lowercased().contains("mono") {
+            self.fontFamily = .monospace
+        } else if uiFont.fontName.lowercased().contains("serif") {
+            self.fontFamily = .serif
+        } else {
+            self.fontFamily = .custom(name: uiFont.fontName)
+        }
+    }
+}
+   
+extension DomainTextStyle {
     func toFont(_ mainFontFamily: DomainTypography.FontFamily) -> Font {
-        var _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
+        
+        let _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
         
         switch _fontFamily {
         case .default:
@@ -156,9 +190,9 @@ public struct DomainTextStyle {
     }
 
     func toUIFont(_ mainFontFamily: DomainTypography.FontFamily) -> UIFont {
-        
-        var _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
-        
+       
+        let _fontFamily: DomainTypography.FontFamily = fontFamily ?? mainFontFamily
+       
         switch _fontFamily {
         case .default:
             return UIFont.systemFont(ofSize: fontSize, weight: fontWeight.toUIFontWeight())
@@ -222,6 +256,29 @@ extension DomainTextStyle.FontWeight {
         case .extraBold:
             return .heavy
         case .black:
+            return .black
+        }
+    }
+    
+    static func from(weightValue: CGFloat) -> DomainTextStyle.FontWeight {
+        switch weightValue {
+        case ..<(-0.7):
+            return .thin
+        case ..<(-0.5):
+            return .extraLight
+        case ..<(-0.3):
+            return .light
+        case ..<0.15:
+            return .normal
+        case ..<0.26:
+            return .medium
+        case ..<0.35:
+            return .semiBold
+        case ..<0.5:
+            return .bold
+        case ..<0.7:
+            return .extraBold
+        default:
             return .black
         }
     }
