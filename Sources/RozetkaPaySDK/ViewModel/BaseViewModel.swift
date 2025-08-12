@@ -143,14 +143,15 @@ class BaseViewModel: ObservableObject {
     }
     
     func setTestData() {
-    #if DEBUG
-        cardName = "test"
-        cardNumber = "4242 4242 4242 4242"
-        expiryDate = "12/29"
-        cvv = "123"
-        cardholderName = "Test Test"
-        email = "test@test.com"
-    #endif
+        #warning("MOC DATA")
+//    #if DEBUG
+//        cardName = "test"
+//        cardNumber = "4242 4242 4242 4242"
+//        expiryDate = "12/29"
+//        cvv = "123"
+//        cardholderName = "Test Test"
+//        email = "test@test.com"
+//    #endif
     }
     
     

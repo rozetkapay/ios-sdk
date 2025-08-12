@@ -14,6 +14,9 @@ class CardNumberValidator: Validator {
     /// The maximum length for a valid card number.
     static let MAX_CARD_NUMBER_LENGTH = 19
     
+    /// The maximum length for a valid card number with spaces.
+    static let MAX_CARD_NUMBER_LENGTH_WITH_SPACES = 23
+    
     /// Validates the provided card number string.
     ///
     /// - Parameter value: The card number string to be validated.
