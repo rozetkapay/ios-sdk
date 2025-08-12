@@ -366,7 +366,7 @@ private extension CardInfoView {
                     .toUIColor(),
                 contentType: .dateTime,
                 keyboardType: .numberPad,
-                maxLength: CardNumberValidator.MAX_CARD_NUMBER_LENGTH,
+                maxLength: CardNumberValidator.MAX_CARD_NUMBER_LENGTH_WITH_SPACES,
                 validators: ValidatorsComposer(validators: [
                     CardNumberValidator()
                 ]),
