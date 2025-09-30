@@ -16,13 +16,20 @@ struct ThreeDSView: View {
     @Binding var isPresented: Bool
     @StateObject var viewModel: ThreeDSViewModel
     
+    private let accessibilityNamespace: String
+    private var tags: AccessibilityTag.ThreeDS {
+        AccessibilityTag.ThreeDS(namespace: accessibilityNamespace)
+    }
+    
     //MARK: - Init
     init(
+        accessibilityNamespace: String,
         themeConfigurator: RozetkaPayThemeConfigurator,
         request: ThreeDSRequest,
         isPresented: Binding<Bool>,
         onResultCallback: @escaping ThreeDSCompletionHandler
     ) {
+        self.accessibilityNamespace = accessibilityNamespace
         self._isPresented = isPresented
         let wrappedCallback: ThreeDSCompletionHandler = { result in
             isPresented.wrappedValue = false
@@ -71,6 +78,7 @@ private extension ThreeDSView {
             ThreeDSWebViewWrapper(
                 viewModel: viewModel
             )
+            .accessibilityIdentifier(tags.webViewWrapper)
         }
         .padding()
         .navigationBarItems(
@@ -97,6 +105,7 @@ private extension ThreeDSView {
                     .appBarIcon
             )
         }
+        .accessibilityIdentifier(tags.closeButton)
     }
     
     ///
@@ -107,13 +116,18 @@ private extension ThreeDSView {
                 .colorScheme(colorScheme)
                 .surface.opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView (themeConfigurator: viewModel.themeConfigurator)
+            LoadingView (
+                accessibilityNamespace: tags.transitionBase,
+                themeConfigurator: viewModel.themeConfigurator
+            )
+            .accessibilityIdentifier(tags.loadingView)
         }
     }
     
     ///О
     var errorView: some View {
         ErrorView(
+            accessibilityNamespace: tags.transitionBase,
             themeConfigurator: viewModel.themeConfigurator,
             errorMessage: viewModel.error?.localizedDescription,
             onCancel: {
@@ -121,6 +135,7 @@ private extension ThreeDSView {
             },
             isButtonRetryEnabled: false
         )
+        .accessibilityIdentifier(tags.errorView)
         .padding()
     }
 }

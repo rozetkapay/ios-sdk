@@ -16,13 +16,16 @@ struct ThreeDSHandlerView: View {
     @Binding private var isPresented: Bool
     private let request: ThreeDSRequest
     private let onResultCallback: ThreeDSCompletionHandler
+    private let accessibilityNamespace: String
     
     init(
+        accessibilityNamespace: String,
         themeConfigurator: RozetkaPayThemeConfigurator,
         request: ThreeDSRequest,
         isPresented: Binding<Bool>,
         onResultCallback: @escaping ThreeDSCompletionHandler
     ) {
+        self.accessibilityNamespace = accessibilityNamespace
         self.themeConfigurator = themeConfigurator
         self.request = request
         self.onResultCallback = onResultCallback
@@ -31,6 +34,7 @@ struct ThreeDSHandlerView: View {
     
     var body: some View {
         ThreeDSView(
+            accessibilityNamespace: accessibilityNamespace,
             themeConfigurator: themeConfigurator,
             request: request,
             isPresented: $isPresented,
@@ -56,6 +60,7 @@ struct ThreeDSHandlerView: View {
     @State var show3DS = false
     
     ThreeDSHandlerView(
+        accessibilityNamespace: "test",
         themeConfigurator: RozetkaPayThemeConfigurator(),
         request: ThreeDSRequest(
             externalId: "test",

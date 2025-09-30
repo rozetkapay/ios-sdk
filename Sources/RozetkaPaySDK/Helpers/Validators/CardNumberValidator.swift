@@ -23,7 +23,9 @@ class CardNumberValidator: Validator {
     /// - Returns: A `ValidationResult` indicating whether the card number is valid or contains errors.
     override func validate(value: String?) -> ValidationResult {
         guard let value = value.isNilOrEmptyValue else {
-            return .error(message: Localization.rozetka_pay_form_validation_card_number_empty.description)
+            return .invalid(
+                message: Localization.rozetka_pay_form_validation_card_number_empty.description
+            )
         }
         
         let _value = value.replacingOccurrences(of: " ", with: "")
@@ -34,9 +36,11 @@ class CardNumberValidator: Validator {
             && validateCardNumberWithLuhnAlgorithm(cardNumber: _value)
         
         if isValid {
-            return .valid
+            return .valid(value: value)
         } else {
-            return .error(message: Localization.rozetka_pay_form_validation_card_number_incorrect.description)
+            return .invalid(
+                message: Localization.rozetka_pay_form_validation_card_number_incorrect.description
+            )
         }
     }
     

@@ -15,7 +15,9 @@ public struct PayView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: PayViewModel
     @State private var contentHeight: CGFloat = .zero
-    
+    private var tags: AccessibilityTag.Pay {
+        AccessibilityTag.Pay()
+    }
     //MARK: - Inits
     public init(
         paymentParameters: PaymentParameters,
@@ -113,13 +115,18 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .surface.opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView (themeConfigurator: viewModel.themeConfigurator)
+            LoadingView (
+                accessibilityNamespace: tags.base,
+                themeConfigurator: viewModel.themeConfigurator
+            )
+                .accessibilityIdentifier(tags.loadingView)
         }
     }
     
     ///
     var errorView: some View {
         ErrorView(
+            accessibilityNamespace: tags.base,
             themeConfigurator: viewModel.themeConfigurator,
             errorMessage: viewModel.errorMessage,
             onCancel: {
@@ -130,23 +137,28 @@ private extension PayView {
             },
             isButtonRetryEnabled: viewModel.getIsRetryEnabled()
         )
+        .accessibilityIdentifier(tags.errorView)
         .padding()
     }
     
     ///
-    @ViewBuilder var threeDSView: some View {
+    @ViewBuilder
+    var threeDSView: some View {
         if let request = viewModel.getThreeDSModel() {
             ThreeDSHandlerView(
+                accessibilityNamespace: tags.base,
                 themeConfigurator: viewModel.themeConfigurator,
                 request: request,
                 isPresented: $viewModel.isThreeDSConfirmationPresented,
                 onResultCallback: viewModel.handleThreeDSResult
             )
+            .accessibilityIdentifier(tags.threeDSView)
         }
     }
     ///
     var cardInfoView: some View {
         CardInfoView(
+            accessibilityNamespace: tags.base,
             viewParameters: viewModel.viewParameters,
             themeConfigurator: viewModel.themeConfigurator,
             cardNumber: $viewModel.cardNumber,
@@ -155,14 +167,14 @@ private extension PayView {
             cardName: $viewModel.cardName,
             cardholderName: $viewModel.cardholderName,
             email: $viewModel.email,
-            errorMessageCardNumber: $viewModel.errorMessageCardNumber,
-            errorMessageCvv: $viewModel.errorMessageCvv,
-            errorMessageExpiryDate: $viewModel.errorMessageExpiryDate,
-            errorMessageCardName: $viewModel.errorMessageCardName,
-            errorMessageCardholderName: $viewModel.errorMessageCardholderName,
-            errorMessageEmail: $viewModel.errorMessageEmail
+            cardNumberStatus: $viewModel.cardNumberStatus,
+            cvvStatus: $viewModel.cvvStatus,
+            expiryDateStatus: $viewModel.expiryDateStatus,
+            cardNameStatus: $viewModel.cardNameStatus,
+            cardholderNameStatus: $viewModel.cardholderNameStatus,
+            emailStatus: $viewModel.emailStatus
         )
-        
+        .accessibilityIdentifier(tags.cardInfoView)
     }
     
     ///
@@ -184,12 +196,14 @@ private extension PayView {
                     .appBarIcon
             )
         }
+        .accessibilityIdentifier(tags.closeButton)
     }
     
     var headerView: some View {
         VStack(alignment: .leading) {
             HStack{
                 Text(Localization.rozetka_pay_payment_title.description)
+                    .accessibilityIdentifier(tags.headerTitle)
                     .font(
                         viewModel
                             .themeConfigurator
@@ -212,7 +226,9 @@ private extension PayView {
     var footerView: some View {
         VStack(spacing: viewModel.getVStackSpacing()) {
             CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
+                .accessibilityIdentifier(tags.cardInfoFooter)
             LegalTextView(themeConfigurator: viewModel.themeConfigurator)
+                .accessibilityIdentifier(tags.legalView)
         }
         .padding(.top,
                  viewModel
@@ -245,6 +261,7 @@ private extension PayView {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .accessibilityIdentifier(tags.cardPayButton)
         .frame(height:
                 viewModel
             .themeConfigurator
@@ -285,6 +302,7 @@ private extension PayView {
                 .colorScheme(colorScheme)
                 .applePayButtonStyle
         )
+        .accessibilityIdentifier(tags.applePayButton)
         .frame(
             height:
                 viewModel

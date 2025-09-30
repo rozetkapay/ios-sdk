@@ -17,7 +17,7 @@ class OptionalStringValidator: Validator {
     
     override func validate(value: String?) -> ValidationResult {
         if value.isNilOrBlank {
-            return .valid
+            return .valid(value: value)
         } else {
             return validator.validate(value: value)
         }

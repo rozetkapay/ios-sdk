@@ -11,9 +11,11 @@ class CardNameValidator: Validator {
 
     override func validate(value: String?) -> ValidationResult {
         if value.isNilOrBlank {
-            return .error(message: Localization.rozetka_pay_form_validation_card_name_empty.description)
+            return .invalid(
+                message: Localization.rozetka_pay_form_validation_card_name_empty.description
+            )
         } else {
-            return .valid
+            return .valid(value: value)
         }
     }
 }

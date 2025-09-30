@@ -7,29 +7,32 @@
 
 import Foundation
 
-public typealias ValidationTextFieldResult = (ValidationResult)->()
-
 public class Validator {
     func validate(value: String?) -> ValidationResult {
         fatalError("This method should be overridden")
     }
-
-    func isValid(value: String?) -> Bool {
-        return validate(value: value).isValid
-    }
 }
 
 public enum ValidationResult {
-    case valid
-    case error(message: String)
+    case none
+    case valid(value: String?)
+    case invalid(message: String)
+}
 
-    var isValid: Bool {
-        switch self {
-        case .valid:
-            return true
-        case .error:
-            return false
+public extension ValidationResult {
+
+    var errorMessage: String? {
+        if case let .invalid(message) = self {
+            return message
         }
+        return nil
+    }
+    
+    var value: String? {
+        if case let .valid(value) = self {
+            return value
+        }
+        return nil
     }
 }
 
@@ -47,10 +50,10 @@ public final class ValidatorsComposer: Validator {
     override func validate(value: String?) -> ValidationResult {
         for validator in allValidators {
             let validationResult = validator.validate(value: value)
-            if case .error = validationResult {
+            if case .invalid = validationResult {
                 return validationResult
             }
         }
-        return .valid
+        return .valid(value: value)
     }
 }

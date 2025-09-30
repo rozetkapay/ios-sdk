@@ -22,24 +22,35 @@ class CardExpirationDateValidator: Validator {
     }
     
     override func validate(value: String?) -> ValidationResult {
+        guard let value = value.isNilOrEmptyValue else {
+            return .invalid(
+                message: Localization.rozetka_pay_form_validation_exp_date_empty.description
+            )
+        }
         
-        guard let value = value.isNilOrEmptyValue,
-              let expDate = CardExpirationDate(rawString: value)
-        else {
-            return .error(message: Localization.rozetka_pay_form_validation_exp_date_invalid.description)
+        guard let expDate = CardExpirationDate(rawString: value) else {
+            return .invalid(
+                message: Localization.rozetka_pay_form_validation_exp_date_incorrect.description
+            )
         }
         
         guard (1...12).contains(expDate.month) else {
-            return .error(message: Localization.rozetka_pay_form_validation_exp_date_invalid.description)
+            return .invalid(
+                message: Localization.rozetka_pay_form_validation_exp_date_incorrect.description
+            )
         }
         
         let currentDate = currentLocalDateProvider()
         
-        switch expirationValidationRule.validate(currentDate: currentDate, expYear: expDate.year, expMonth: expDate.month) {
+        switch expirationValidationRule.validate(
+            currentDate: currentDate,
+            expYear: expDate.year,
+            expMonth: expDate.month
+        ) {
         case true:
-            return .valid
+            return .valid(value: value)
         case false:
-            return .error(message: Localization.rozetka_pay_form_validation_exp_date_expired.description)
+            return .invalid(message: Localization.rozetka_pay_form_validation_exp_date_expired.description)
         }
         
     }

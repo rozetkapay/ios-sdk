@@ -12,7 +12,9 @@ public struct TokenizationView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: TokenizationViewModel
-    
+    private var tags: AccessibilityTag.Tokenization {
+        AccessibilityTag.Tokenization()
+    }
     //MARK: - Init
     public init(
         parameters: TokenizationParameters,
@@ -62,6 +64,7 @@ private extension TokenizationView {
                 Text(
                     Localization.rozetka_pay_tokenization_title.description
                 )
+                .accessibilityIdentifier(tags.headerTitle)
                 .font(
                     viewModel
                         .themeConfigurator
@@ -106,12 +109,17 @@ private extension TokenizationView {
                 .surface
                 .opacity(0.8)
                 .ignoresSafeArea()
-            LoadingView (themeConfigurator: viewModel.themeConfigurator)
+            LoadingView (
+                accessibilityNamespace: tags.base,
+                themeConfigurator: viewModel.themeConfigurator
+            )
+                .accessibilityIdentifier(tags.loadingView)
         }
     }
     ///
     var errorView: some View {
         ErrorView(
+            accessibilityNamespace: tags.base,
             themeConfigurator: viewModel.themeConfigurator,
             errorMessage: viewModel.errorMessage,
             onCancel: {
@@ -121,12 +129,14 @@ private extension TokenizationView {
                 viewModel.retryLoading()
             }
         )
+        .accessibilityIdentifier(tags.errorView)
         .padding()
     }
     
     ///
     var cardInfoView: some View {
         CardInfoView(
+            accessibilityNamespace: tags.base,
             viewParameters: viewModel.viewParameters,
             themeConfigurator: viewModel.themeConfigurator,
             cardNumber: $viewModel.cardNumber,
@@ -135,13 +145,14 @@ private extension TokenizationView {
             cardName: $viewModel.cardName,
             cardholderName: $viewModel.cardholderName,
             email: $viewModel.email,
-            errorMessageCardNumber: $viewModel.errorMessageCardNumber,
-            errorMessageCvv: $viewModel.errorMessageCvv,
-            errorMessageExpiryDate: $viewModel.errorMessageExpiryDate,
-            errorMessageCardName: $viewModel.errorMessageCardName,
-            errorMessageCardholderName: $viewModel.errorMessageCardholderName,
-            errorMessageEmail: $viewModel.errorMessageEmail
+            cardNumberStatus: $viewModel.cardNumberStatus,
+            cvvStatus: $viewModel.cvvStatus,
+            expiryDateStatus: $viewModel.expiryDateStatus,
+            cardNameStatus: $viewModel.cardNameStatus,
+            cardholderNameStatus: $viewModel.cardholderNameStatus,
+            emailStatus: $viewModel.emailStatus
         )
+        .accessibilityIdentifier(tags.cardInfoView)
         .padding(.top, viewModel.getVStackSpacing())
     }
     ///
@@ -163,10 +174,13 @@ private extension TokenizationView {
                     .appBarIcon
             )
         }
+        .accessibilityIdentifier(tags.closeButton)
     }
+    
     ///
     var legalView: some View {
         CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
+            .accessibilityIdentifier(tags.cardInfoFooter)
             .padding(.top,
                      viewModel
                         .themeConfigurator
@@ -197,6 +211,7 @@ private extension TokenizationView {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .accessibilityIdentifier(tags.mainButton)
         .frame(height:
             viewModel
                 .themeConfigurator

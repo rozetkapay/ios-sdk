@@ -120,6 +120,23 @@
         }
       }
     },
+    "rozetka_pay_form_card_name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Card name"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назва картки"
+          }
+        }
+      }
+    },
     "rozetka_pay_form_card_number" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -205,19 +222,19 @@
         }
       }
     },
-    "rozetka_pay_form_optional_card_name" : {
+    "rozetka_pay_form_optional" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Card name"
+            "value" : "(optional)"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Назва картки"
+            "value" : "(не обов'язково)"
           }
         }
       }
@@ -307,6 +324,23 @@
         }
       }
     },
+    "rozetka_pay_form_validation_cvv_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CVV can't be empty"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CVV не може бути пустим"
+          }
+        }
+      }
+    },
     "rozetka_pay_form_validation_cvv_incorrect" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -320,6 +354,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Неправильне значення CVV"
+          }
+        }
+      }
+    },
+    "rozetka_pay_form_validation_email_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email can't be empty"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email не може бути пустим"
           }
         }
       }
@@ -341,6 +392,23 @@
         }
       }
     },
+    "rozetka_pay_form_validation_exp_date_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expiration date can't be empty"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дата закінчення терміну дії не може бути пустим"
+          }
+        }
+      }
+    },
     "rozetka_pay_form_validation_exp_date_expired" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -358,7 +426,7 @@
         }
       }
     },
-    "rozetka_pay_form_validation_exp_date_invalid" : {
+    "rozetka_pay_form_validation_exp_date_incorrect" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {

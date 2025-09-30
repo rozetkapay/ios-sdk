@@ -9,7 +9,9 @@ import UIKit
 import SwiftUI
 
 public struct InputTextFieldRepresentable: UIViewRepresentable {
+    //MARK: - Properties
     @Binding private var text: String?
+    @Binding private var validationStatus: ValidationResult
     
     private let appearance: UIUserInterfaceStyle
     private let placeholder: String?
@@ -18,21 +20,21 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
     private let isSecure: Bool
     private let contentType: UITextContentType?
     private let rightViewMode: UITextField.ViewMode
-    private let passwordRules: UITextInputPasswordRules?
     private let keyboardType: UIKeyboardType
     private let textFont: UIFont
     private let textColor: UIColor
+    private let errorTextColor: UIColor
     private let backgroundColor: UIColor
     private let textField: InsetTextField = InsetTextField()
     
     private let maxLength: Int
     private let isRequired: Bool
     private let validators: ValidatorsComposer?
-    private let validationTextFieldResult: ValidationTextFieldResult?
     private let textMasking: TextMasking?
     
     private let clearButton: UIButton
     
+    //MARK: - Init
     public init(
         appearance: UIUserInterfaceStyle,
         placeholder: String? = nil,
@@ -41,16 +43,16 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         text: Binding<String?>,
         textFont: UIFont = UIFont.systemFont(ofSize: 16),
         textColor: UIColor = UIColor.black,
+        errorTextColor: UIColor = UIColor.red,
         backgroundColor: UIColor = UIColor.clear,
         isSecure: Bool = false,
         contentType: UITextContentType? = nil,
         rightViewMode: UITextField.ViewMode = .never,
-        passwordRules: UITextInputPasswordRules? = nil,
         keyboardType: UIKeyboardType = .default,
         maxLength: Int = -1,
         isRequired: Bool = true,
         validators: ValidatorsComposer? = nil,
-        validationTextFieldResult: ValidationTextFieldResult? = nil,
+        validationStatus: Binding<ValidationResult>,
         textMasking: TextMasking? = nil
     ) {
         self.appearance = appearance
@@ -60,16 +62,16 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         self._text = text
         self.textFont = textFont
         self.textColor = textColor
+        self.errorTextColor = errorTextColor
         self.backgroundColor = backgroundColor
         self.isSecure = isSecure
         self.contentType = contentType
         self.rightViewMode = rightViewMode
-        self.passwordRules = passwordRules
         self.keyboardType = keyboardType
         self.maxLength = maxLength
         self.isRequired = isRequired
         self.validators = validators
-        self.validationTextFieldResult = validationTextFieldResult
+        self._validationStatus = validationStatus
         self.textMasking = textMasking
         
         self.clearButton =  {
@@ -98,19 +100,18 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         textField.textColor = self.textColor
         textField.backgroundColor = self.backgroundColor
         textField.isSecureTextEntry = isSecure
+        textField.placeholder = self.placeholder
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
-        textField.passwordRules = self.passwordRules
-        textField.placeholder = self.placeholder
+        textField.spellCheckingType = .no
+        textField.textContentType = .oneTimeCode
         
-        textField.attributedPlaceholder = NSAttributedString(
-            string: self.placeholder ?? "",
-            attributes: [
-                .font: self.placeholderFont,
-                .foregroundColor: self.placeholderColor
-            ]
+        setPlaceholder(
+            for: textField,
+            text: self.placeholder,
+            color: self.placeholderColor,
+            isRequired: self.isRequired
         )
-        
         textField.textInsets = .init(top: 0, left: 0, bottom: 0, right: 0)
         textField.rightViewInsets = UIEdgeInsets(top: 0, left: -15, bottom: 0, right: 15)
         
@@ -137,7 +138,25 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         if uiView.text != self.text {
             uiView.text = self.text
         }
-        uiView.textColor = self.textColor
+        
+        switch validationStatus {
+        case .valid, .none:
+            uiView.textColor = self.textColor
+            setPlaceholder(
+                for: uiView,
+                text: self.placeholder,
+                color: self.placeholderColor,
+                isRequired: self.isRequired
+            )
+        case .invalid:
+            uiView.textColor = self.errorTextColor
+            setPlaceholder(
+                for: uiView,
+                text: self.placeholder,
+                color: self.errorTextColor,
+                isRequired: self.isRequired
+            )
+        }
     }
     
     public func makeCoordinator() -> Coordinator {
@@ -145,6 +164,23 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
     }
     
     // MARK: - Private methods
+    private  func setPlaceholder(for input: UITextField, text: String?, color: UIColor, isRequired: Bool) {
+        guard var newText = text else {
+            return
+        }
+        
+        if !isRequired {
+            newText += " \(Localization.rozetka_pay_form_optional.description)"
+        }
+        input.attributedPlaceholder = NSAttributedString(
+            string: newText,
+            attributes: [
+                .font: self.placeholderFont,
+                .foregroundColor: color
+            ]
+        )
+    }
+    
     private func configureClearButton() {
         var action: UIAction!
         
@@ -177,11 +213,22 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
 
 extension InputTextFieldRepresentable {
     public class Coordinator: NSObject, UITextFieldDelegate {
-        let parent: InputTextFieldRepresentable
+
+        private enum Constants {
+            static let debounceDelay: TimeInterval = 0.6
+        }
+        
+        private let parent: InputTextFieldRepresentable
+        private var debounceWorkItem: DispatchWorkItem?
         
         public init(parent: InputTextFieldRepresentable) {
             self.parent = parent
             super.init()
+        }
+        
+        public func textFieldDidEndEditing(_ textField: UITextField) {
+            debounceWorkItem?.cancel()
+            validate(from: textField.text)
         }
         
         public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -198,27 +245,58 @@ extension InputTextFieldRepresentable {
                 return false
             }
             
-            if let textMasking = parent.textMasking {
-                newText = textMasking.format(text: newText)
+            if let masked = maskText(from: newText),
+                masked != newText {
+                newText = masked
             }
+            
             parent.text = newText
             
-            if let validators = parent.validators {                
-                if parent.isRequired || !newText.isNilOrEmpty {
-                    parent.validationTextFieldResult?(
-                        validators.validate(value: newText)
-                    )
-                } else {
-                    parent.validationTextFieldResult?(.valid)
-                }
-            }
-            
-            return true
+            scheduleDebouncedValidation(for: textField )
+            return false
         }
     
         public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
             textField.resignFirstResponder()
             return false
+        }
+        
+        //MARK: - Methods 
+        private func maskText(from text: String?) -> String? {
+            guard let text = text else {
+                return text
+            }
+            guard let masking = parent.textMasking else {
+                return text
+            }
+            
+            return masking.format(text: text)
+        }
+        
+        private func validate(from text: String?) {
+            guard let validators = parent.validators else {
+                parent.validationStatus = .valid(value: text)
+                return
+            }
+            
+            if parent.isRequired || !text.isNilOrEmpty {
+                parent.validationStatus = validators.validate(value: text)
+            } else {
+                parent.validationStatus = .valid(value: text)
+            }
+        }
+        
+        private func scheduleDebouncedValidation(for input: UITextField) {
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.validate(from: input.text)
+            }
+
+            debounceWorkItem?.cancel()
+            debounceWorkItem = workItem
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + Constants.debounceDelay,
+                execute: workItem
+            )
         }
         
         @objc func dismissKeyboard() {

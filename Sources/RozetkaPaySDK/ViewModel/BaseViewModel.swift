@@ -31,13 +31,12 @@ class BaseViewModel: ObservableObject {
     @Published var cardholderName: String? = nil
     @Published var email: String? = nil
     ///
-    @Published var errorMessageCardNumber: String? = nil
-    @Published var errorMessageCvv: String? = nil
-    @Published var errorMessageExpiryDate: String? = nil
-    
-    @Published var errorMessageCardName: String? = nil
-    @Published var errorMessageCardholderName: String? = nil
-    @Published var errorMessageEmail: String? = nil
+    @Published var cardNumberStatus: ValidationResult = .none
+    @Published var cvvStatus: ValidationResult = .none
+    @Published var expiryDateStatus: ValidationResult = .none
+    @Published var cardNameStatus: ValidationResult = .none
+    @Published var cardholderNameStatus: ValidationResult = .none
+    @Published var emailStatus: ValidationResult = .none
     
     //MARK: - Inits
     init(
@@ -55,30 +54,31 @@ class BaseViewModel: ObservableObject {
     //MARK: - Methods
     
     func validateAll() -> ValidationResultModel? {
-        guard let validCardNumber = validateCardNumber(cardNumber),
-              let validExpiryDate = validateExpiryDate(expiryDate),
-              let validCVV = validateCVV(cvv)
-        else {
-            return nil
-        }
+        var isValid = true
         
+        let _validCardNumber = validateCardNumber(cardNumber)
+        let _validExpiryDate = validateExpiryDate(expiryDate)
+        let _validCVV = validateCVV(cvv)
+       
         ///
         var validEmail: String? = nil
         switch viewParameters.emailField {
         case .optional:
             if !email.isNilOrEmpty {
-                guard let value = validateEmail(email) else {
-                    return nil
+                if let value = validateEmail(email) {
+                    validEmail = value
+                }else {
+                    isValid = false
                 }
-                validEmail = value
             }
         case .none:
             break
         case .required:
-            guard let value = validateEmail(email) else {
-                return nil
+            if let value = validateEmail(email)  {
+                validEmail = value
+            }else {
+                isValid = false
             }
-            validEmail = value
         }
         
         ///
@@ -86,39 +86,56 @@ class BaseViewModel: ObservableObject {
         switch viewParameters.cardholderNameField {
         case .optional:
             if !cardholderName.isNilOrEmpty {
-                guard let value = validateCardholderName(cardholderName) else {
-                    return nil
+                if let value = validateCardholderName(cardholderName) {
+                    validCardholderName = value
+                }else {
+                    isValid = false
                 }
-                validCardholderName = value
             }
         case .none:
             break
         case .required:
-            guard let value = validateCardholderName(cardholderName) else {
-                return nil
+            if let value = validateCardholderName(cardholderName) {
+                validCardholderName = value
+            }else {
+                isValid = false
             }
-            validCardholderName = value
         }
         
-        
+        ///
         var validCardName: String? = nil
         switch viewParameters.cardNameField {
         case .optional:
             if !cardName.isNilOrEmpty {
-                guard let value = validateCardName(cardName) else {
-                    return nil
+                if let value = validateCardName(cardName)  {
+                    validCardName = value
+                }else {
+                    isValid = false
                 }
-                validCardName = value
             }
         case .none:
             break
         case .required:
-            guard let value = validateCardName(cardName) else {
-                return nil
+            if let value = validateCardName(cardName) {
+                validCardName = value
+            }else {
+                isValid = false
             }
-            validCardName = value
         }
         
+        ///
+        guard let validCardNumber = _validCardNumber,
+              let validExpiryDate = _validExpiryDate,
+              let validCVV = _validCVV
+        else {
+            return nil
+        }
+        
+        guard isValid else {
+            return nil
+        }
+        
+        ///
         return ValidationResultModel(
             cardNumber: validCardNumber,
             cardExpMonth: validExpiryDate.month,
@@ -157,75 +174,55 @@ class BaseViewModel: ObservableObject {
     
     @discardableResult
     private func validateCardNumber(_ value: String?) -> String? {
-        switch CardNumberValidator().validate(value: value) {
-        case .valid:
-            errorMessageCardNumber = nil
-            return value
-        case let .error(message):
-            errorMessageCardNumber = message
-            return nil
-        }
+        let status = CardNumberValidator().validate(value: value)
+        cardNumberStatus = status
+        return status.value
     }
     
     @discardableResult
     private func validateExpiryDate(_ value: String?) -> CardExpirationDate? {
-        switch CardExpirationDateValidator(
+        
+        let status = CardExpirationDateValidator(
             expirationValidationRule: RozetkaPaySdk.validationRules.cardExpirationDateValidationRule
-        ).validate(value: value) {
+        ).validate(value: value)
+        
+        expiryDateStatus = status
+        
+        switch status{
         case .valid:
-            errorMessageExpiryDate = nil
             return CardExpirationDate(rawString: value)
-        case .error(let message):
-            errorMessageExpiryDate = message
+        case .invalid,
+                .none:
             return nil
         }
     }
     
     @discardableResult
     private func validateCVV(_ value: String?) -> String? {
-        switch CardCVVValidator().validate(value: value) {
-        case .valid:
-            errorMessageCvv = nil
-            return value
-        case let .error(message):
-            errorMessageCvv = message
-            return nil
-        }
+       
+        let status = CardCVVValidator().validate(value: value)
+        cvvStatus = status
+        return status.value
     }
     
     @discardableResult
     private func validateEmail(_ value: String?) -> String? {
-        switch EmailValidator().validate(value: value) {
-        case .valid:
-            errorMessageEmail = nil
-            return value
-        case let .error(message):
-            errorMessageEmail = message
-            return nil
-        }
+        let status = EmailValidator().validate(value: value)
+        emailStatus = status
+        return status.value
     }
     
     @discardableResult
     private func validateCardholderName(_ value: String?) -> String? {
-        switch CardholderNameValidator().validate(value: value) {
-        case .valid:
-            errorMessageCardholderName = nil
-            return value
-        case let .error(message):
-            errorMessageCardholderName = message
-            return nil
-        }
+        let status = CardholderNameValidator().validate(value: value)
+        cardholderNameStatus = status
+        return status.value
     }
     
     @discardableResult
     private func validateCardName(_ value: String?) -> String? {
-        switch CardNameValidator().validate(value: value) {
-        case .valid:
-            errorMessageCardName = nil
-            return value
-        case let .error(message):
-            errorMessageCardName = message
-            return nil
-        }
+        let status = CardNameValidator().validate(value: value)
+        cardNameStatus = status
+        return status.value
     }
 }

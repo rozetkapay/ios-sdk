@@ -42,21 +42,22 @@ public struct CardExpirationDate: Equatable {
             filteredDate = filteredDate.digitsOnly
         }
 
-        switch filteredDate.count {
-        case 3, 5:
-            indexEndMonth = filteredDate.index(filteredDate.startIndex, offsetBy: 1)
-        case 4, 6:
-            indexEndMonth = filteredDate.index(filteredDate.startIndex, offsetBy: 2)
-        default:
+        guard filteredDate.count == 4 else {
             throw CardExpirationDateError.stringWrongLength
         }
-        month = Int(filteredDate[..<indexEndMonth])
-        year = Int(filteredDate[indexEndMonth...].suffix(2))
-        if let month = month, let year = year {
-            self.init(month: month, year: year)
-        } else {
+        
+        let monthString = String(filteredDate.prefix(2))
+        let yearString = String(filteredDate.suffix(2))
+        
+        guard let month = Int(monthString), (1...12).contains(month) else {
             throw CardExpirationDateError.parsingError
         }
+        
+        guard let year = Int(yearString) else {
+            throw CardExpirationDateError.parsingError
+        }
+        
+        self.init(month: month, year: year)
     }
     
     public init?(rawString: String?) {
