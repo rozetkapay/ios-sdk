@@ -110,10 +110,10 @@ public struct Request {
 
 public enum APIError<ValidationError: Decodable & Swift.Error>: Swift.Error {
     case decodingFailure(Swift.Error)
-    case networkUnreachable
+    case networkUnreachable(code: Int, message: String?)
     case external(code: Int, message: String?)
     case validation(ValidationError)
-    case unknown
+    case unknown(code: Int, message: String?)
 }
 
 extension APIConfiguration {
@@ -166,20 +166,38 @@ extension APIConfiguration {
             }
         } catch let urlError as URLError {
             Logger.network.error("🔴 Error: An error network. \(urlError.localizedDescription) ⚠️")
-            throw APIError<E>.networkUnreachable
+            throw APIError<E>.networkUnreachable(
+                code: urlError.errorCode,
+                message: "An error network. \(urlError.localizedDescription)"
+            )
         } catch let apiError as APIError<E> {
             Logger.network.error("🔴 Error: An error. \(apiError.localizedDescription) ⚠️")
             throw apiError
         } catch {
             switch error {
-            case URLError.timedOut, URLError.notConnectedToInternet, URLError.networkConnectionLost:
-                Logger.network.error("🔴 Error: An error network. \(request.urlRequest.debugDescription) ⚠️")
-                throw APIError<E>.networkUnreachable
+            case let urlError as URLError:
+                switch urlError.code {
+                case .timedOut, .notConnectedToInternet, .networkConnectionLost:
+                    Logger.network.error("🔴 Error: Network unreachable. \(request.urlRequest.debugDescription) ⚠️")
+                    throw APIError<E>.networkUnreachable(
+                        code: urlError.code.rawValue,
+                        message: "Network unreachable. \(request.urlRequest.debugDescription)"
+                    )
+                default:
+                    Logger.network.error("🔴 Error: URLError \(urlError.localizedDescription) ⚠️")
+                    throw APIError<E>.external(
+                        code: urlError.code.rawValue,
+                        message: urlError.localizedDescription
+                    )
+                }
             case is DecodingError:
                 throw APIError<E>.decodingFailure(error)
             default:
-                Logger.network.error("🔴 Error: An error network. \(error.localizedDescription) ⚠️")
-                throw APIError<E>.unknown
+                Logger.network.error("🔴 Error: Unknown error. \(error.localizedDescription) ⚠️")
+                throw APIError<E>.unknown(
+                    code: (error as NSError).code,
+                    message: error.localizedDescription
+                )
             }
         }
     }
@@ -205,7 +223,10 @@ extension APIConfiguration {
     
     private func validateFail<E: Decodable & Swift.Error>(response: URLResponse, data: Data, errorType: E.Type? = nil) async throws {
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw APIError<E>.unknown
+            throw APIError<E>.unknown(
+                code: (response as? HTTPURLResponse)?.statusCode ?? -1,
+                message: "Response is not HTTPURLResponse"
+            )
         }
         
         var decodingError: APIError<E>
@@ -222,9 +243,10 @@ extension APIConfiguration {
                 decodingError = APIError<E>.decodingFailure(error)
             }
         } else {
+            let message = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
             decodingError = APIError<E>.external(
                 code: httpResponse.statusCode,
-                message: "Unknown error"
+                message: message
             )
         }
         
