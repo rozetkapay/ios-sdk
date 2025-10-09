@@ -17,21 +17,23 @@ public struct CardInfoView: View {
     
     //MARK: - Properties
     ///
-    @Binding var cardNumber: String?
-    @Binding var cvv: String?
-    @Binding var expiryDate: String?
+    @Binding private var cardNumber: String?
+    @Binding private var cvv: String?
+    @Binding private var expiryDate: String?
     ///
-    @Binding var cardName: String?
-    @Binding var cardholderName: String?
-    @Binding var email: String?
+    @Binding private var cardName: String?
+    @Binding private var cardholderName: String?
+    @Binding private var email: String?
     ///
-    @Binding var cardNumberStatus: ValidationResult
-    @Binding var cvvStatus: ValidationResult
-    @Binding var expiryDateStatus: ValidationResult
-    @Binding var cardNameStatus: ValidationResult
-    @Binding var cardholderNameStatus: ValidationResult
-    @Binding var emailStatus: ValidationResult
-    
+    @Binding private var cardNumberStatus: ValidationResult
+    @Binding private var cvvStatus: ValidationResult
+    @Binding private var expiryDateStatus: ValidationResult
+    @Binding private var cardNameStatus: ValidationResult
+    @Binding private var cardholderNameStatus: ValidationResult
+    @Binding private var emailStatus: ValidationResult
+    ///
+    @Binding private var didPerformInitialValidation: Bool
+    ///
     @Environment(\.colorScheme) var colorScheme
     
     //MARK: - Properties
@@ -75,7 +77,8 @@ public struct CardInfoView: View {
         expiryDateStatus: Binding<ValidationResult>,
         cardNameStatus: Binding<ValidationResult>,
         cardholderNameStatus: Binding<ValidationResult>,
-        emailStatus: Binding<ValidationResult>
+        emailStatus: Binding<ValidationResult>,
+        didPerformInitialValidation: Binding<Bool>
     ) {
         ///
         self.accessibilityNamespace = accessibilityNamespace
@@ -100,7 +103,9 @@ public struct CardInfoView: View {
         self._cardNameStatus = cardNameStatus
         self._cardholderNameStatus = cardholderNameStatus
         self._emailStatus = emailStatus
-        
+        ///
+        self._didPerformInitialValidation = didPerformInitialValidation
+        ///
         self._detectedPaymentSystem = State(initialValue: self.detectPaymentSystem(cardNumber.wrappedValue))
     }
     
@@ -181,7 +186,8 @@ private extension CardInfoView {
                 validators: ValidatorsComposer(validators: [
                     CardNameValidator()
                 ]),
-                validationStatus: $cardNameStatus
+                validationStatus: $cardNameStatus,
+                didPerformInitialValidation: $didPerformInitialValidation
             )
             .accessibilityIdentifier(tags.cardName)
             .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
@@ -235,7 +241,8 @@ private extension CardInfoView {
                 validators: ValidatorsComposer(validators: [
                     CardholderNameValidator()
                 ]),
-                validationStatus: $cardholderNameStatus
+                validationStatus: $cardholderNameStatus,
+                didPerformInitialValidation: $didPerformInitialValidation
             )
             .accessibilityIdentifier(tags.cardHolderName)
             .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
@@ -289,7 +296,8 @@ private extension CardInfoView {
                 validators: ValidatorsComposer(validators: [
                     EmailValidator()
                 ]),
-                validationStatus: $emailStatus
+                validationStatus: $emailStatus,
+                didPerformInitialValidation: $didPerformInitialValidation
             )
             .accessibilityIdentifier(tags.email)
             .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
@@ -344,6 +352,7 @@ private extension CardInfoView {
                     CardNumberValidator()
                 ]),
                 validationStatus: $cardNumberStatus,
+                didPerformInitialValidation: $didPerformInitialValidation,
                 textMasking: CardNumberMask()
             )
             .accessibilityIdentifier(tags.cardNumber)
@@ -425,6 +434,7 @@ private extension CardInfoView {
                     )
                 ]),
                 validationStatus: $expiryDateStatus,
+                didPerformInitialValidation: $didPerformInitialValidation,
                 textMasking: ExpirationDateMask()
             )
             .accessibilityIdentifier(tags.expiryDate)
@@ -480,7 +490,8 @@ private extension CardInfoView {
             validators: ValidatorsComposer(validators: [
                 CardCVVValidator()
             ]),
-            validationStatus: $cvvStatus
+            validationStatus: $cvvStatus,
+            didPerformInitialValidation: $didPerformInitialValidation
         )
         .accessibilityIdentifier(tags.cvv)
         .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
@@ -584,7 +595,8 @@ private extension CardInfoView {
         expiryDateStatus: .constant(.none),
         cardNameStatus: .constant(.none),
         cardholderNameStatus:.constant(.none),
-        emailStatus: .constant(.none)
+        emailStatus: .constant(.none),
+        didPerformInitialValidation: .constant(false)
     )
     
 }

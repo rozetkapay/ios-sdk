@@ -12,6 +12,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
     //MARK: - Properties
     @Binding private var text: String?
     @Binding private var validationStatus: ValidationResult
+    @Binding private var didPerformInitialValidation: Bool
     
     private let appearance: UIUserInterfaceStyle
     private let placeholder: String?
@@ -53,6 +54,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         isRequired: Bool = true,
         validators: ValidatorsComposer? = nil,
         validationStatus: Binding<ValidationResult>,
+        didPerformInitialValidation: Binding<Bool>,
         textMasking: TextMasking? = nil
     ) {
         self.appearance = appearance
@@ -72,6 +74,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         self.isRequired = isRequired
         self.validators = validators
         self._validationStatus = validationStatus
+        self._didPerformInitialValidation = didPerformInitialValidation
         self.textMasking = textMasking
         
         self.clearButton =  {
@@ -252,7 +255,9 @@ extension InputTextFieldRepresentable {
             
             parent.text = newText
             
-            scheduleDebouncedValidation(for: textField )
+            if parent.didPerformInitialValidation {
+                scheduleDebouncedValidation(for: textField )
+            }
             return false
         }
     

@@ -150,7 +150,8 @@ private extension TokenizationView {
             expiryDateStatus: $viewModel.expiryDateStatus,
             cardNameStatus: $viewModel.cardNameStatus,
             cardholderNameStatus: $viewModel.cardholderNameStatus,
-            emailStatus: $viewModel.emailStatus
+            emailStatus: $viewModel.emailStatus,
+            didPerformInitialValidation: $viewModel.didPerformInitialValidation
         )
         .accessibilityIdentifier(tags.cardInfoView)
         .padding(.top, viewModel.getVStackSpacing())

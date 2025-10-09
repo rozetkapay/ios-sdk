@@ -24,7 +24,7 @@ class BaseViewModel: ObservableObject {
     
     ///
     @Published var cardNumber: String? = nil
-    @Published var cvv: String?
+    @Published var cvv: String? = nil
     @Published var expiryDate: String? = nil
     ///
     @Published var cardName: String? = nil
@@ -38,6 +38,8 @@ class BaseViewModel: ObservableObject {
     @Published var cardholderNameStatus: ValidationResult = .none
     @Published var emailStatus: ValidationResult = .none
     
+    @Published var didPerformInitialValidation = false
+    
     //MARK: - Inits
     init(
         client: ClientAuthParametersProtocol,
@@ -49,11 +51,13 @@ class BaseViewModel: ObservableObject {
         self.viewParameters = viewParameters
         self.themeConfigurator = themeConfigurator
         self.provideCardPaymentSystemUseCase = provideCardPaymentSystemUseCase
+        self.didPerformInitialValidation = false
     }
     
     //MARK: - Methods
     
     func validateAll() -> ValidationResultModel? {
+        didPerformInitialValidation = true
         var isValid = true
         
         let _validCardNumber = validateCardNumber(cardNumber)
