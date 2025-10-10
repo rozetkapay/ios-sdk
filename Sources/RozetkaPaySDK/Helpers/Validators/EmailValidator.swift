@@ -14,14 +14,16 @@ class EmailValidator: Validator {
     override func validate(value: String?) -> ValidationResult {
         
         guard let value = value.isNilOrEmptyValue else {
-            return .error(message: Localization.rozetka_pay_form_validation_email_incorrect.description)
+            return .invalid(
+                message: Localization.rozetka_pay_form_validation_email_empty.description
+            )
         }
         
         let predicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
         if predicate.evaluate(with: value) {
-            return .valid
+            return .valid(value: value)
         } else {
-            return .error(message: Localization.rozetka_pay_form_validation_email_incorrect.description)
+            return .invalid(message: Localization.rozetka_pay_form_validation_email_incorrect.description)
         }
     }
 }

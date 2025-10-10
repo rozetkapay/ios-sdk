@@ -7,10 +7,9 @@
 
 import Foundation
 
-
 class AlwaysValidValidator: Validator {
 
     override func validate(value: String?) -> ValidationResult {
-        return .valid
+        return .valid(value: value)
     }
 }

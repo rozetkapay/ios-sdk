@@ -51,36 +51,64 @@ extension TokenizationFormViewModel {
         )
         tokenizeCard(key: client.key, model: model)
     }
+    
+    func retryLoading() {
+        startLoading()
+    }
+    
+    func cancelled() {
+        resetState()
+        stopLoader()
+        
+        onResultCallback?(
+            .cancelled
+        )
+    }
+    
+    func resetState() {
+        DispatchQueue.main.async {
+            self.isError = false
+            self.errorMessage = nil
+        }
+    }
 }
 
 //MARK: - Private Methods
 
 private extension TokenizationFormViewModel {
     func tokenizeCard(key: String, model: CardRequestModel) {
-        
+        resetState()
+        startLoader()
         self.stateUICallback?(
             .startLoading
         )
         
         TokenizationService.tokenizeCard(key: key, model: model) { [weak self] result in
             DispatchQueue.main.async {
+                self?.stopLoader()
                 self?.stateUICallback?(
                     .stopLoading
                 )
                 
                 switch result {
                 case .complete(let success):
+                    self?.resetState()
                     self?.onResultCallback?(
                         .complete(tokenizedCard: success)
                     )
                 case .failed(let error):
-                    self?.onResultCallback?(
-                        .failed(error: error)
-                    )
+                    switch error {
+                    case .cancelled:
+                        self?.cancelled()
+                    case let .failed(message, _):
+                        self?.isError = true
+                        self?.errorMessage = message
+                        self?.onResultCallback?(
+                            .failed(error: error)
+                        )
+                    }
                 case .cancelled:
-                    self?.onResultCallback?(
-                        .cancelled
-                    )
+                    self?.cancelled()
                 }
             }
         }

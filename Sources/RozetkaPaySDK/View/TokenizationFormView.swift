@@ -13,6 +13,10 @@ public struct TokenizationFormView<Content: View>: View {
     @StateObject var viewModel: TokenizationFormViewModel
     private let cardFormFooterEmbeddedContent: (() -> Content)
     
+    private var tags: AccessibilityTag.TokenizationForm {
+        AccessibilityTag.TokenizationForm()
+    }
+    
     private var isFooterEmpty: Bool {
         return Content.self == EmptyView.self
     }
@@ -36,12 +40,60 @@ public struct TokenizationFormView<Content: View>: View {
     
     //MARK: - Body
     public var body: some View {
-        mainView
+        contentView
     }
 }
 
 //MARK: UI
 private extension TokenizationFormView {
+    
+    @ViewBuilder
+    private var contentView: some View {
+        ZStack {
+            mainView
+            if viewModel.isLoading {
+                loadingView
+            }
+            if viewModel.isError {
+                errorView
+            }
+        }
+    }
+    
+    var loadingView: some View {
+        ZStack {
+            viewModel
+                .themeConfigurator
+                .colorScheme(colorScheme)
+                .surface
+                .opacity(0.8)
+                .ignoresSafeArea()
+            LoadingView (
+                accessibilityNamespace: tags.base,
+                themeConfigurator: viewModel.themeConfigurator,
+                isExpanded: true
+            )
+                .accessibilityIdentifier(tags.loadingView)
+        }
+        .padding()
+    }
+    ///
+    var errorView: some View {
+        ErrorView(
+            accessibilityNamespace: tags.base,
+            themeConfigurator: viewModel.themeConfigurator,
+            errorMessage: viewModel.errorMessage,
+            onCancel: {
+                viewModel.cancelled()
+            },
+            onRetry: {
+                viewModel.retryLoading()
+            },
+            isExpanded: true
+        )
+        .accessibilityIdentifier(tags.errorView)
+        .padding()
+    }
     
     var mainView: some View {
         VStack(spacing: 0) {
@@ -49,11 +101,13 @@ private extension TokenizationFormView {
             
             if !isFooterEmpty {
                 cardFormFooterEmbeddedContent()
-                    .padding(.top,
-                             viewModel
-                        .themeConfigurator
-                        .sizes
-                        .cardFormFooterEmbeddedContentTopPadding
+                    .accessibilityIdentifier(tags.cardFormFooterEmbeddedContent)
+                    .padding(
+                        .top,
+                        viewModel
+                            .themeConfigurator
+                            .sizes
+                            .cardFormFooterEmbeddedContentTopPadding
                     )
             }
             mainButton
@@ -72,6 +126,7 @@ private extension TokenizationFormView {
     ///
     var cardInfoView: some View {
         CardInfoView(
+            accessibilityNamespace: tags.base,
             viewParameters: viewModel.viewParameters,
             themeConfigurator: viewModel.themeConfigurator,
             cardNumber: $viewModel.cardNumber,
@@ -80,17 +135,20 @@ private extension TokenizationFormView {
             cardName: $viewModel.cardName,
             cardholderName: $viewModel.cardholderName,
             email: $viewModel.email,
-            errorMessageCardNumber: $viewModel.errorMessageCardNumber,
-            errorMessageCvv: $viewModel.errorMessageCvv,
-            errorMessageExpiryDate: $viewModel.errorMessageExpiryDate,
-            errorMessageCardName: $viewModel.errorMessageCardName,
-            errorMessageCardholderName: $viewModel.errorMessageCardholderName,
-            errorMessageEmail: $viewModel.errorMessageEmail
+            cardNumberStatus: $viewModel.cardNumberStatus,
+            cvvStatus: $viewModel.cvvStatus,
+            expiryDateStatus: $viewModel.expiryDateStatus,
+            cardNameStatus: $viewModel.cardNameStatus,
+            cardholderNameStatus: $viewModel.cardholderNameStatus,
+            emailStatus: $viewModel.emailStatus,
+            didPerformInitialValidation: $viewModel.didPerformInitialValidation
         )
+        .accessibilityIdentifier(tags.cardInfoView)
     }
     ///
     var legalView: some View {
         CardInfoFooterView(themeConfigurator: viewModel.themeConfigurator)
+            .accessibilityIdentifier(tags.cardInfoFooter)
             .padding(.top,
                      viewModel
                 .themeConfigurator
@@ -124,11 +182,12 @@ private extension TokenizationFormView {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .accessibilityIdentifier(tags.mainButton)
         .frame(height:
-                viewModel
-            .themeConfigurator
-            .sizes
-            .buttonFrameHeight
+            viewModel
+                .themeConfigurator
+                .sizes
+                .buttonFrameHeight
         )
         .background(
             viewModel

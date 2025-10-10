@@ -39,22 +39,26 @@ public enum Localization: String {
     
     
     case rozetka_pay_form_card_info_title
-    case rozetka_pay_form_optional_card_name
+    case rozetka_pay_form_optional
+    case rozetka_pay_form_card_name
     case rozetka_pay_form_card_number
     case rozetka_pay_form_cvv
     case rozetka_pay_form_exp_date
     case rozetka_pay_form_cardholder_name
     case rozetka_pay_form_email
     case rozetka_pay_form_save_card
-    case rozetka_pay_form_validation_exp_date_invalid
+    case rozetka_pay_form_validation_exp_date_empty
+    case rozetka_pay_form_validation_exp_date_incorrect
     case rozetka_pay_form_validation_exp_date_expired
     case rozetka_pay_form_validation_card_number_incorrect
     case rozetka_pay_form_validation_card_number_empty
+    case rozetka_pay_form_validation_cvv_empty
     case rozetka_pay_form_validation_cvv_incorrect
     case rozetka_pay_form_validation_cardholder_name_empty
     case rozetka_pay_form_validation_card_name_empty
     case rozetka_pay_form_validation_field_empty
     case rozetka_pay_form_validation_email_incorrect
+    case rozetka_pay_form_validation_email_empty
     
     case  rozetka_pay_custom_alert_view_ok_button
     

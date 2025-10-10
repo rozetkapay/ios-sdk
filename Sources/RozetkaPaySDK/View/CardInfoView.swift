@@ -17,22 +17,23 @@ public struct CardInfoView: View {
     
     //MARK: - Properties
     ///
-    @Binding var cardNumber: String?
-    @Binding var cvv: String?
-    @Binding var expiryDate: String?
+    @Binding private var cardNumber: String?
+    @Binding private var cvv: String?
+    @Binding private var expiryDate: String?
     ///
-    @Binding var cardName: String?
-    @Binding var cardholderName: String?
-    @Binding var email: String?
+    @Binding private var cardName: String?
+    @Binding private var cardholderName: String?
+    @Binding private var email: String?
     ///
-    @Binding var errorMessageCardNumber: String?
-    @Binding var errorMessageCvv: String?
-    @Binding var errorMessageExpiryDate: String?
-    
-    @Binding var errorMessageCardName: String?
-    @Binding var errorMessageCardholderName: String?
-    @Binding var errorMessageEmail: String?
-    
+    @Binding private var cardNumberStatus: ValidationResult
+    @Binding private var cvvStatus: ValidationResult
+    @Binding private var expiryDateStatus: ValidationResult
+    @Binding private var cardNameStatus: ValidationResult
+    @Binding private var cardholderNameStatus: ValidationResult
+    @Binding private var emailStatus: ValidationResult
+    ///
+    @Binding private var didPerformInitialValidation: Bool
+    ///
     @Environment(\.colorScheme) var colorScheme
     
     //MARK: - Properties
@@ -51,8 +52,14 @@ public struct CardInfoView: View {
         detectedPaymentSystem?.logo ?? PaymentSystem.defaultLogo
     }
     
+    private let accessibilityNamespace: String
+    private var tags: AccessibilityTag.CardInfo {
+        AccessibilityTag.CardInfo(namespace: accessibilityNamespace)
+    }
+    
     //MARK: - Init
     public init(
+        accessibilityNamespace: String,
         viewParameters: ViewParametersProtocol,
         themeConfigurator: RozetkaPayThemeConfigurator,
         provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase? = nil,
@@ -65,14 +72,16 @@ public struct CardInfoView: View {
         email: Binding<String?>,
         
         ///
-        errorMessageCardNumber: Binding<String?>,
-        errorMessageCvv: Binding<String?>,
-        errorMessageExpiryDate: Binding<String?>,
-        errorMessageCardName: Binding<String?>,
-        errorMessageCardholderName: Binding<String?>,
-        errorMessageEmail: Binding<String?>
+        cardNumberStatus: Binding<ValidationResult>,
+        cvvStatus: Binding<ValidationResult>,
+        expiryDateStatus: Binding<ValidationResult>,
+        cardNameStatus: Binding<ValidationResult>,
+        cardholderNameStatus: Binding<ValidationResult>,
+        emailStatus: Binding<ValidationResult>,
+        didPerformInitialValidation: Binding<Bool>
     ) {
         ///
+        self.accessibilityNamespace = accessibilityNamespace
         self.themeConfigurator = themeConfigurator
         self.provideCardPaymentSystemUseCase = provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
         self.fieldRequirementCardName = viewParameters.cardNameField
@@ -88,12 +97,14 @@ public struct CardInfoView: View {
         self._cardholderName = cardholderName
         self._email = email
         ///
-        self._errorMessageCardNumber = errorMessageCardNumber
-        self._errorMessageCvv = errorMessageCvv
-        self._errorMessageExpiryDate = errorMessageExpiryDate
-        self._errorMessageCardName = errorMessageCardName
-        self._errorMessageCardholderName = errorMessageCardholderName
-        self._errorMessageEmail = errorMessageEmail
+        self._cardNumberStatus = cardNumberStatus
+        self._cvvStatus = cvvStatus
+        self._expiryDateStatus = expiryDateStatus
+        self._cardNameStatus = cardNameStatus
+        self._cardholderNameStatus = cardholderNameStatus
+        self._emailStatus = emailStatus
+        ///
+        self._didPerformInitialValidation = didPerformInitialValidation
         ///
         self._detectedPaymentSystem = State(initialValue: self.detectPaymentSystem(cardNumber.wrappedValue))
     }
@@ -149,7 +160,7 @@ private extension CardInfoView {
         VStack(spacing: 0){
             InputTextFieldRepresentable(
                 appearance: themeConfigurator.colorScheme(colorScheme),
-                placeholder: Localization.rozetka_pay_form_optional_card_name.description,
+                placeholder: Localization.rozetka_pay_form_card_name.description,
                 placeholderFont: themeConfigurator
                     .typography
                     .inputUI,
@@ -161,16 +172,12 @@ private extension CardInfoView {
                 textFont: themeConfigurator
                     .typography
                     .inputUI,
-                textColor: errorMessageCardName.isNilOrEmpty ?
-                themeConfigurator
+                textColor: themeConfigurator
                     .colorScheme(colorScheme)
                     .onComponent
-                    .toUIColor()
-                :
-                    themeConfigurator
-                    .colorScheme(
-                        colorScheme
-                    )
+                    .toUIColor(),
+                errorTextColor: themeConfigurator
+                    .colorScheme(colorScheme)
                     .error
                     .toUIColor(),
                 contentType: .name,
@@ -179,18 +186,11 @@ private extension CardInfoView {
                 validators: ValidatorsComposer(validators: [
                     CardNameValidator()
                 ]),
-                validationTextFieldResult: { result in
-                    switch result {
-                    case .valid:
-                        errorMessageCardName = nil
-                    case let .error(message):
-                        errorMessageCardName = message
-                    }
-                }
+                validationStatus: $cardNameStatus,
+                didPerformInitialValidation: $didPerformInitialValidation
             )
-            .frame(
-                height: themeConfigurator.sizes.textFieldFrameHeight
-            )
+            .accessibilityIdentifier(tags.cardName)
+            .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
             .padding()
             .background(
                 themeConfigurator
@@ -202,8 +202,10 @@ private extension CardInfoView {
                     .sizes
                     .componentCornerRadius
             )
-            if let errorMessage = errorMessageCardName.isNilOrEmptyValue {
+            
+            if let errorMessage = cardNameStatus.errorMessage {
                 FieldErrorView(message: errorMessage, themeConfigurator)
+                    .accessibilityIdentifier(tags.cardNameError)
             }
         }
     }
@@ -225,16 +227,12 @@ private extension CardInfoView {
                 textFont: themeConfigurator
                     .typography
                     .inputUI,
-                textColor: errorMessageCardholderName.isNilOrEmpty ?
-                themeConfigurator
+                textColor: themeConfigurator
                     .colorScheme(colorScheme)
                     .onComponent
-                    .toUIColor()
-                :
-                    themeConfigurator
-                    .colorScheme(
-                        colorScheme
-                    )
+                    .toUIColor(),
+                errorTextColor: themeConfigurator
+                    .colorScheme(colorScheme)
                     .error
                     .toUIColor(),
                 contentType: .name,
@@ -243,15 +241,10 @@ private extension CardInfoView {
                 validators: ValidatorsComposer(validators: [
                     CardholderNameValidator()
                 ]),
-                validationTextFieldResult: { result in
-                    switch result {
-                    case .valid:
-                        errorMessageCardholderName = nil
-                    case let .error(message):
-                        errorMessageCardholderName = message
-                    }
-                }
+                validationStatus: $cardholderNameStatus,
+                didPerformInitialValidation: $didPerformInitialValidation
             )
+            .accessibilityIdentifier(tags.cardHolderName)
             .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
             .padding()
             .background(
@@ -265,8 +258,9 @@ private extension CardInfoView {
                     .componentCornerRadius
             )
             
-            if let errorMessage = errorMessageCardholderName.isNilOrEmptyValue {
+            if let errorMessage = cardholderNameStatus.errorMessage {
                 FieldErrorView(message: errorMessage, themeConfigurator)
+                    .accessibilityIdentifier(tags.cardHolderNameError)
             }
         }
     }
@@ -288,16 +282,12 @@ private extension CardInfoView {
                 textFont: themeConfigurator
                     .typography
                     .inputUI,
-                textColor: errorMessageEmail.isNilOrEmpty ?
-                themeConfigurator
+                textColor: themeConfigurator
                     .colorScheme(colorScheme)
                     .onComponent
-                    .toUIColor()
-                :
-                    themeConfigurator
-                    .colorScheme(
-                        colorScheme
-                    )
+                    .toUIColor(),
+                errorTextColor: themeConfigurator
+                    .colorScheme(colorScheme)
                     .error
                     .toUIColor(),
                 contentType: .emailAddress,
@@ -306,15 +296,10 @@ private extension CardInfoView {
                 validators: ValidatorsComposer(validators: [
                     EmailValidator()
                 ]),
-                validationTextFieldResult: { result in
-                    switch result {
-                    case .valid:
-                        errorMessageEmail = nil
-                    case let .error(message):
-                        errorMessageEmail = message
-                    }
-                }
+                validationStatus: $emailStatus,
+                didPerformInitialValidation: $didPerformInitialValidation
             )
+            .accessibilityIdentifier(tags.email)
             .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
             .padding()
             .background(
@@ -328,8 +313,9 @@ private extension CardInfoView {
                     .componentCornerRadius
             )
             
-            if let errorMessage = errorMessageEmail.isNilOrEmptyValue {
+            if let errorMessage = emailStatus.errorMessage {
                 FieldErrorView(message: errorMessage, themeConfigurator)
+                    .accessibilityIdentifier(tags.emailError)
             }
         }
     }
@@ -351,17 +337,12 @@ private extension CardInfoView {
                 textFont: themeConfigurator
                     .typography
                     .inputUI,
-                textColor:
-                    errorMessageCardNumber.isNilOrEmpty ?
-                themeConfigurator
+                textColor: themeConfigurator
                     .colorScheme(colorScheme)
                     .onComponent
-                    .toUIColor()
-                :
-                    themeConfigurator
-                    .colorScheme(
-                        colorScheme
-                    )
+                    .toUIColor(),
+                errorTextColor: themeConfigurator
+                    .colorScheme(colorScheme)
                     .error
                     .toUIColor(),
                 contentType: .dateTime,
@@ -370,16 +351,11 @@ private extension CardInfoView {
                 validators: ValidatorsComposer(validators: [
                     CardNumberValidator()
                 ]),
-                validationTextFieldResult: { result in
-                    switch result {
-                    case .valid:
-                        errorMessageCardNumber = nil
-                    case let .error(message):
-                        errorMessageCardNumber = message
-                    }
-                },
+                validationStatus: $cardNumberStatus,
+                didPerformInitialValidation: $didPerformInitialValidation,
                 textMasking: CardNumberMask()
             )
+            .accessibilityIdentifier(tags.cardNumber)
             .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
             .padding()
             .keyboardType(.numberPad)
@@ -399,10 +375,12 @@ private extension CardInfoView {
                     ]
                 )
             )
+            
             paymentSystemLogo.image(themeConfigurator.colorScheme(colorScheme))
                 .resizable()
                 .frame(width: 36, height: 22)
                 .padding(.trailing)
+            
         }
         .background(
             themeConfigurator
@@ -439,17 +417,12 @@ private extension CardInfoView {
                 textFont: themeConfigurator
                     .typography
                     .inputUI,
-                textColor:
-                    errorMessageExpiryDate.isNilOrEmpty ?
-                themeConfigurator
+                textColor: themeConfigurator
                     .colorScheme(colorScheme)
                     .onComponent
-                    .toUIColor()
-                :
-                    themeConfigurator
-                    .colorScheme(
-                        colorScheme
-                    )
+                    .toUIColor(),
+                errorTextColor: themeConfigurator
+                    .colorScheme(colorScheme)
                     .error
                     .toUIColor(),
                 contentType: .dateTime,
@@ -460,16 +433,11 @@ private extension CardInfoView {
                         expirationValidationRule: RozetkaPaySdk.validationRules.cardExpirationDateValidationRule
                     )
                 ]),
-                validationTextFieldResult: { result in
-                    switch result {
-                    case .valid:
-                        errorMessageExpiryDate = nil
-                    case let .error(message):
-                        errorMessageExpiryDate = message
-                    }
-                },
+                validationStatus: $expiryDateStatus,
+                didPerformInitialValidation: $didPerformInitialValidation,
                 textMasking: ExpirationDateMask()
             )
+            .accessibilityIdentifier(tags.expiryDate)
             .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
             .padding()
             .keyboardType(.numberPad)
@@ -507,14 +475,11 @@ private extension CardInfoView {
             textFont: themeConfigurator
                 .typography
                 .inputUI,
-            textColor:
-                errorMessageCvv.isNilOrEmpty ?
-            themeConfigurator
+            textColor: themeConfigurator
                 .colorScheme(colorScheme)
                 .onComponent
-                .toUIColor()
-            :
-                themeConfigurator
+                .toUIColor(),
+            errorTextColor: themeConfigurator
                 .colorScheme(colorScheme)
                 .error
                 .toUIColor(),
@@ -525,15 +490,10 @@ private extension CardInfoView {
             validators: ValidatorsComposer(validators: [
                 CardCVVValidator()
             ]),
-            validationTextFieldResult: { result in
-                switch result {
-                case .valid:
-                    errorMessageCvv = nil
-                case let .error(message):
-                    errorMessageCvv = message
-                }
-            }
+            validationStatus: $cvvStatus,
+            didPerformInitialValidation: $didPerformInitialValidation
         )
+        .accessibilityIdentifier(tags.cvv)
         .frame(height: themeConfigurator.sizes.textFieldFrameHeight)
         .padding()
         .keyboardType(.numberPad)
@@ -586,10 +546,11 @@ private extension CardInfoView {
                     .componentCornerRadius
             )
             
-            if let errorMessage = errorMessageExpiryDate.isNilOrEmptyValue ??
-                errorMessageCardNumber.isNilOrEmptyValue ??
-                errorMessageCvv.isNilOrEmptyValue {
+            if let errorMessage = cardNumberStatus.errorMessage ??
+                expiryDateStatus.errorMessage ??
+                cvvStatus.errorMessage {
                 FieldErrorView(message: errorMessage, themeConfigurator)
+                    .accessibilityIdentifier(tags.cardDetailsError)
             }
         }
     }
@@ -604,13 +565,19 @@ private extension CardInfoView {
     }
     
     func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
     }
 }
 
 //MARK: Preview
 #Preview {
     CardInfoView(
+        accessibilityNamespace: "test",
         viewParameters: TokenizationFormViewParameters(
             cardNameField: .optional,
             emailField: .required,
@@ -623,12 +590,13 @@ private extension CardInfoView {
         cardName: .constant(nil),
         cardholderName: .constant(nil),
         email: .constant(nil),
-        errorMessageCardNumber: .constant(nil),
-        errorMessageCvv: .constant(nil),
-        errorMessageExpiryDate: .constant(nil),
-        errorMessageCardName: .constant(nil),
-        errorMessageCardholderName: .constant(nil),
-        errorMessageEmail: .constant(nil)
+        cardNumberStatus: .constant(.none),
+        cvvStatus: .constant(.none),
+        expiryDateStatus: .constant(.none),
+        cardNameStatus: .constant(.none),
+        cardholderNameStatus:.constant(.none),
+        emailStatus: .constant(.none),
+        didPerformInitialValidation: .constant(false)
     )
     
 }

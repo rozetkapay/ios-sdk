@@ -14,18 +14,19 @@ public enum TokenizationError: Error, Decodable {
         case failed
         case cancelled
         case message
-        case errorDescription = "error"
+        case errorDescription = "error_message"
     }
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        if container.contains(.failed) {
-            let message = try container.decode(String?.self, forKey: .message)
-            let errorDescription = try container.decode(String?.self, forKey: .errorDescription)
-            self = .failed(message: message, errorDescription: errorDescription)
-        } else {
+        
+         if container.contains(.cancelled) {
             self = .cancelled
-        }
+         }else {
+             let message = try container.decodeIfPresent(String.self, forKey: .message)
+             let errorDescription = try container.decodeIfPresent(String.self, forKey: .errorDescription)
+             self = .failed(message: message, errorDescription: errorDescription)
+         }
     }
     
     public var localizedDescription: String {
@@ -50,26 +51,40 @@ extension TokenizationError {
         switch apiError {
         case let .validation(model):
             return model
+            
         case let .decodingFailure(error):
             return .failed(
                 message: nil,
                 errorDescription: error.localizedDescription
             )
+            
         case let .external(code, message):
             var text = "Unknown error (code: \(code))"
             if let message = message {
                 text += ", message: \(message)"
             }
-        
             return .failed(
                 message: text,
                 errorDescription: nil
             )
-        case .networkUnreachable:
-            return .cancelled
-        case .unknown:
+            
+        case let .networkUnreachable(code, message):
+            var text = "Network unreachable (code: \(code))"
+            if let message = message {
+                text += ", message: \(message)"
+            }
             return .failed(
-                message: "Unknown error",
+                message: text,
+                errorDescription: nil
+            )
+            
+        case let .unknown(code, message):
+            var text = "Unknown error (code: \(code))"
+            if let message = message {
+                text += ", message: \(message)"
+            }
+            return .failed(
+                message: text,
                 errorDescription: nil
             )
         }
