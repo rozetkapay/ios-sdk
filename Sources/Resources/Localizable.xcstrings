@@ -268,7 +268,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Імʼя не може бути пустим"
+            "value" : "Назва картки не може бути пустим"
           }
         }
       }
@@ -319,7 +319,7 @@
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Назва картки не може бути пустим"
+            "value" : "Ім’я власника картки не може бути пустим"
           }
         }
       }
@@ -398,13 +398,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Expiration date can't be empty"
+            "value" : "Invalid expiration date value"
           }
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Дата закінчення терміну дії не може бути пустим"
+            "state" : "needs_review",
+            "value" : "Неправильне значення дати закінчення терміну дії"
           }
         }
       }
