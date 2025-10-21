@@ -22,11 +22,11 @@ public struct CardInfoFooterView: View {
                 themeConfigurator
                 .colorScheme(colorScheme)
             )
-            DomainImages.legalPcidss.image(
+            DomainImages.legalMastercard.image(
                 themeConfigurator
                 .colorScheme(colorScheme)
             )
-            DomainImages.legalMastercard.image(
+            DomainImages.legalProstir.image(
                 themeConfigurator
                 .colorScheme(colorScheme)
             )

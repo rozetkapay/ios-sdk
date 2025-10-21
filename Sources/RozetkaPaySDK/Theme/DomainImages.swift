@@ -24,7 +24,7 @@ public enum DomainImages: String {
     case prostir = "rozetka.pay.ic.prostir"
     case visa = "rozetka.pay.ic.visa"
     case legalMastercard = "rozetka.pay.legal.mastercard"
-    case legalPcidss = "rozetka.pay.legal.pcidss"
+    case legalProstir = "rozetka.pay.legal.prostir"
     case legalVisa = "rozetka.pay.legal.visa"
 }
 
