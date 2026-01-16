@@ -40,6 +40,23 @@ final class ApplePaymentService: NSObject {
 extension ApplePaymentService {
     
     func startPayment(onResultCallback: @escaping ApplePaymentCompletionHandler) {
+        
+        self.onResultCallback = onResultCallback
+        guard config.checkApplePayAvailability() else {
+            
+            let paymentError = PaymentError(
+                code: ErrorResponseCode.applePayUnavailable.rawValue,
+                message: "Apple Pay is not available on this device.",
+                externalId: self.externalId,
+                type: ErrorResponseType.paymentError.rawValue
+            )
+            
+            self.onResultCallback?(
+                .failed(error: paymentError)
+            )
+            return
+        }
+        
         paymentSummaryItems.removeAll()
         let amount = PKPaymentSummaryItem(
             label: Localization.rozetka_pay_payment_applepay_label_amount.description,
@@ -74,26 +91,30 @@ extension ApplePaymentService {
         
         self.paymentController = PKPaymentAuthorizationController(paymentRequest: paymentRequest)
         self.paymentController?.delegate = self
-        self.onResultCallback = onResultCallback
         
-        self.paymentController?.present(completion: { (presented: Bool) in
-            if presented {
-                Logger.payByApplePay.info("✅ Presented Apple Pay payment controller")
-            } else {
-                Logger.payByApplePay.warning("⚠️ WARNING: Apple Pay payment controller unavailable")
-                
-                let paymentError = PaymentError(
-                    code: ErrorResponseCode.applePayUnavailable.rawValue,
-                    message: "Apple Pay payment controller unavailable",
-                    externalId: self.externalId,
-                    type: ErrorResponseType.paymentError.rawValue
-                )
-                
-                self.onResultCallback?(
-                    .failed(error: paymentError)
-                )
+        DispatchQueue.main.async { [weak self] in
+            guard let self else {
+                return
             }
-        })
+            self.paymentController?.present { presented in
+                if presented {
+                    Logger.payByApplePay.info("✅ Presented Apple Pay payment controller")
+                } else {
+                    Logger.payByApplePay.warning("⚠️ WARNING: Apple Pay payment controller unavailable")
+                    
+                    let paymentError = PaymentError(
+                        code: ErrorResponseCode.applePayUnavailable.rawValue,
+                        message: "Apple Pay payment controller unavailable",
+                        externalId: self.externalId,
+                        type: ErrorResponseType.paymentError.rawValue
+                    )
+                    
+                    self.onResultCallback?(
+                        .failed(error: paymentError)
+                    )
+                }
+            }
+        }
     }
     
     
@@ -113,7 +134,7 @@ extension ApplePaymentService {
         }
         
         Logger.payByApplePay.debug("✅ Apple Pay token successfully encoded: \(base64Token.prefix(5))... to Base64")
-      
+        
         return base64Token
     }
     

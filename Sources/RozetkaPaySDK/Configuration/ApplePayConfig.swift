@@ -40,7 +40,7 @@ public class ApplePayConfig {
     ///   - merchantIdentifier: Your Apple Pay merchant ID.
     ///   - merchantName: The merchant name displayed in the payment sheet.
     ///   - supportedNetworks: Optional list of card networks. Defaults to Visa and MasterCard.
-    ///   - merchantCapabilities: Optional capabilities. Defaults to `.capability3DS`.
+    ///   - merchantCapabilities: Optional capabilities. Defaults to `[.capability3DS, .capabilityDebit, .capabilityCredit]`.
     ///   - currencyCode: Optional currency code. Defaults to `RozetkaPayConfig.defaultCurrencyCode`.
     ///   - countryCode: Optional country code. Defaults to `RozetkaPayConfig.defaultCountryCode`.
     init(
@@ -54,7 +54,13 @@ public class ApplePayConfig {
         self.merchantIdentifier = merchantIdentifier
         self.merchantName = merchantName
         self.supportedNetworks = supportedNetworks ?? [.visa, .masterCard]
-        self.merchantCapabilities = merchantCapabilities ?? .capability3DS
+        
+        if #available(iOS 17.0, *) {
+            self.merchantCapabilities = merchantCapabilities ?? [.threeDSecure, .debit, .credit]
+        } else {
+            self.merchantCapabilities = merchantCapabilities ?? [.capability3DS, .capabilityDebit, .capabilityCredit]
+        }
+        
         self.countryCode = countryCode ?? RozetkaPayConfig.defaultCountryCode
         self.currencyCode = currencyCode ?? RozetkaPayConfig.defaultCurrencyCode
     }
@@ -62,15 +68,19 @@ public class ApplePayConfig {
     /// Test configuration for sandbox Apple Pay.
     public class Test: ApplePayConfig {
         /// Initializes a test config with default merchant name.
-        public init(
+        public override init(
             merchantIdentifier: String,
             merchantName: String = "RozetkaPay Test Merchant",
+            supportedNetworks: [PKPaymentNetwork]? = nil,
+            merchantCapabilities: PKMerchantCapability? = nil,
             currencyCode: String? = nil,
             countryCode: String? = nil
         ) {
             super.init(
                 merchantIdentifier: merchantIdentifier,
                 merchantName: merchantName,
+                supportedNetworks: supportedNetworks,
+                merchantCapabilities: merchantCapabilities,
                 currencyCode: currencyCode,
                 countryCode: countryCode
             )
@@ -80,11 +90,11 @@ public class ApplePayConfig {
     /// Production configuration for live Apple Pay.
     public class Production: ApplePayConfig {
         /// Initializes a production config with required merchant info.
-        public init(
+        public override init(
             merchantIdentifier: String,
             merchantName: String,
-            supportedNetworks: [PKPaymentNetwork] = [.visa, .masterCard],
-            merchantCapabilities: PKMerchantCapability = .capability3DS,
+            supportedNetworks: [PKPaymentNetwork]? = nil,
+            merchantCapabilities: PKMerchantCapability? = nil,
             currencyCode: String? = nil,
             countryCode: String? = nil
         ) {
@@ -102,13 +112,16 @@ public class ApplePayConfig {
     /// Checks whether Apple Pay is available and configured correctly on the device.
     ///
     /// Logs detailed messages using `Logger.payByApplePay`.
-    /// - Returns: `true` if Apple Pay is available and supports the configured networks; otherwise, `false`.
+    /// - Returns: `true` if Apple Pay is available and supports the configured networks and capabilities; otherwise, `false`.
     func checkApplePayAvailability() -> Bool {
         if PKPaymentAuthorizationController.canMakePayments() {
             Logger.payByApplePay.info("🍏 Apple Pay is available on this device. 🍏")
             
-            if PKPaymentAuthorizationController.canMakePayments(usingNetworks: supportedNetworks) {
-                Logger.payByApplePay.info("Apple Pay supports payment networks: [\(supportedNetworks.debugDescription)].")
+            if PKPaymentAuthorizationController.canMakePayments(
+                usingNetworks: supportedNetworks,
+                capabilities: merchantCapabilities
+            ) {
+                Logger.payByApplePay.info("Apple Pay supports payment networks: [\(supportedNetworks.debugDescription)], capabilities: [\(merchantCapabilities.debugDescription)]")
                 return true
             } else {
                 Logger.payByApplePay.warning("⚠️ Apple Pay is available but doesn't support these networks: [\(supportedNetworks.debugDescription)].")
