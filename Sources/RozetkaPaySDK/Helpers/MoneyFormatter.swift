@@ -112,6 +112,7 @@ public final class MoneyFormatter {
     /// - Returns: A configured `NumberFormatter`.
     private static func generateFormatter(for exponent: Int, usesGroupingSeparator: Bool) -> NumberFormatter {
         let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = usesGroupingSeparator ? " " : ""
         formatter.decimalSeparator = String(decimalSeparator)
