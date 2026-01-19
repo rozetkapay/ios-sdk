@@ -65,7 +65,66 @@ public class ApplePayConfig {
         self.currencyCode = currencyCode ?? RozetkaPayConfig.defaultCurrencyCode
     }
     
-    /// Test configuration for sandbox Apple Pay.
+    // MARK: - String-Based Initializer
+    
+    /// Initializes Apple Pay configuration with string-based parameters.
+    ///
+    /// This initializer provides a convenient way to configure Apple Pay using string arrays,
+    /// which is useful for configurations loaded from JSON, remote configs, or bridge interfaces.
+    ///
+    /// - Parameters:
+    ///   - merchantIdentifier: Your Apple Pay merchant ID registered in Apple Developer Portal.
+    ///   - merchantName: The merchant name displayed in the payment sheet.
+    ///   - supportedNetworks: Array of network strings. Supported values: `"visa"`, `"mastercard"`, `"amex"`, `"discover"`, `"maestro"`.
+    ///     Defaults to `["visa", "mastercard"]` if `nil` or empty.
+    ///   - merchantCapabilities: Array of capability strings. Supported values: `"3ds"`, `"credit"`, `"debit"`, `"emv"`, `"instantFundsOut"`.
+    ///     Defaults to `["3ds", "credit", "debit"]` if `nil` or empty.
+    ///   - currencyCode: ISO 4217 currency code (e.g., `"UAH"`, `"USD"`). Defaults to `RozetkaPayConfig.defaultCurrencyCode`.
+    ///   - countryCode: ISO 3166-1 alpha-2 country code (e.g., `"UA"`, `"US"`). Defaults to `RozetkaPayConfig.defaultCountryCode`.
+    ///
+    /// ## Supported Network Strings
+    ///
+    /// | String | Network | iOS |
+    /// |--------|---------|-----|
+    /// | `"visa"` | Visa | 8.0+ |
+    /// | `"mastercard"` | MasterCard | 8.0+ |
+    /// | `"amex"` | American Express | 8.0+ |
+    /// | `"discover"` | Discover | 9.0+ |
+    /// | `"maestro"` | Maestro | 12.0+ |
+    ///
+    /// ## Supported Capability Strings
+    ///
+    /// | String | Capability | iOS |
+    /// |--------|------------|-----|
+    /// | `"3ds"` | 3D Secure | 8.0+ |
+    /// | `"credit"` | Credit cards | 9.0+ |
+    /// | `"debit"` | Debit cards | 9.0+ |
+    /// | `"emv"` | EMV | 8.0+ |
+    /// | `"instantFundsOut"` | Instant Funds Out | 17.0+ |
+    ///
+    /// - Note: String matching is case-insensitive.
+    /// - Note: Unknown values are logged as warnings and skipped.
+    public convenience init(
+        merchantIdentifier: String,
+        merchantName: String,
+        supportedNetworks: [String]?,
+        merchantCapabilities: [String]?,
+        currencyCode: String?,
+        countryCode: String?
+    ) {
+        self.init(
+            merchantIdentifier: merchantIdentifier,
+            merchantName: merchantName,
+            supportedNetworks: PaymentNetworkParser.parse(supportedNetworks),
+            merchantCapabilities: MerchantCapabilityParser.parse(merchantCapabilities),
+            currencyCode: currencyCode,
+            countryCode: countryCode
+        )
+    }
+    
+    // MARK: - Subclasses
+    
+    /// Test configuration for sandbox Apple Pay environment.
     public class Test: ApplePayConfig {
         /// Initializes a test config with default merchant name.
         public override init(
