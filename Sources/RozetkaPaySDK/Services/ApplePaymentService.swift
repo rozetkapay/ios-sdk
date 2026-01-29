@@ -74,7 +74,7 @@ extension ApplePaymentService {
             paymentSummaryItems.append(tax)
         }
         let total = PKPaymentSummaryItem(
-            label: Localization.rozetka_pay_payment_applepay_label_total.description,
+            label: config.merchantName,
             amount: NSDecimalNumber(string: MoneyFormatter.formatCoinsToRawMoneyString(coins: amountParameters.total)),
             type: .final
         )

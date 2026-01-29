@@ -403,7 +403,7 @@
         },
         "uk" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Неправильне значення дати закінчення терміну дії"
           }
         }
@@ -490,23 +490,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Податок"
-          }
-        }
-      }
-    },
-    "rozetka_pay_payment_applepay_label_total" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total"
-          }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Всього"
           }
         }
       }
