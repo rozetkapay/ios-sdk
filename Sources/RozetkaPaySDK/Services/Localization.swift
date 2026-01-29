@@ -35,7 +35,6 @@ public enum Localization: String {
     
     case rozetka_pay_payment_applepay_label_amount
     case rozetka_pay_payment_applepay_label_tax
-    case rozetka_pay_payment_applepay_label_total
     
     
     case rozetka_pay_form_card_info_title
