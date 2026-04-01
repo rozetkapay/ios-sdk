@@ -163,6 +163,26 @@ class BaseViewModel: ObservableObject {
         }
     }
     
+    func clearFormFields() {
+        DispatchQueue.main.async {
+            self.cardNumber = nil
+            self.cvv = nil
+            self.expiryDate = nil
+            self.cardName = nil
+            self.cardholderName = nil
+            self.email = nil
+            
+            self.cardNumberStatus = .none
+            self.cvvStatus = .none
+            self.expiryDateStatus = .none
+            self.cardNameStatus = .none
+            self.cardholderNameStatus = .none
+            self.emailStatus = .none
+            
+            self.didPerformInitialValidation = false
+        }
+    }
+    
     func setTestData() {
         #warning("MOC DATA")
 //    #if DEBUG

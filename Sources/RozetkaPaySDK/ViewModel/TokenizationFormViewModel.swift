@@ -53,12 +53,20 @@ extension TokenizationFormViewModel {
     }
     
     func retryLoading() {
-        startLoading()
+        resetState()
+        stopLoader()
+        stateUICallback?(
+            .stopLoading
+        )
     }
     
     func cancelled() {
+        clearFormFields()
         resetState()
         stopLoader()
+        stateUICallback?(
+            .stopLoading
+        )
         
         onResultCallback?(
             .cancelled
