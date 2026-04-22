@@ -8,12 +8,13 @@
 import SwiftUI
 import OSLog
 
+@MainActor
 final class ThreeDSViewModel: ObservableObject {
     //MARK: - UI Properties
-    @Published var isLoading = false
-    @Published var isError = false
-    @Published var isRetry = false
-    @Published var error: PaymentError?
+    @Published private(set) var isLoading = false
+    @Published private(set) var isError = false
+    @Published private(set) var isRetry = false
+    @Published private(set) var error: PaymentError?
     
     //MARK: - Properties
     let themeConfigurator: RozetkaPayThemeConfigurator
@@ -48,88 +49,90 @@ final class ThreeDSViewModel: ObservableObject {
     }
     
     func retry() {
-        DispatchQueue.main.async {
-            guard !self.hasFinished else {
-                return
-            }
-            self.isLoading = false
-            self.error = nil
-            self.isError = false
-            self.isRetry = true
+        guard !hasFinished else {
+            return
         }
+        isLoading = false
+        error = nil
+        isError = false
+        isRetry = true
     }
-    
+
+    func markRetryConsumed() {
+        isRetry = false
+    }
+
     func handleSuccess() {
-        DispatchQueue.main.async {
-            guard !self.hasFinished else {
-                return
-            }
-            self.isLoading = false
-            self.error = nil
-            self.isError = false
-            self.hasFinished = true
-            
-            self.onResultCallback(
-                .success(
-                    externalId: self.request.externalId,
-                    paymentId: self.request.paymentId,
-                    tokenizedCard: self.request.tokenizedCard,
-                    ordersPayments: self.request.ordersPayments
-                )
-            )
+        guard !hasFinished else {
+            return
         }
+        isLoading = false
+        error = nil
+        isError = false
+        hasFinished = true
+
+        onResultCallback(
+            .success(
+                externalId: request.externalId,
+                paymentId: request.paymentId,
+                tokenizedCard: request.tokenizedCard,
+                ordersPayments: request.ordersPayments
+            )
+        )
     }
-    
+
+    /// Surfaces a 3DS error in the UI without finalizing the flow.
+    ///
+    /// Stores the error and flips `isError` so `ThreeDSView` renders `errorView`.
+    /// The flow is finalized only when the user taps the close / cancel button,
+    /// which routes through `handleCancelled()` and emits `.failed(error:)`
+    /// because `self.error` is set here. This lets the user keep the sheet open
+    /// to read the message instead of being kicked out immediately.
     func handleFailure(_ error: Error? = nil,  message: String? = nil) {
-        DispatchQueue.main.async {
-            guard !self.hasFinished else {
-                return
-            }
-            
-            self.isLoading = false
-            self.isError = true
-            
-            let paymentError = PaymentError(
-                code: ErrorResponseCode.threeDSRequired.rawValue,
-                message: message ?? error?.localizedDescription,
-                externalId: self.request.externalId,
-                paymentId: self.request.paymentId,
-                type: ErrorResponseType.paymentError.rawValue
-            )
-            self.error = paymentError
+        guard !hasFinished else {
+            return
         }
+
+        isLoading = false
+        isError = true
+
+        let paymentError = PaymentError(
+            code: ErrorResponseCode.threeDSRequired.rawValue,
+            message: message ?? error?.localizedDescription,
+            externalId: request.externalId,
+            paymentId: request.paymentId,
+            type: ErrorResponseType.paymentError.rawValue
+        )
+        self.error = paymentError
     }
-    
+
     func handleCancelled() {
-        DispatchQueue.main.async {
-            guard !self.hasFinished else {
-                return
-            }
-            self.isLoading = false
-            self.isError = false
-            
-            
-            if let error = self.error {
-                self.hasFinished = true
-                self.onResultCallback(
-                    .failed(
-                        error: error,
-                        tokenizedCard: self.request.tokenizedCard,
-                        ordersPayments: self.request.ordersPayments
-                    )
+        guard !hasFinished else {
+            return
+        }
+        isLoading = false
+        isError = false
+
+        if let error = self.error {
+            hasFinished = true
+            onResultCallback(
+                .failed(
+                    error: error,
+                    tokenizedCard: request.tokenizedCard,
+                    ordersPayments: request.ordersPayments
                 )
-            }else {
-                self.error = nil
-                self.hasFinished = true
-                self.onResultCallback(
-                    .cancelled(
-                        externalId: self.request.externalId,
-                        paymentId: self.request.paymentId,
-                        tokenizedCard: self.request.tokenizedCard,
-                        ordersPayments: self.request.ordersPayments
-                    )
+            )
+        } else {
+            self.error = nil
+            hasFinished = true
+            onResultCallback(
+                .cancelled(
+                    externalId: request.externalId,
+                    paymentId: request.paymentId,
+                    tokenizedCard: request.tokenizedCard,
+                    ordersPayments: request.ordersPayments
                 )
-            }
+            )
         }
     }
     
