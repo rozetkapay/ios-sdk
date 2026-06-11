@@ -11,7 +11,7 @@ struct TokenizationResponse: Decodable {
     let token: String
     let expiresAt: Date
     let cardMask: String
-    let issuer: Issuer
+    let issuer: Issuer?
 
     struct Issuer: Codable {
         let bank: String?
@@ -59,7 +59,7 @@ struct TokenizationResponse: Decodable {
         
         self.token = try container.decode(String.self, forKey: .token)
         self.cardMask = try container.decode(String.self, forKey: .cardMask)
-        self.issuer = try container.decode(Issuer.self, forKey: .issuer)
+        self.issuer = try container.decodeIfPresent(Issuer.self, forKey: .issuer)
         
         let expiresAtString = try container.decode(String.self, forKey: .expiresAt)
         let formatter = DateFormatter()
@@ -88,9 +88,9 @@ extension TokenizationResponse {
             maskedNumber: self.cardMask,
             name: cardName,
             email: cardEmail,
-            bank: self.issuer.bank,
-            isoA3Code: self.issuer.isoA3Code,
-            cardType: self.issuer.cardType
+            bank: self.issuer?.bank,
+            isoA3Code: self.issuer?.isoA3Code,
+            cardType: self.issuer?.cardType
         )
     }
 }
