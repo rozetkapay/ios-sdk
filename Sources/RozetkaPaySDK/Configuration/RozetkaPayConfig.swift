@@ -50,7 +50,16 @@ struct RozetkaPayConfig {
     
     /// Default network timeout settings used for API calls.
     static let network_TimeoutInterval: TimeoutInterval = .standart
-    
+
+    /// Default per-request network timeout in seconds.
+    static let DEFAULT_REQUEST_TIMEOUT: TimeInterval = 60
+
+    /// Per-request network timeout in seconds for payment-status polling
+    /// (`checkPayment` / `checkBatchPayment`). Kept shorter than
+    /// `DEFAULT_REQUEST_TIMEOUT` so a single hung poll request cannot stretch
+    /// the overall `DEFAULT_RETRY_TIMEOUT` window.
+    static let DEFAULT_CHECK_REQUEST_TIMEOUT: TimeInterval = 30
+
     /// Default retry timeout in seconds for failed operations.
     static let DEFAULT_RETRY_TIMEOUT: TimeInterval = 30
     

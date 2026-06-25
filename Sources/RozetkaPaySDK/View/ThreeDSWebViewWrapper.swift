@@ -40,8 +40,8 @@ struct ThreeDSWebViewWrapper: UIViewRepresentable {
     func updateUIView(_ uiView: WKWebView, context: Context) {
         if viewModel.isRetry {
             context.coordinator.load3DSUrl()
-            DispatchQueue.main.async {
-                viewModel.isRetry = false
+            Task { @MainActor in
+                viewModel.markRetryConsumed()
             }
         }
     }

@@ -6,6 +6,7 @@
 //
 import SwiftUI
 
+@MainActor
 final class TokenizationFormViewModel: BaseViewModel {
     
     //MARK: - Properties
@@ -59,7 +60,7 @@ extension TokenizationFormViewModel {
             .stopLoading
         )
     }
-    
+
     func cancelled() {
         clearFormFields()
         resetState()
@@ -74,10 +75,7 @@ extension TokenizationFormViewModel {
     }
     
     func resetState() {
-        DispatchQueue.main.async {
-            self.isError = false
-            self.errorMessage = nil
-        }
+        clearError()
     }
 }
 
@@ -92,31 +90,29 @@ private extension TokenizationFormViewModel {
         )
         
         TokenizationService.tokenizeCard(key: key, model: model) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.stopLoader()
-                self?.stateUICallback?(
-                    .stopLoading
-                )
-                
+            Task { @MainActor in
+                guard let self else { return }
+                self.stopLoader()
+                self.stateUICallback?(.stopLoading)
+
                 switch result {
                 case .complete(let success):
-                    self?.resetState()
-                    self?.onResultCallback?(
+                    self.resetState()
+                    self.onResultCallback?(
                         .complete(tokenizedCard: success)
                     )
                 case .failed(let error):
                     switch error {
                     case .cancelled:
-                        self?.cancelled()
+                        self.cancelled()
                     case let .failed(message, _):
-                        self?.isError = true
-                        self?.errorMessage = message
-                        self?.onResultCallback?(
+                        self.setError(message)
+                        self.onResultCallback?(
                             .failed(error: error)
                         )
                     }
                 case .cancelled:
-                    self?.cancelled()
+                    self.cancelled()
                 }
             }
         }

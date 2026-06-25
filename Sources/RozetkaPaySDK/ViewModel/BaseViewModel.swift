@@ -8,6 +8,7 @@
 import SwiftUI
 import OSLog
 
+@MainActor
 class BaseViewModel: ObservableObject {
     //MARK: - Properties
     let client: ClientAuthParametersProtocol
@@ -18,9 +19,9 @@ class BaseViewModel: ObservableObject {
     //MARK: - UI Properties
     @Published var alertItem: CustomAlertItem?
     
-    @Published var isLoading = false
-    @Published var isError = false
-    @Published var errorMessage: String?
+    @Published private(set) var isLoading = false
+    @Published private(set) var isError = false
+    @Published private(set) var errorMessage: String?
     
     ///
     @Published var cardNumber: String? = nil
@@ -152,35 +153,39 @@ class BaseViewModel: ObservableObject {
     }
     
     func startLoader() {
-        DispatchQueue.main.async {
-            self.isLoading = true
-        }
+        isLoading = true
     }
-    
+
     func stopLoader() {
-        DispatchQueue.main.async {
-            self.isLoading = false
-        }
+        isLoading = false
     }
-    
+
+    func setError(_ message: String?) {
+        isError = true
+        errorMessage = message
+    }
+
+    func clearError() {
+        isError = false
+        errorMessage = nil
+    }
+
     func clearFormFields() {
-        DispatchQueue.main.async {
-            self.cardNumber = nil
-            self.cvv = nil
-            self.expiryDate = nil
-            self.cardName = nil
-            self.cardholderName = nil
-            self.email = nil
-            
-            self.cardNumberStatus = .none
-            self.cvvStatus = .none
-            self.expiryDateStatus = .none
-            self.cardNameStatus = .none
-            self.cardholderNameStatus = .none
-            self.emailStatus = .none
-            
-            self.didPerformInitialValidation = false
-        }
+        cardNumber = nil
+        cvv = nil
+        expiryDate = nil
+        cardName = nil
+        cardholderName = nil
+        email = nil
+
+        cardNumberStatus = .none
+        cvvStatus = .none
+        expiryDateStatus = .none
+        cardNameStatus = .none
+        cardholderNameStatus = .none
+        emailStatus = .none
+
+        didPerformInitialValidation = false
     }
     
     func setTestData() {

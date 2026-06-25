@@ -56,6 +56,9 @@ struct ThreeDSView: View {
                         .surface
                 )
         }
+        .onDisappear {
+            viewModel.handleCancelled()
+        }
     }
 }
 

@@ -60,30 +60,32 @@ open class BatchPayService {
     ) {
         
         Task {
-            let startTime = Date.now
             let timeout: TimeInterval = RozetkaPayConfig.DEFAULT_RETRY_TIMEOUT
             let delay: TimeInterval = RozetkaPayConfig.DEFAULT_RETRY_DELAY
-            
+            let deadline = Date().addingTimeInterval(timeout)
+
             do {
                 var finalResponse: BatchPaymentDetailsResponse?
-                
-                repeat {
+
+                while Date() < deadline {
                     let response = try await BatchPayServiceEndpoint
                         .checkBatchPayment(data: model, key: key)
                         .execute(BatchPaymentDetailsResponse.self, errorType: PaymentError.self)
-                    
+
                     if let data = response.convertToCheckBatchPaymentData(ordersPayments: model.ordersPayments),
                        data.status.isTerminated {
                         finalResponse = response
                         break
                     }
-                    
+
+                    // Stop if the next poll would start after the deadline.
+                    guard Date().addingTimeInterval(delay) < deadline else { break }
+
                     Logger.payServices.info("⚠️ PENDING: BatchPayment has not been terminated yet, retrying after \(Int(delay))s delay")
-                    
+
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-                    
-                } while Date().timeIntervalSince(startTime) < timeout
-                
+                }
+
                 if let finalResponse = finalResponse {
                     handleCheckBatchPaymentStatuses(finalResponse, model, result: result)
                 } else {
@@ -302,7 +304,16 @@ fileprivate enum BatchPayServiceEndpoint: APIConfiguration {
             return .GET
         }
     }
-    
+
+    var timeInterval: TimeInterval {
+        switch self {
+        case .checkBatchPayment:
+            return RozetkaPayConfig.DEFAULT_CHECK_REQUEST_TIMEOUT
+        case .createBatchPayment:
+            return RozetkaPayConfig.DEFAULT_REQUEST_TIMEOUT
+        }
+    }
+
     private var path: String {
         switch self {
         case .createBatchPayment:

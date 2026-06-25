@@ -97,15 +97,16 @@ extension TokenizationError {
                     externalId: externalId,
                     paymentId: nil
                 )
-        case let .failed(message, _):
+        case let .failed(message, errorDescription):
             let errorModel = PaymentError(
                 code: ErrorResponseCode.failedToVerifyCard.rawValue,
                 message: message,
                 externalId: externalId,
                 paymentId: nil,
-                type: ErrorResponseType.paymentError.rawValue
+                type: ErrorResponseType.paymentError.rawValue,
+                errorDescription: errorDescription
             )
-            
+
             return .failed(error: errorModel)
         }
     }

@@ -388,3 +388,23 @@ public enum ErrorResponseCode: Error, Decodable, Equatable {
         }
     }
 }
+
+public extension ErrorResponseCode {
+    /// User-facing localized text for this code, resolved from
+    /// `Localizable.xcstrings` under the `rozetka_pay_error_<raw>` key.
+    /// Returns `nil` when no localized entry exists (e.g. unrecognized server codes),
+    /// so callers can fall back to server-provided text or a generic template.
+    var localizedDescription: String? {
+        switch self {
+        case .unknown(let code):
+            let key = "rozetka_pay_error_unknown_code"
+            let template = Localization.localizedString(forKey: key)
+            guard template != key else { return nil }
+            return template.replacingOccurrences(of: "%1", with: code)
+        default:
+            let key = "rozetka_pay_error_\(rawValue)"
+            let resolved = Localization.localizedString(forKey: key)
+            return resolved == key ? nil : resolved
+        }
+    }
+}

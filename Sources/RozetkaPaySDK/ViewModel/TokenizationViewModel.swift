@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 final class TokenizationViewModel: BaseViewModel {
     
     //MARK: - Constants & Defaults
@@ -16,6 +17,7 @@ final class TokenizationViewModel: BaseViewModel {
     
     //MARK: - Properties
     private let onResultCallback: (TokenizationResultCompletionHandler)?
+    private var hasDeliveredResult = false
     
     //MARK: - Init
     init(
@@ -61,21 +63,27 @@ extension TokenizationViewModel {
     func retryLoading() {
         startLoading()
     }
-    
+
     func cancelled() {
         resetState()
         stopLoader()
-        
-        onResultCallback?(
-            .cancelled
-        )
+
+        deliver(.cancelled)
     }
-    
+
+    func handleViewDisappeared() {
+        guard !hasDeliveredResult else { return }
+        cancelled()
+    }
+
     func resetState() {
-        DispatchQueue.main.async {
-            self.isError = false
-            self.errorMessage = nil
-        }
+        clearError()
+    }
+
+    private func deliver(_ result: TokenizationResult) {
+        guard !hasDeliveredResult else { return }
+        hasDeliveredResult = true
+        onResultCallback?(result)
     }
 }
 
@@ -86,24 +94,24 @@ private extension TokenizationViewModel {
         startLoader()
         
         TokenizationService.tokenizeCard(key: key, model: model) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.stopLoader()
-                
+            Task { @MainActor in
+                guard let self else { return }
+                self.stopLoader()
+
                 switch result {
                 case .complete(let success):
-                    self?.onResultCallback?(
+                    self.deliver(
                         .complete(tokenizedCard: success)
                     )
                 case .failed(let error):
                     switch error {
                     case .cancelled:
-                        self?.cancelled()
+                        self.cancelled()
                     case let .failed(message, _):
-                        self?.isError = true
-                        self?.errorMessage = message
+                        self.setError(message)
                     }
                 case .cancelled:
-                    self?.cancelled()
+                    self.cancelled()
                 }
             }
         }

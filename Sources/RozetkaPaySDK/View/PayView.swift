@@ -61,6 +61,9 @@ public struct PayView: View {
             item: $viewModel.alertItem,
             themeConfigurator: viewModel.themeConfigurator
         )
+        .onDisappear {
+            viewModel.handleViewDisappeared()
+        }
     }
 }
 
