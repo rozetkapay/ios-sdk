@@ -62,6 +62,7 @@ final class PayViewModel:  BaseViewModel {
     
     private let onResultCallback: PaymentResultCompletionHandler?
     private let onBatchResultCallback: BatchPaymentResultCompletionHandler?
+    private var hasDeliveredResult = false
     
     //MARK: - Init
     init(
@@ -173,12 +174,38 @@ extension PayViewModel {
         isThreeDSConfirmationPresented = false
         threeDSModel = nil
 
-        onResultCallback?(
-            .cancelled(
-                externalId: externalId,
-                paymentId: nil
+        switch initialMode {
+        case .single:
+            deliver(
+                .cancelled(
+                    externalId: externalId,
+                    paymentId: nil
+                )
             )
-        )
+        case .batch:
+            deliverBatch(
+                .cancelled(
+                    batchExternalId: externalId
+                )
+            )
+        }
+    }
+
+    func handleViewDisappeared() {
+        guard !hasDeliveredResult else { return }
+        cancelled()
+    }
+
+    private func deliver(_ result: PaymentResult) {
+        guard !hasDeliveredResult else { return }
+        hasDeliveredResult = true
+        onResultCallback?(result)
+    }
+
+    private func deliverBatch(_ result: BatchPaymentResult) {
+        guard !hasDeliveredResult else { return }
+        hasDeliveredResult = true
+        onBatchResultCallback?(result)
     }
     
     func retryLoading() {
@@ -399,14 +426,14 @@ private extension PayViewModel {
 
         switch result {
         case let .cancelled(externalId, paymentId):
-            onResultCallback?(
+            deliver(
                 .cancelled(
                     externalId: externalId,
                     paymentId: paymentId
                 )
             )
         case let .success(externalId, paymentId):
-            onResultCallback?(
+            deliver(
                 .complete(
                     externalId: externalId,
                     paymentId: paymentId,
@@ -425,9 +452,7 @@ private extension PayViewModel {
             clearError()
         case let .failed(error):
             if error.code == .transactionAlreadyPaid {
-                onResultCallback?(
-                    .failed(error: error)
-                )
+                deliver(.failed(error: error))
                 return
             }
             showError(error.localizedDescription)
@@ -440,11 +465,9 @@ private extension PayViewModel {
 
         switch result {
         case let .cancelled(batchExternalId):
-            onBatchResultCallback?(
-                .cancelled(batchExternalId: batchExternalId)
-            )
+            deliverBatch(.cancelled(batchExternalId: batchExternalId))
         case let .success(batchExternalId, ordersPayments):
-            onBatchResultCallback?(
+            deliverBatch(
                 .complete(
                     batchExternalId: batchExternalId,
                     ordersPayments: ordersPayments,
@@ -464,7 +487,7 @@ private extension PayViewModel {
             clearError()
         case let .failed(batchExternalId, error):
             if error.code == .transactionAlreadyPaid {
-                onBatchResultCallback?(
+                deliverBatch(
                     .failed(
                         batchExternalId: batchExternalId,
                         error: error,
@@ -509,14 +532,12 @@ extension PayViewModel {
                     switch result {
                     case let .failed(error):
                         if error.code == .transactionAlreadyPaid {
-                            self.onResultCallback?(
-                                .failed(error: error)
-                            )
+                            self.deliver(.failed(error: error))
                             return
                         }
                         self.setError(error.localizedDescription)
                     default:
-                        self.onResultCallback?(result)
+                        self.deliver(result)
                     }
                 }
             }
@@ -551,7 +572,7 @@ extension PayViewModel {
                     switch result {
                     case let .failed(batchExternalId, error, ordersPayments):
                         if error.code == .transactionAlreadyPaid {
-                            self.onBatchResultCallback?(
+                            self.deliverBatch(
                                 .failed(
                                     batchExternalId: batchExternalId,
                                     error: error,
@@ -562,7 +583,7 @@ extension PayViewModel {
                         }
                         self.setError(error.localizedDescription)
                     default:
-                        self.onBatchResultCallback?(result)
+                        self.deliverBatch(result)
                     }
                 }
             }
@@ -598,8 +619,10 @@ extension PayViewModel {
             guard let externalId = error.externalId,
                   let paymentId = error.paymentId
             else {
-                onResultCallback?(
-                    .failed(error: error)
+                deliver(
+                    .failed(
+                        error: error
+                    )
                 )
                 return
             }
@@ -629,7 +652,7 @@ extension PayViewModel {
             guard let externalId = error.externalId,
                   let ordersPayments = ordersPayments
             else {
-                onBatchResultCallback?(
+                deliverBatch(
                     .failed(
                         batchExternalId: nil,
                         error: error,

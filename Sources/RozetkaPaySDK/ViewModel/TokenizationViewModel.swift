@@ -17,6 +17,7 @@ final class TokenizationViewModel: BaseViewModel {
     
     //MARK: - Properties
     private let onResultCallback: (TokenizationResultCompletionHandler)?
+    private var hasDeliveredResult = false
     
     //MARK: - Init
     init(
@@ -66,14 +67,23 @@ extension TokenizationViewModel {
     func cancelled() {
         resetState()
         stopLoader()
-        
-        onResultCallback?(
-            .cancelled
-        )
+
+        deliver(.cancelled)
     }
-    
+
+    func handleViewDisappeared() {
+        guard !hasDeliveredResult else { return }
+        cancelled()
+    }
+
     func resetState() {
         clearError()
+    }
+
+    private func deliver(_ result: TokenizationResult) {
+        guard !hasDeliveredResult else { return }
+        hasDeliveredResult = true
+        onResultCallback?(result)
     }
 }
 
@@ -90,7 +100,7 @@ private extension TokenizationViewModel {
 
                 switch result {
                 case .complete(let success):
-                    self.onResultCallback?(
+                    self.deliver(
                         .complete(tokenizedCard: success)
                     )
                 case .failed(let error):

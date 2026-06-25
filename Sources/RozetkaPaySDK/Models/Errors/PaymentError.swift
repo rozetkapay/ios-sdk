@@ -77,22 +77,43 @@ public struct PaymentError: Error, Decodable {
     
     
     public var localizedDescription: String {
-        if let message = message.isNilOrEmptyValue {
-            return message
-        } else {
-            var message = "Unknown error (code: \(code.rawValue), type: \(type.rawValue))"
-            if let externalId = externalId {
-                message += ", externalId: \(externalId)"
-            }
-            if let paymentId = paymentId {
-                message += ", paymentId: \(paymentId)"
-            }
-            
-            if let errorDescription = errorDescription {
-                message += ", errorDescription: \(errorDescription)"
-            }
-            return message
+        let primary = message.isNilOrEmptyValue
+            ?? errorDescription.isNilOrEmptyValue
+            ?? code.localizedDescription
+            ?? fallbackDescription
+
+        var parts = [primary]
+        if let externalId = externalId {
+            parts.append("externalId: \(externalId)")
         }
+        if let paymentId = paymentId {
+            parts.append("paymentId: \(paymentId)")
+        }
+        return parts.joined(separator: ", ")
+    }
+
+    /// Generic message used when neither server text nor a localized code is available.
+    private var fallbackDescription: String {
+        let key = "rozetka_pay_error_unknown_code"
+        let template = Localization.localizedString(forKey: key)
+        return template != key
+            ? template.replacingOccurrences(of: "%1", with: code.rawValue)
+            : "Payment error (code: \(code.rawValue))"
+    }
+
+    /// Diagnostic representation for logs
+    public var debugDescription: String {
+        var parts: [String] = [
+            "code: \(code.rawValue)",
+            "type: \(type.rawValue)",
+        ]
+        if let message = message { parts.append("message: \(message)") }
+        if let errorDescription = errorDescription { parts.append("error: \(errorDescription)") }
+        if let param = param { parts.append("param: \(param)") }
+        if let externalId = externalId { parts.append("externalId: \(externalId)") }
+        if let paymentId = paymentId { parts.append("paymentId: \(paymentId)") }
+        if let errorId = errorId { parts.append("errorId: \(errorId)") }
+        return "PaymentError(\(parts.joined(separator: ", ")))"
     }
     
     mutating func setExternalId(_ value: String) {

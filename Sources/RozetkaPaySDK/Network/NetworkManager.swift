@@ -118,7 +118,7 @@ public enum APIError<ValidationError: Decodable & Swift.Error>: Swift.Error {
 
 extension APIConfiguration {
     var timeInterval: TimeInterval {
-        return 60.0
+        return RozetkaPayConfig.DEFAULT_REQUEST_TIMEOUT
     }
     
     var headers: Headers? { nil }

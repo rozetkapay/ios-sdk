@@ -39,6 +39,9 @@ public struct TokenizationView: View {
                         .surface
                 )
         }
+        .onDisappear {
+            viewModel.handleViewDisappeared()
+        }
     }
 }
 

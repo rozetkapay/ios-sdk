@@ -55,30 +55,32 @@ open class PayService {
     ) {
         
         Task {
-            let startTime = Date.now
             let timeout: TimeInterval = RozetkaPayConfig.DEFAULT_RETRY_TIMEOUT
             let delay: TimeInterval = RozetkaPayConfig.DEFAULT_RETRY_DELAY
-            
+            let deadline = Date().addingTimeInterval(timeout)
+
             do {
                 var finalResponse: PaymentDetailsResponse?
-                
-                repeat {
+
+                while Date() < deadline {
                     let response = try await PayServiceEndpoint
                         .checkPayment(data: model, key: key)
                         .execute(PaymentDetailsResponse.self, errorType: PaymentError.self)
-                    
+
                     if let data = response.convertToCheckPaymentData(paymentId: model.paymentId),
                        data.status.isTerminated {
                         finalResponse = response
                         break
                     }
-                    
+
+                    // Stop if the next poll would start after the deadline.
+                    guard Date().addingTimeInterval(delay) < deadline else { break }
+
                     Logger.payServices.info("⚠️ PENDING: Payment has not been terminated yet, retrying after \(Int(delay))s delay")
-                    
+
                     try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-                    
-                } while Date().timeIntervalSince(startTime) < timeout
-                
+                }
+
                 if let finalResponse = finalResponse {
                     handleCheckPaymentStatuses(finalResponse, model, result: result)
                 } else {
@@ -277,7 +279,16 @@ fileprivate enum PayServiceEndpoint: APIConfiguration {
             return .GET
         }
     }
-    
+
+    var timeInterval: TimeInterval {
+        switch self {
+        case .checkPayment:
+            return RozetkaPayConfig.DEFAULT_CHECK_REQUEST_TIMEOUT
+        case .createPayment:
+            return RozetkaPayConfig.DEFAULT_REQUEST_TIMEOUT
+        }
+    }
+
     private var path: String {
         switch self {
         case .createPayment:
