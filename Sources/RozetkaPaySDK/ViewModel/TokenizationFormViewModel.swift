@@ -12,6 +12,9 @@ final class TokenizationFormViewModel: BaseViewModel {
     //MARK: - Properties
     private let onResultCallback: (TokenizationFormResultCompletionHandler)?
     private let stateUICallback: (TokenizationFormUIStateCompletionHandler)?
+
+    /// Last tokenization error shown on the error screen, used to deliver `.failed` when the user taps "Close".
+    private var lastError: TokenizationError?
     
     //MARK: - Init
     init(
@@ -26,7 +29,8 @@ final class TokenizationFormViewModel: BaseViewModel {
             client: parameters.client,
             viewParameters: parameters.viewParameters,
             themeConfigurator: parameters.themeConfigurator,
-            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
+            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase(),
+            errorDismissButtonTitle: parameters.errorDismissButtonTitle
         )
         
         setTestData()
@@ -73,7 +77,20 @@ extension TokenizationFormViewModel {
             .cancelled
         )
     }
-    
+
+    func failed() {
+        resetState()
+        stopLoader()
+        stateUICallback?(
+            .stopLoading
+        )
+
+        let error = lastError ?? .failed(message: errorMessage, errorDescription: nil)
+        onResultCallback?(
+            .failed(error: error)
+        )
+    }
+
     func resetState() {
         clearError()
     }
@@ -106,6 +123,7 @@ private extension TokenizationFormViewModel {
                     case .cancelled:
                         self.cancelled()
                     case let .failed(message, _):
+                        self.lastError = error
                         self.setError(message)
                         self.onResultCallback?(
                             .failed(error: error)

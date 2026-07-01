@@ -43,7 +43,10 @@ public struct BatchPaymentParameters: ParametersProtocol {
     
     /// List of orders to be paid in the batch.
     let orders: [BatchOrder]
-    
+
+    /// Title shown on the dismiss button of the error screen. Defaults to `.close`.
+    let errorDismissButtonTitle: ErrorDismissButtonTitle
+
     /// Creates a new instance of `PaymentParameters`.
     public init(
         client: ClientAuthParameters,
@@ -54,7 +57,8 @@ public struct BatchPaymentParameters: ParametersProtocol {
         amountParameters: AmountParameters,
         externalId: String,
         callbackUrl: String? = nil,
-        orders: [BatchOrder]
+        orders: [BatchOrder],
+        errorDismissButtonTitle: ErrorDismissButtonTitle = .close
     ) {
         self.client = client
         self.themeConfigurator = themeConfigurator
@@ -64,6 +68,7 @@ public struct BatchPaymentParameters: ParametersProtocol {
         self.callbackUrl = callbackUrl
         self.resultUrl = EnvironmentProvider.environment.paymentsConfirmation3DsCallbackUrl
         self.orders = orders
+        self.errorDismissButtonTitle = errorDismissButtonTitle
     }
     
     var applePaymentService: ApplePaymentService? {

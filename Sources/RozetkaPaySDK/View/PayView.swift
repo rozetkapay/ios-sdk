@@ -133,11 +133,12 @@ private extension PayView {
             themeConfigurator: viewModel.themeConfigurator,
             errorMessage: viewModel.errorMessage,
             onCancel: {
-                viewModel.cancelled()
+                viewModel.failed()
             },
             onRetry: {
                 viewModel.retryLoading()
             },
+            cancelButtonTitle: viewModel.errorDismissButtonTitle.title,
             isButtonRetryEnabled: viewModel.getIsRetryEnabled()
         )
         .accessibilityIdentifier(tags.errorView)

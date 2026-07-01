@@ -110,4 +110,25 @@ extension TokenizationError {
             return .failed(error: errorModel)
         }
     }
+
+    func convertToCreateBatchPaymentResult(_ batchExternalId: String) -> CreateBatchPaymentResult {
+        switch self {
+        case .cancelled:
+            return .cancelled(batchExternalId: batchExternalId)
+        case let .failed(message, errorDescription):
+            let errorModel = PaymentError(
+                code: ErrorResponseCode.failedToVerifyCard.rawValue,
+                message: message,
+                externalId: batchExternalId,
+                paymentId: nil,
+                type: ErrorResponseType.paymentError.rawValue,
+                errorDescription: errorDescription
+            )
+
+            return .failed(
+                batchExternalId: batchExternalId,
+                error: errorModel
+            )
+        }
+    }
 }

@@ -38,7 +38,10 @@ public struct PaymentParameters: ParametersProtocol {
     
     /// Optional URL that will be called after the payment is finished.
     let resultUrl: String?
-    
+
+    /// Title shown on the dismiss button of the error screen. Defaults to `.close`.
+    let errorDismissButtonTitle: ErrorDismissButtonTitle
+
     /// Creates a new instance of `PaymentParameters`.
     public init(
         client: ClientAuthParameters,
@@ -48,7 +51,8 @@ public struct PaymentParameters: ParametersProtocol {
         ),
         amountParameters: AmountParameters,
         externalId: String,
-        callbackUrl: String? = nil
+        callbackUrl: String? = nil,
+        errorDismissButtonTitle: ErrorDismissButtonTitle = .close
     ) {
         self.client = client
         self.themeConfigurator = themeConfigurator
@@ -57,6 +61,7 @@ public struct PaymentParameters: ParametersProtocol {
         self.externalId = externalId
         self.callbackUrl = callbackUrl
         self.resultUrl = EnvironmentProvider.environment.paymentsConfirmation3DsCallbackUrl
+        self.errorDismissButtonTitle = errorDismissButtonTitle
     }
     
     var applePaymentService: ApplePaymentService? {

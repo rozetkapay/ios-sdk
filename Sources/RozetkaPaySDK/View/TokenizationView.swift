@@ -126,11 +126,12 @@ private extension TokenizationView {
             themeConfigurator: viewModel.themeConfigurator,
             errorMessage: viewModel.errorMessage,
             onCancel: {
-                viewModel.cancelled()
+                viewModel.failed()
             },
             onRetry: {
                 viewModel.retryLoading()
-            }
+            },
+            cancelButtonTitle: viewModel.errorDismissButtonTitle.title
         )
         .accessibilityIdentifier(tags.errorView)
         .padding()

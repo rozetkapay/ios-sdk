@@ -13,6 +13,7 @@ public enum Localization: String {
     case rozetka_pay_common_loading_message
     case rozetka_pay_common_error_message
     case rozetka_pay_common_button_cancel
+    case rozetka_pay_common_button_close
     case rozetka_pay_common_button_retry
     case rozetka_pay_common_button_done
     
