@@ -18,6 +18,23 @@
         }
       }
     },
+    "rozetka_pay_common_button_close" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрити"
+          }
+        }
+      }
+    },
     "rozetka_pay_common_button_done" : {
       "extractionState" : "manual",
       "localizations" : {

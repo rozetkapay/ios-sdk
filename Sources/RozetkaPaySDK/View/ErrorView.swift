@@ -15,6 +15,7 @@ struct ErrorView: View {
     private var errorMessage: String
     private var onCancel: () -> Void
     private var onRetry: () -> Void
+    private var cancelButtonTitle: String
     private var isButtonRetryEnabled: Bool
     private var isExpanded: Bool
     private let accessibilityNamespace: String
@@ -29,6 +30,7 @@ struct ErrorView: View {
         errorMessage: String? = nil,
         onCancel: @escaping () -> Void,
         onRetry: @escaping () -> Void = {},
+        cancelButtonTitle: String? = nil,
         isButtonRetryEnabled: Bool = true,
         isExpanded: Bool = false
     ) {
@@ -37,6 +39,7 @@ struct ErrorView: View {
         self.errorMessage = errorMessage ?? Localization.rozetka_pay_tokenization_error_common.description
         self.onCancel = onCancel
         self.onRetry = onRetry
+        self.cancelButtonTitle = cancelButtonTitle ?? Localization.rozetka_pay_common_button_cancel.description
         self.isButtonRetryEnabled = isButtonRetryEnabled
         self.isExpanded = isExpanded
     }
@@ -161,7 +164,7 @@ private extension ErrorView {
         }) {
             Text(isButtonRetryEnabled ?
                  Localization.rozetka_pay_common_button_retry.description :
-                    Localization.rozetka_pay_common_button_cancel.description
+                    cancelButtonTitle
             )
             .font(
                 themeConfigurator
@@ -202,7 +205,7 @@ private extension ErrorView {
         Button(action: {
             onCancel()
         }) {
-            Text(Localization.rozetka_pay_common_button_cancel.description
+            Text(cancelButtonTitle
             )
             .font(
                 themeConfigurator

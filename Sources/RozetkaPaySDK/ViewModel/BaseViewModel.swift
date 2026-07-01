@@ -15,6 +15,7 @@ class BaseViewModel: ObservableObject {
     let viewParameters: ViewParametersProtocol
     let themeConfigurator: RozetkaPayThemeConfigurator
     let provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
+    let errorDismissButtonTitle: ErrorDismissButtonTitle
     
     //MARK: - UI Properties
     @Published var alertItem: CustomAlertItem?
@@ -46,12 +47,14 @@ class BaseViewModel: ObservableObject {
         client: ClientAuthParametersProtocol,
         viewParameters: ViewParametersProtocol,
         themeConfigurator: RozetkaPayThemeConfigurator,
-        provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase
+        provideCardPaymentSystemUseCase: ProvideCardPaymentSystemUseCase,
+        errorDismissButtonTitle: ErrorDismissButtonTitle = .close
     ) {
         self.client = client
         self.viewParameters = viewParameters
         self.themeConfigurator = themeConfigurator
         self.provideCardPaymentSystemUseCase = provideCardPaymentSystemUseCase
+        self.errorDismissButtonTitle = errorDismissButtonTitle
         self.didPerformInitialValidation = false
     }
     

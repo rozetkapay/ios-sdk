@@ -18,6 +18,9 @@ final class TokenizationViewModel: BaseViewModel {
     //MARK: - Properties
     private let onResultCallback: (TokenizationResultCompletionHandler)?
     private var hasDeliveredResult = false
+
+    /// Last tokenization error shown on the error screen, used to deliver `.failed` when the user taps "Close".
+    private var lastError: TokenizationError?
     
     //MARK: - Init
     init(
@@ -30,7 +33,8 @@ final class TokenizationViewModel: BaseViewModel {
             client: parameters.client,
             viewParameters: parameters.viewParameters,
             themeConfigurator: parameters.themeConfigurator,
-            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
+            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase(),
+            errorDismissButtonTitle: parameters.errorDismissButtonTitle
         )
         
         setTestData()
@@ -71,6 +75,15 @@ extension TokenizationViewModel {
         deliver(.cancelled)
     }
 
+    /// Delivers a `.failed` result. Triggered when the user taps the "Close" button on the error screen.
+    func failed() {
+        resetState()
+        stopLoader()
+
+        let error = lastError ?? .failed(message: errorMessage, errorDescription: nil)
+        deliver(.failed(error: error))
+    }
+
     func handleViewDisappeared() {
         guard !hasDeliveredResult else { return }
         cancelled()
@@ -108,6 +121,7 @@ private extension TokenizationViewModel {
                     case .cancelled:
                         self.cancelled()
                     case let .failed(message, _):
+                        self.lastError = error
                         self.setError(message)
                     }
                 case .cancelled:

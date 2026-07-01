@@ -54,6 +54,8 @@ final class PayViewModel:  BaseViewModel {
     
     private let isNeedToReturnTokenizationCard: Bool
     private let isAllowApplePay: Bool
+
+    private var lastError: PaymentError?
     
     private let amountWithCurrencyStr: String
     
@@ -98,7 +100,8 @@ final class PayViewModel:  BaseViewModel {
             client: parameters.client,
             viewParameters: parameters.viewParameters,
             themeConfigurator: parameters.themeConfigurator,
-            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
+            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase(),
+            errorDismissButtonTitle: parameters.errorDismissButtonTitle
         )
         
         checkIsNeedToPayByTokenizedCard()
@@ -137,7 +140,8 @@ final class PayViewModel:  BaseViewModel {
             client: parameters.client,
             viewParameters: parameters.viewParameters,
             themeConfigurator: parameters.themeConfigurator,
-            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase()
+            provideCardPaymentSystemUseCase: provideCardPaymentSystemUseCase ?? ProvideCardPaymentSystemUseCase(),
+            errorDismissButtonTitle: parameters.errorDismissButtonTitle
         )
         
         checkIsNeedToPayByTokenizedCard()
@@ -186,6 +190,34 @@ extension PayViewModel {
             deliverBatch(
                 .cancelled(
                     batchExternalId: externalId
+                )
+            )
+        }
+    }
+
+    func failed() {
+        stopLoader()
+        clearError()
+        isThreeDSConfirmationPresented = false
+        threeDSModel = nil
+
+        let error = lastError ?? PaymentError(
+            code: nil,
+            message: errorMessage,
+            externalId: externalId
+        )
+
+        switch initialMode {
+        case .single:
+            deliver(
+                .failed(error: error)
+            )
+        case .batch:
+            deliverBatch(
+                .failed(
+                    batchExternalId: externalId,
+                    error: error,
+                    ordersPayments: nil
                 )
             )
         }
@@ -279,16 +311,9 @@ extension PayViewModel {
                 case let .success(_, token):
                     self.createPayment(fromApplePay: token)
                 case let .cancelled(externalId):
-                    self.processPaymentResult(
-                        .cancelled(
-                            externalId: externalId,
-                            paymentId: nil
-                        )
-                    )
+                    self.handlePrePaymentCancelled(externalId: externalId)
                 case let .failed(error):
-                    self.processPaymentResult(
-                        .failed(error: error)
-                    )
+                    self.handlePrePaymentFailed(error)
                 }
             }
         }
@@ -337,16 +362,9 @@ extension PayViewModel {
                     case .complete(let successModel):
                         self.createPayment(from: successModel)
                     case .failed(let error):
-                        self.processPaymentResult(
-                            error.convertToCreatePaymentResult(self.externalId)
-                        )
+                        self.handleTokenizationFailed(error)
                     case .cancelled:
-                        self.processPaymentResult(
-                            .cancelled(
-                                externalId: self.externalId,
-                                paymentId: nil
-                            )
-                        )
+                        self.handlePrePaymentCancelled(externalId: self.externalId)
                     }
                 }
             }
@@ -361,6 +379,11 @@ private extension PayViewModel {
         setError(message)
         isThreeDSConfirmationPresented = false
         threeDSModel = nil
+    }
+
+    func showError(_ error: PaymentError) {
+        lastError = error
+        showError(error.localizedDescription)
     }
     
     func createPayment(from model: TokenizedCard) {
@@ -419,8 +442,49 @@ private extension PayViewModel {
         }
     }
     
-    
-    func processPaymentResult(_ result: CreatePaymentResult,_ tokenizedCard: TokenizedCard? = nil) {
+    func handlePrePaymentCancelled(externalId: String?) {
+        switch initialMode {
+        case .single:
+            processPaymentResult(
+                .cancelled(externalId: externalId, paymentId: nil)
+            )
+        case .batch:
+            processBatchPaymentResult(
+                .cancelled(batchExternalId: externalId)
+            )
+        }
+    }
+
+    func handlePrePaymentFailed(_ error: PaymentError) {
+        switch initialMode {
+        case .single:
+            processPaymentResult(
+                .failed(error: error)
+            )
+        case .batch:
+            processBatchPaymentResult(
+                .failed(
+                    batchExternalId: externalId,
+                    error: error
+                )
+            )
+        }
+    }
+
+    func handleTokenizationFailed(_ error: TokenizationError) {
+        switch initialMode {
+        case .single:
+            processPaymentResult(
+                error.convertToCreatePaymentResult(externalId)
+            )
+        case .batch:
+            processBatchPaymentResult(
+                error.convertToCreateBatchPaymentResult(externalId)
+            )
+        }
+    }
+
+    func processPaymentResult(_ result: CreatePaymentResult, _ tokenizedCard: TokenizedCard? = nil) {
         resetState()
         stopLoader()
 
@@ -455,11 +519,11 @@ private extension PayViewModel {
                 deliver(.failed(error: error))
                 return
             }
-            showError(error.localizedDescription)
+            showError(error)
         }
     }
 
-    func processBatchPaymentResult(_ result: CreateBatchPaymentResult, _ tokenizedCard: TokenizedCard?) {
+    func processBatchPaymentResult(_ result: CreateBatchPaymentResult, _ tokenizedCard: TokenizedCard? = nil) {
         resetState()
         stopLoader()
 
@@ -496,7 +560,7 @@ private extension PayViewModel {
                 )
                 return
             }
-            showError(error.localizedDescription)
+            showError(error)
         }
     }
 
@@ -535,7 +599,7 @@ extension PayViewModel {
                             self.deliver(.failed(error: error))
                             return
                         }
-                        self.setError(error.localizedDescription)
+                        self.showError(error)
                     default:
                         self.deliver(result)
                     }
@@ -581,7 +645,7 @@ extension PayViewModel {
                             )
                             return
                         }
-                        self.setError(error.localizedDescription)
+                        self.showError(error)
                     default:
                         self.deliverBatch(result)
                     }

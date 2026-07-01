@@ -84,11 +84,12 @@ private extension TokenizationFormView {
             themeConfigurator: viewModel.themeConfigurator,
             errorMessage: viewModel.errorMessage,
             onCancel: {
-                viewModel.cancelled()
+                viewModel.failed()
             },
             onRetry: {
                 viewModel.retryLoading()
             },
+            cancelButtonTitle: viewModel.errorDismissButtonTitle.title,
             isExpanded: true
         )
         .accessibilityIdentifier(tags.errorView)
