@@ -33,7 +33,11 @@ public class ApplePayConfig {
     
     /// Country code for the transaction (e.g. "UA").
     let countryCode: String
-    
+
+    /// Label rendered on the Apple Pay button (e.g. `.plain`, `.buy`, `.checkout`).
+    /// See Apple's HIG: https://developer.apple.com/design/human-interface-guidelines/apple-pay/
+    let buttonType: PKPaymentButtonType
+
     /// Initializes a general Apple Pay configuration.
     ///
     /// - Parameters:
@@ -43,16 +47,19 @@ public class ApplePayConfig {
     ///   - merchantCapabilities: Optional capabilities. Defaults to `[.capability3DS, .capabilityDebit, .capabilityCredit]`.
     ///   - currencyCode: Optional currency code. Defaults to `RozetkaPayConfig.defaultCurrencyCode`.
     ///   - countryCode: Optional country code. Defaults to `RozetkaPayConfig.defaultCountryCode`.
+    ///   - buttonType: Optional Apple Pay button label. Defaults to `.plain` ("Apple Pay").
     init(
         merchantIdentifier: String,
         merchantName: String,
         supportedNetworks: [PKPaymentNetwork]? = nil,
         merchantCapabilities: PKMerchantCapability? = nil,
         currencyCode: String? = nil,
-        countryCode: String? = nil
+        countryCode: String? = nil,
+        buttonType: PKPaymentButtonType? = nil
     ) {
         self.merchantIdentifier = merchantIdentifier
         self.merchantName = merchantName
+        self.buttonType = buttonType ?? .plain
         self.supportedNetworks = supportedNetworks ?? [.visa, .masterCard]
         
         if #available(iOS 17.0, *) {
@@ -133,7 +140,8 @@ public class ApplePayConfig {
             supportedNetworks: [PKPaymentNetwork]? = nil,
             merchantCapabilities: PKMerchantCapability? = nil,
             currencyCode: String? = nil,
-            countryCode: String? = nil
+            countryCode: String? = nil,
+            buttonType: PKPaymentButtonType? = nil
         ) {
             super.init(
                 merchantIdentifier: merchantIdentifier,
@@ -141,11 +149,12 @@ public class ApplePayConfig {
                 supportedNetworks: supportedNetworks,
                 merchantCapabilities: merchantCapabilities,
                 currencyCode: currencyCode,
-                countryCode: countryCode
+                countryCode: countryCode,
+                buttonType: buttonType
             )
         }
     }
-    
+
     /// Production configuration for live Apple Pay.
     public class Production: ApplePayConfig {
         /// Initializes a production config with required merchant info.
@@ -155,7 +164,8 @@ public class ApplePayConfig {
             supportedNetworks: [PKPaymentNetwork]? = nil,
             merchantCapabilities: PKMerchantCapability? = nil,
             currencyCode: String? = nil,
-            countryCode: String? = nil
+            countryCode: String? = nil,
+            buttonType: PKPaymentButtonType? = nil
         ) {
             super.init(
                 merchantIdentifier: merchantIdentifier,
@@ -163,7 +173,8 @@ public class ApplePayConfig {
                 supportedNetworks: supportedNetworks,
                 merchantCapabilities: merchantCapabilities,
                 currencyCode: currencyCode,
-                countryCode: countryCode
+                countryCode: countryCode,
+                buttonType: buttonType
             )
         }
     }
