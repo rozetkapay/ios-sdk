@@ -11,19 +11,22 @@ import PassKit
 public struct ApplePayButton: UIViewRepresentable {
     private var action: () -> Void
     private var paymentButtonStyle: PKPaymentButtonStyle
-    
+    private var paymentButtonType: PKPaymentButtonType
+
     public init(
         action: @escaping () -> Void,
-        paymentButtonStyle: PKPaymentButtonStyle = .automatic
+        paymentButtonStyle: PKPaymentButtonStyle = .automatic,
+        paymentButtonType: PKPaymentButtonType = .plain
     ) {
         self.action = action
         self.paymentButtonStyle = paymentButtonStyle
+        self.paymentButtonType = paymentButtonType
     }
-    
-    
+
+
     public func makeUIView(context: Context) -> PKPaymentButton {
         let button = PKPaymentButton(
-            paymentButtonType: .plain,
+            paymentButtonType: paymentButtonType,
             paymentButtonStyle: paymentButtonStyle
         )
         button.addTarget(

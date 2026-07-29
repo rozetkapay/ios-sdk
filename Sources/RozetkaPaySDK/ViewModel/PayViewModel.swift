@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import PassKit
+import OSLog
 
 @MainActor
 final class PayViewModel:  BaseViewModel {
@@ -55,6 +56,9 @@ final class PayViewModel:  BaseViewModel {
     private let isNeedToReturnTokenizationCard: Bool
     private let isAllowApplePay: Bool
 
+    /// Label rendered on the Apple Pay button, taken from `ApplePayConfig.buttonType`.
+    let applePayButtonType: PKPaymentButtonType
+
     private var lastError: PaymentError?
     
     private let amountWithCurrencyStr: String
@@ -92,6 +96,7 @@ final class PayViewModel:  BaseViewModel {
         
         self.isAllowApplePay = parameters.paymentType.isAllowApplePay
         self.applePaymentService = parameters.applePaymentService
+        self.applePayButtonType = parameters.paymentType.applePayConfig?.buttonType ?? .plain
         
         self.onResultCallback = onResultCallback
         self.onBatchResultCallback = nil
@@ -130,6 +135,7 @@ final class PayViewModel:  BaseViewModel {
         
         self.isAllowApplePay = parameters.paymentType.isAllowApplePay
         self.applePaymentService = parameters.applePaymentService
+        self.applePayButtonType = parameters.paymentType.applePayConfig?.buttonType ?? .plain
         
         self.batchOrders = parameters.orders
         
@@ -310,8 +316,8 @@ extension PayViewModel {
                 switch result {
                 case let .success(_, token):
                     self.createPayment(fromApplePay: token)
-                case let .cancelled(externalId):
-                    self.handlePrePaymentCancelled(externalId: externalId)
+                case let .dismissed(externalId):
+                    self.handleApplePaySheetDismissed(externalId: externalId)
                 case let .failed(error):
                     self.handlePrePaymentFailed(error)
                 }
@@ -442,6 +448,14 @@ private extension PayViewModel {
         }
     }
     
+    func handleApplePaySheetDismissed(externalId: String) {
+        Logger.payByApplePay.info("ℹ️ Returning to the payment form after Apple Pay sheet dismissal, externalId: \(externalId)")
+
+        stopLoader()
+        resetState()
+        initialPaymentType = .unknown
+    }
+
     func handlePrePaymentCancelled(externalId: String?) {
         switch initialMode {
         case .single:

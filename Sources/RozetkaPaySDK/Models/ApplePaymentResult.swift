@@ -10,5 +10,5 @@ typealias ApplePaymentCompletionHandler = (ApplePaymentResult) -> Void
 enum ApplePaymentResult {
     case success(externalId: String, key: String)
     case failed(error: PaymentError)
-    case cancelled(externalId: String)
+    case dismissed(externalId: String)
 }

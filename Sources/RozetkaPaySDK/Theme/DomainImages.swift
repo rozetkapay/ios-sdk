@@ -35,15 +35,17 @@ public extension DomainImages {
         return DomainImages.loadUIImage(
             name: self.name(for: appearance),
             appearance: appearance,
-            in: .module
+            in: .module,
+            allowsHostOverride: !isSystemImage
         )
     }
-    
+
     func image(_ appearance: UIUserInterfaceStyle) -> Image {
         return DomainImages.loadSwiftUIImage(
             name: self.name(for: appearance),
             appearance: appearance,
-            in: .module
+            in: .module,
+            allowsHostOverride: !isSystemImage
         )
     }
 }
@@ -53,29 +55,46 @@ public extension DomainImages {
     static func loadSwiftUIImage(
         name: String,
         appearance: UIUserInterfaceStyle,
-        in bundle: Bundle
+        in bundle: Bundle,
+        allowsHostOverride: Bool = false
     ) -> Image {
-        
+
         if let image = loadUIImage(
             name: name,
             appearance: appearance,
-            in: bundle
+            in: bundle,
+            allowsHostOverride: allowsHostOverride
         ) {
             return Image(uiImage: image)
         }
-        
+
         return Image(systemName: name)
     }
-    
+
     static func loadUIImage(
         name: String,
         appearance: UIUserInterfaceStyle,
-        in bundle: Bundle
+        in bundle: Bundle,
+        allowsHostOverride: Bool = false
     ) -> UIImage? {
         let traitCollection = UITraitCollection(
             userInterfaceStyle: appearance
         )
-        
+
+        // For custom assets, first look in the host app's main bundle so a
+        // consumer can override an SDK image simply by adding one with the same
+        // name to its project. System (SF Symbol) images are never overridden.
+        if allowsHostOverride,
+           bundle != .main,
+           let overriddenImage = UIImage(
+            named: name,
+            in: .main,
+            compatibleWith: traitCollection
+        ) {
+            return overriddenImage
+        }
+
+        // Fall back to the requested bundle (the SDK's own `.module`).
         if let image = UIImage(
             named: name,
             in: bundle,
@@ -83,7 +102,7 @@ public extension DomainImages {
         ) {
             return image
         }
-        
+
         return UIImage(systemName: name, compatibleWith: traitCollection)
     }
 }

@@ -118,19 +118,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         textField.textInsets = .init(top: 0, left: 0, bottom: 0, right: 0)
         textField.rightViewInsets = UIEdgeInsets(top: 0, left: -15, bottom: 0, right: 15)
         
-        if keyboardType == .numberPad {
-            let toolbar = UIToolbar()
-            toolbar.sizeToFit()
-            let doneButton = UIBarButtonItem(
-                title: Localization.rozetka_pay_common_button_done.description,
-                style: .done,
-                target: context.coordinator,
-                action: #selector(Coordinator.dismissKeyboard)
-            )
-            let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-            toolbar.setItems([flexibleSpace, doneButton], animated: false)
-            textField.inputAccessoryView = toolbar
-        }else {
+        if keyboardType != .numberPad {
             textField.returnKeyType = .done
             textField.addTarget(context.coordinator, action: #selector(Coordinator.dismissKeyboard), for: .editingDidEnd)
         }

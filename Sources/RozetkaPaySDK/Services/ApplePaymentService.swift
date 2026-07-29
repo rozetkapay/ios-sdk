@@ -12,8 +12,9 @@ final class ApplePaymentService: NSObject {
     //MARK: - Properties
     private var paymentController: PKPaymentAuthorizationController?
     private var paymentSummaryItems = [PKPaymentSummaryItem]()
-    private var paymentStatus = PKPaymentAuthorizationStatus.failure
     private var onResultCallback: ApplePaymentCompletionHandler?
+    private var didAuthorizePayment = false
+    private var hasDeliveredResult = false
     
     private var config: ApplePayConfig
     private var amountParameters: AmountParameters
@@ -42,18 +43,19 @@ extension ApplePaymentService {
     func startPayment(onResultCallback: @escaping ApplePaymentCompletionHandler) {
         
         self.onResultCallback = onResultCallback
+        self.didAuthorizePayment = false
+        self.hasDeliveredResult = false
+
         guard config.checkApplePayAvailability() else {
-            
+
             let paymentError = PaymentError(
                 code: ErrorResponseCode.applePayUnavailable.rawValue,
                 message: "Apple Pay is not available on this device.",
                 externalId: self.externalId,
                 type: ErrorResponseType.paymentError.rawValue
             )
-            
-            self.onResultCallback?(
-                .failed(error: paymentError)
-            )
+
+            self.deliver(.failed(error: paymentError))
             return
         }
         
@@ -108,16 +110,22 @@ extension ApplePaymentService {
                         externalId: self.externalId,
                         type: ErrorResponseType.paymentError.rawValue
                     )
-                    
-                    self.onResultCallback?(
-                        .failed(error: paymentError)
-                    )
+
+                    self.deliver(.failed(error: paymentError))
                 }
             }
         }
     }
     
     
+    private func deliver(_ result: ApplePaymentResult) {
+        guard !hasDeliveredResult else {
+            return
+        }
+        hasDeliveredResult = true
+        onResultCallback?(result)
+    }
+
     private func createPayToken(from payment: PKPayment) -> String? {
         let paymentData = payment.token.paymentData
         
@@ -144,11 +152,12 @@ extension ApplePaymentService {
 extension ApplePaymentService: PKPaymentAuthorizationControllerDelegate {
     
     func paymentAuthorizationController(_ controller: PKPaymentAuthorizationController, didAuthorizePayment payment: PKPayment, completion: @escaping (PKPaymentAuthorizationStatus) -> Void) {
-        
+
+        self.didAuthorizePayment = true
+
         guard let tokenBase64 = createPayToken(from: payment) else {
-            self.paymentStatus = .failure
-            completion(self.paymentStatus)
-            
+            completion(.failure)
+
             let errorModel = PaymentError(
                 code: ErrorResponseCode.applePayTokenError.rawValue,
                 message: "Failed to encode Apple Pay token",
@@ -156,49 +165,34 @@ extension ApplePaymentService: PKPaymentAuthorizationControllerDelegate {
                 type: ErrorResponseType.applePayError.rawValue
             )
             Logger.payByApplePay.error("🔴 ERROR: Failed to encode Apple Pay token")
-            self.onResultCallback?(
-                .failed(error: errorModel)
-            )
+            self.deliver(.failed(error: errorModel))
             return
         }
-        
-        self.paymentStatus = .success
-        
-        completion(self.paymentStatus)
-        
+
+        completion(.success)
+
         Logger.payByApplePay.info("✅ Success: Apple Pay is created")
-        self.onResultCallback?(
+        self.deliver(
             .success(
                 externalId: self.externalId,
                 key: tokenBase64
             )
         )
     }
-    
+
     func paymentAuthorizationControllerDidFinish(_ controller: PKPaymentAuthorizationController) {
-        
+
         DispatchQueue.main.async { [weak self] in
             controller.dismiss {
                 guard let self = self else {
                     return
                 }
-                
-                switch self.paymentStatus {
-                case .success:
-                    break
-                case .failure:
-                    let errorModel = PaymentError(
-                        code: ErrorResponseCode.applePayFailed.rawValue,
-                        message: "Payment has not been completed",
-                        externalId: self.externalId,
-                        type: ErrorResponseType.applePayError.rawValue
-                    )
-                    Logger.payByApplePay.error("🔴 ERROR: Payment has not been completed")
-                    self.onResultCallback?(
-                        .failed(error: errorModel)
-                    )
-                default:
-                    break
+
+                self.paymentController = nil
+
+                if !self.didAuthorizePayment {
+                    Logger.payByApplePay.info("ℹ️ Apple Pay sheet was dismissed without authorization, externalId: \(self.externalId)")
+                    self.deliver(.dismissed(externalId: self.externalId))
                 }
             }
         }

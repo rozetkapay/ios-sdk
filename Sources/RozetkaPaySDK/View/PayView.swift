@@ -305,7 +305,8 @@ private extension PayView {
                 viewModel
                 .themeConfigurator
                 .colorScheme(colorScheme)
-                .applePayButtonStyle
+                .applePayButtonStyle,
+            paymentButtonType: viewModel.applePayButtonType
         )
         .accessibilityIdentifier(tags.applePayButton)
         .frame(
