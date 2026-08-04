@@ -32,6 +32,15 @@ final class ApplePayFormViewModel: BaseViewModel {
     /// Label rendered on the Apple Pay button, taken from `ApplePayConfig.buttonType`.
     let applePayButtonType: PKPaymentButtonType
 
+    /// When `true`, dismissing the Apple Pay sheet without paying delivers a terminal
+    /// `.cancelled` result instead of only stopping the loader.
+    ///
+    /// `ApplePayFormView` keeps this `false`: its button stays on screen, so the user
+    /// can simply tap it again. The imperative flow
+    /// (`RozetkaPaySdk.payByApplePay`) has no button left to tap and its host waits
+    /// for exactly one terminal result, so it needs the `.cancelled` event.
+    private let deliversCancelledOnSheetDismiss: Bool
+
     @Published var isThreeDSConfirmationPresented = false
     private var threeDSModel: ThreeDSRequest?
 
@@ -43,9 +52,11 @@ final class ApplePayFormViewModel: BaseViewModel {
     init(
         parameters: ApplePayFormParameters,
         onResultCallback: @escaping PaymentResultCompletionHandler,
-        stateUICallback: @escaping ApplePayFormUIStateCompletionHandler
+        stateUICallback: @escaping ApplePayFormUIStateCompletionHandler,
+        deliversCancelledOnSheetDismiss: Bool = false
     ) {
         self.initialMode = .single
+        self.deliversCancelledOnSheetDismiss = deliversCancelledOnSheetDismiss
         self.amountParameters = parameters.amountParameters
         self.externalId = parameters.externalId
         self.callbackUrl = parameters.callbackUrl
@@ -70,9 +81,11 @@ final class ApplePayFormViewModel: BaseViewModel {
     init(
         parameters: BatchApplePayFormParameters,
         onResultCallback: @escaping BatchPaymentResultCompletionHandler,
-        stateUICallback: @escaping ApplePayFormUIStateCompletionHandler
+        stateUICallback: @escaping ApplePayFormUIStateCompletionHandler,
+        deliversCancelledOnSheetDismiss: Bool = false
     ) {
         self.initialMode = .batch
+        self.deliversCancelledOnSheetDismiss = deliversCancelledOnSheetDismiss
         self.amountParameters = parameters.amountParameters
         self.externalId = parameters.externalId
         self.callbackUrl = parameters.callbackUrl
@@ -300,9 +313,14 @@ private extension ApplePayFormViewModel {
     func handleApplePaySheetDismissed(externalId: String) {
         Logger.payByApplePay.info("ℹ️ Returning to the host screen after Apple Pay sheet dismissal, externalId: \(externalId)")
 
-        stopLoader()
-        stateUICallback?(.stopLoading)
-        resetState()
+        guard deliversCancelledOnSheetDismiss else {
+            stopLoader()
+            stateUICallback?(.stopLoading)
+            resetState()
+            return
+        }
+
+        deliverCancelled(externalId: externalId)
     }
 
     /// Routes an Apple Pay sheet cancellation to the terminal callback of the active mode.
