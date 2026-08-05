@@ -16,10 +16,14 @@ final class ApplePaymentService: NSObject {
     private var didAuthorizePayment = false
     private var hasDeliveredResult = false
     
+    private var retainedSelf: ApplePaymentService?
+
+    private var pendingResult: ApplePaymentResult?
+
     private var config: ApplePayConfig
     private var amountParameters: AmountParameters
     private let externalId: String
-    
+
     //MARK: - Init
     init?(
         externalId: String,
@@ -45,6 +49,7 @@ extension ApplePaymentService {
         self.onResultCallback = onResultCallback
         self.didAuthorizePayment = false
         self.hasDeliveredResult = false
+        self.pendingResult = nil
 
         guard config.checkApplePayAvailability() else {
 
@@ -98,12 +103,13 @@ extension ApplePaymentService {
             guard let self else {
                 return
             }
+            self.retainedSelf = self
             self.paymentController?.present { presented in
                 if presented {
                     Logger.payByApplePay.info("✅ Presented Apple Pay payment controller")
                 } else {
                     Logger.payByApplePay.warning("⚠️ WARNING: Apple Pay payment controller unavailable")
-                    
+
                     let paymentError = PaymentError(
                         code: ErrorResponseCode.applePayUnavailable.rawValue,
                         message: "Apple Pay payment controller unavailable",
@@ -112,6 +118,7 @@ extension ApplePaymentService {
                     )
 
                     self.deliver(.failed(error: paymentError))
+                    self.retainedSelf = nil
                 }
             }
         }
@@ -165,7 +172,8 @@ extension ApplePaymentService: PKPaymentAuthorizationControllerDelegate {
                 type: ErrorResponseType.applePayError.rawValue
             )
             Logger.payByApplePay.error("🔴 ERROR: Failed to encode Apple Pay token")
-            self.deliver(.failed(error: errorModel))
+
+            self.pendingResult = .failed(error: errorModel)
             return
         }
 
@@ -190,10 +198,15 @@ extension ApplePaymentService: PKPaymentAuthorizationControllerDelegate {
 
                 self.paymentController = nil
 
-                if !self.didAuthorizePayment {
+                if let pendingResult = self.pendingResult {
+                    self.pendingResult = nil
+                    self.deliver(pendingResult)
+                } else if !self.didAuthorizePayment {
                     Logger.payByApplePay.info("ℹ️ Apple Pay sheet was dismissed without authorization, externalId: \(self.externalId)")
                     self.deliver(.dismissed(externalId: self.externalId))
                 }
+
+                self.retainedSelf = nil
             }
         }
     }
