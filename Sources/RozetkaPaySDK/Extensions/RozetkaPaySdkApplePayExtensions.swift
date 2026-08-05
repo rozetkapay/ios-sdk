@@ -36,7 +36,9 @@ public extension RozetkaPaySdk {
     /// - Parameters:
     ///   - parameters: Apple Pay payment configuration.
     ///   - presentingViewController: Controller to present the Apple Pay / 3DS UI from.
-    ///     Defaults to the top-most presented controller of the key window.
+    ///     Defaults to the key window's root controller. Either way the SDK walks down
+    ///     to the top-most presented controller, so passing one that already presents
+    ///     something is safe.
     ///   - onResultCallback: Receives the terminal `PaymentResult`.
     @MainActor
     static func payByApplePay(
@@ -44,7 +46,7 @@ public extension RozetkaPaySdk {
         presentingViewController: UIViewController? = nil,
         onResultCallback: @escaping PaymentResultCompletionHandler
     ) {
-        guard let host = presentingViewController ?? ApplePayCheckoutPresenter.topMostViewController() else {
+        guard let host = ApplePayCheckoutPresenter.topMostViewController(startingFrom: presentingViewController) else {
             onResultCallback(
                 .failed(error: .noPresentingViewController(externalId: parameters.externalId))
             )
@@ -64,7 +66,9 @@ public extension RozetkaPaySdk {
     /// - Parameters:
     ///   - batchParameters: Batch Apple Pay payment configuration.
     ///   - presentingViewController: Controller to present the Apple Pay / 3DS UI from.
-    ///     Defaults to the top-most presented controller of the key window.
+    ///     Defaults to the key window's root controller. Either way the SDK walks down
+    ///     to the top-most presented controller, so passing one that already presents
+    ///     something is safe.
     ///   - onResultCallback: Receives the terminal `BatchPaymentResult`.
     @MainActor
     static func payByApplePay(
@@ -72,7 +76,7 @@ public extension RozetkaPaySdk {
         presentingViewController: UIViewController? = nil,
         onResultCallback: @escaping BatchPaymentResultCompletionHandler
     ) {
-        guard let host = presentingViewController ?? ApplePayCheckoutPresenter.topMostViewController() else {
+        guard let host = ApplePayCheckoutPresenter.topMostViewController(startingFrom: presentingViewController) else {
             onResultCallback(
                 .failed(
                     batchExternalId: batchParameters.externalId,

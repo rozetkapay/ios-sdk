@@ -58,20 +58,27 @@ final class ApplePayCheckoutPresenter {
         presenter.show(AnyView(contentView), on: host)
     }
 
-    /// Top-most presented controller of the key window, used when the host does not
-    /// pass a presenting controller explicitly.
-    static func topMostViewController() -> UIViewController? {
-        var controller = RozetkaPaySdk.appContext.connectedScenes
+    /// Resolves the controller to present from.
+    ///
+    /// Walks down the modal chain, because presenting on a controller that already has a
+    /// `presentedViewController` is a silent no-op in UIKit — the overlay would never
+    /// appear and the flow would never deliver a result. That makes it safe for hosts to
+    /// hand over a root controller, or none at all.
+    ///
+    /// - Parameter controller: Controller the host asked to present from, if any.
+    ///   Defaults to the root controller of the key window.
+    static func topMostViewController(startingFrom controller: UIViewController? = nil) -> UIViewController? {
+        var candidate = controller ?? RozetkaPaySdk.appContext.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .flatMap { $0.windows }
             .first { $0.isKeyWindow }?
             .rootViewController
 
-        while let presented = controller?.presentedViewController {
-            controller = presented
+        while let presented = candidate?.presentedViewController {
+            candidate = presented
         }
 
-        return controller
+        return candidate
     }
 }
 
