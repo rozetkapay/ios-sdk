@@ -79,7 +79,7 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         
         self.clearButton =  {
             let btn = UIButton(type: .system)
-            if let image = DomainImages.xmarkCircle.image(appearance) {
+            if let image = DomainImages.xmarkCircle.uiImage(appearance) {
                 btn.setImage(image, for: .normal)
                 btn.frame = CGRect(origin: .zero, size: image.size)
                 btn.tintColor = .gray
@@ -177,19 +177,19 @@ public struct InputTextFieldRepresentable: UIViewRepresentable {
         
         if isSecure {
             clearButton.setImage(
-                DomainImages.eye.image(appearance),
+                DomainImages.eye.uiImage(appearance),
                 for: .normal
             )
             action = UIAction { _ in
                 self.textField.isSecureTextEntry.toggle()
                 self.clearButton.setImage(
                     self.textField.isSecureTextEntry ?
-                    DomainImages.eye.image(appearance) :
-                    DomainImages.eyeSlash.image(appearance),
+                    DomainImages.eye.uiImage(appearance) :
+                    DomainImages.eyeSlash.uiImage(appearance),
                     for: .normal)
             }
         } else {
-            clearButton.setImage(DomainImages.xmarkCircle.image(appearance), for: .normal)
+            clearButton.setImage(DomainImages.xmarkCircle.uiImage(appearance), for: .normal)
             action = UIAction { _ in
                 if self.textField.delegate?.textFieldShouldClear?(self.textField) ?? true {
                     self.textField.text = nil

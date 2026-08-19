@@ -31,7 +31,7 @@ public enum DomainImages: String {
 //MARK: - Public Methods and Properties
 public extension DomainImages {
 
-    func image(_ appearance: UIUserInterfaceStyle) -> UIImage? {
+    func uiImage(_ appearance: UIUserInterfaceStyle) -> UIImage? {
         return DomainImages.loadUIImage(
             name: self.name(for: appearance),
             appearance: appearance,
