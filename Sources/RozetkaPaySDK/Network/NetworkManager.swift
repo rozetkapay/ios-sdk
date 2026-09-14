@@ -116,6 +116,32 @@ public enum APIError<ValidationError: Decodable & Swift.Error>: Swift.Error {
     case unknown(code: Int, message: String?)
 }
 
+extension APIError: LocalizedError {
+    
+    /// Diagnostic description of the failure, naming the case and unwrapping its payload.
+    public var errorDescription: String? {
+        switch self {
+        case let .decodingFailure(error):
+            return "decodingFailure(\(String(reflecting: error)))"
+        case let .networkUnreachable(code, message):
+            return "networkUnreachable(code: \(code)\(Self.messageSuffix(message)))"
+        case let .external(code, message):
+            return "external(code: \(code)\(Self.messageSuffix(message)))"
+        case let .validation(error):
+            return "validation(\(String(reflecting: error)))"
+        case let .unknown(code, message):
+            return "unknown(code: \(code)\(Self.messageSuffix(message)))"
+        }
+    }
+    
+    private static func messageSuffix(_ message: String?) -> String {
+        guard let message = message.isNilOrEmptyValue else {
+            return ""
+        }
+        return ", message: \(message)"
+    }
+}
+
 extension APIConfiguration {
     var timeInterval: TimeInterval {
         return RozetkaPayConfig.DEFAULT_REQUEST_TIMEOUT

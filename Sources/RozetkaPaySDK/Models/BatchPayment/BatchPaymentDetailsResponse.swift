@@ -10,34 +10,45 @@ import Foundation
 import OSLog
 
 public struct BatchPaymentDetailsResponse: Decodable {
-    public let batchExternalId: String
-    public let status: String
-    public let statusCode: String?
-    public let statusDescription: String?
+    let batchExternalId: String
+    let status: String
+    let statusCode: String?
+    let statusDescription: String?
+    let statusDescriptionEn: String?
+    let statusDescriptionUk: String?
     
     private enum CodingKeys: String, CodingKey {
         case batchExternalId = "batch_external_id"
         case status
         case statusCode = "status_code"
         case statusDescription = "status_description"
+        case statusDescriptionEn = "status_description_en"
+        case statusDescriptionUk = "status_description_uk"
     }
  
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.batchExternalId = try container.decode(String.self, forKey: .batchExternalId)
         self.status = try container.decode(String.self, forKey: .status)
-        self.statusCode = try container.decode(String.self, forKey: .statusCode)
+        self.statusCode = try container.decodeIfPresent(String.self, forKey: .statusCode)
         self.statusDescription = try container.decodeIfPresent(String.self, forKey: .statusDescription)
+        self.statusDescriptionEn = try container.decodeIfPresent(String.self, forKey: .statusDescriptionEn)
+        self.statusDescriptionUk = try container.decodeIfPresent(String.self, forKey: .statusDescriptionUk)
     }
 }
 
+extension BatchPaymentDetailsResponse: LocalizedStatusDescription {}
+
 extension BatchPaymentDetailsResponse {
-    func convertToCheckBatchPaymentData(ordersPayments: [BatchOrderPaymentResult]?) -> CheckBatchPaymentData? {
+    func convertToCheckBatchPaymentData(
+        ordersPayments: [BatchOrderPaymentResult]?,
+        language: RozetkaPayLanguage
+    ) -> CheckBatchPaymentData? {
         return CheckBatchPaymentData(
             batchExternalId: self.batchExternalId,
             status: self.convertToStatus(),
             statusCode: self.statusCode,
-            statusDescription: self.statusDescription,
+            statusDescription: self.resolveDescription(language: language),
             ordersPayments: ordersPayments
         )
     }

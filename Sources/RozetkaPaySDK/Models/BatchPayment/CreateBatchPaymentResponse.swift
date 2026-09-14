@@ -35,7 +35,7 @@ public struct CreateBatchPaymentResponse: Decodable {
 }
 
 extension CreateBatchPaymentResponse {
-    func convertToCreateBatchPaymentData() -> CreateBatchPaymentData {
+    func convertToCreateBatchPaymentData(language: RozetkaPayLanguage) -> CreateBatchPaymentData {
         return CreateBatchPaymentData(
             action: self.action?.convertToAction(),
             batchExternalId: self.batchExternalId,
@@ -45,7 +45,7 @@ extension CreateBatchPaymentResponse {
             transactionId: self.orderDetails.first?.transactionId,
             status: self.orderDetails.first?.convertToStatus() ?? .failure,
             statusCode: self.orderDetails.first?.statusCode,
-            statusDescription: self.orderDetails.first?.statusDescription
+            statusDescription: self.orderDetails.first?.resolveDescription(language: language)
         )
     }
 }
@@ -83,13 +83,8 @@ extension BatchPaymentResultAction {
 
 //MARK: - Result
 public struct BatchPaymentResultDetails: Decodable {
-    public let amount: Int64
-    public let currency: String
-
-       public init(amount: Int64, currency: String) {
-           self.amount = amount
-           self.currency = currency
-       }
+    let amount: Int64
+    let currency: String
 
        enum CodingKeys: String, CodingKey {
            case amount
@@ -119,28 +114,14 @@ public struct BatchPaymentResultDetails: Decodable {
 
 //MARK: - Orders
 public struct BatchPaymentOrderResultDetails: Decodable {
-    public let externalId: String
-    public let operationId: String
-    public let transactionId: String
-    public let status: String
-    public let statusCode: String?
-    public let statusDescription: String?
-
-    public init(
-        externalId: String,
-        operationId: String,
-        transactionId: String,
-        status: String,
-        statusCode: String?,
-        statusDescription: String?
-    ) {
-        self.externalId = externalId
-        self.operationId = operationId
-        self.transactionId = transactionId
-        self.status = status
-        self.statusCode = statusCode
-        self.statusDescription = statusDescription
-    }
+    let externalId: String
+    let operationId: String
+    let transactionId: String
+    let status: String
+    let statusCode: String?
+    let statusDescription: String?
+    let statusDescriptionEn: String?
+    let statusDescriptionUk: String?
 
     enum CodingKeys: String, CodingKey {
         case externalId = "external_id"
@@ -149,6 +130,8 @@ public struct BatchPaymentOrderResultDetails: Decodable {
         case status
         case statusCode = "status_code"
         case statusDescription = "status_description"
+        case statusDescriptionEn = "status_description_en"
+        case statusDescriptionUk = "status_description_uk"
     }
     
     public init(from decoder: Decoder) throws {
@@ -157,10 +140,14 @@ public struct BatchPaymentOrderResultDetails: Decodable {
         self.operationId = try container.decode(String.self, forKey: .operationId)
         self.transactionId = try container.decode(String.self, forKey: .transactionId)
         self.status = try container.decode(String.self, forKey: .status)
-        self.statusCode = try container.decode(String.self, forKey: .statusCode)
+        self.statusCode = try container.decodeIfPresent(String.self, forKey: .statusCode)
         self.statusDescription = try container.decodeIfPresent(String.self, forKey: .statusDescription)
+        self.statusDescriptionEn = try container.decodeIfPresent(String.self, forKey: .statusDescriptionEn)
+        self.statusDescriptionUk = try container.decodeIfPresent(String.self, forKey: .statusDescriptionUk)
     }
 }
+
+extension BatchPaymentOrderResultDetails: LocalizedStatusDescription {}
 
 extension BatchPaymentOrderResultDetails {
     func convertToStatus() -> PaymentStatus {

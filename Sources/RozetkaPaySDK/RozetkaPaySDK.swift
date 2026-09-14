@@ -1,6 +1,9 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
-
+//
+//  RozetkaPaySDK.swift
+//  RozetkaPaySDK
+//
+//  Created by Ruslan Kasian Dev on 27.08.2024.
+//
 import SwiftUI
 import OSLog
 import Foundation
@@ -40,6 +43,9 @@ public final class RozetkaPaySdk {
     /// Decimal separator for formatting monetary values.
     static var decimalSeparator: String = "."
 
+    /// Language of the payment status descriptions returned by the API.
+    static var apiLanguage: RozetkaPayLanguage = .system
+
     /// Initializes the RozetkaPay SDK.
     ///
     /// - Parameters:
@@ -48,12 +54,14 @@ public final class RozetkaPaySdk {
     ///   - enableLogging: Enable internal SDK logging. Defaults to `false`.
     ///   - validationRules: Custom validation rules. Defaults to built-in.
     ///   - decimalSeparator: Decimal separator used for amount formatting. Defaults to `"."`.
+    ///   - apiLanguage: Language of the payment status descriptions returned by the API. Defaults to `.system`.
     public static func initSdk(
         appContext: UIApplication,
         mode: RozetkaPaySdkMode = .production,
         enableLogging: Bool = false,
         validationRules: RozetkaPaySdkValidationRules = RozetkaPaySdkValidationRules(),
-        decimalSeparator: String = "."
+        decimalSeparator: String = ".",
+        apiLanguage: RozetkaPayLanguage = .system
     ) {
         self._appContext = appContext
         self.mode = mode
@@ -61,6 +69,7 @@ public final class RozetkaPaySdk {
         self.isLoggingEnabled = enableLogging
         self.validationRules = validationRules
         self.decimalSeparator = decimalSeparator
+        self.apiLanguage = apiLanguage
 
         checkParameters()
     }

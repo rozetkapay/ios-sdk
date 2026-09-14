@@ -9,9 +9,7 @@ import SwiftUI
 /// UI-less host for the imperative Apple Pay flow (`RozetkaPaySdk.payByApplePay`).
 ///
 /// Renders nothing: it starts the Apple Pay sheet as soon as it appears and presents
-/// the 3DS screen when the payment requires confirmation. Unlike `ApplePayFormView`
-/// it draws no button, so hosts that cannot embed SwiftUI (React Native, UIKit) get
-/// the same flow behind a single imperative call.
+/// the 3DS screen when the payment requires confirmation.
 ///
 /// Presented by `ApplePayCheckoutPresenter` inside a transparent
 /// `UIHostingController`; the presenter tears that overlay down before the terminal

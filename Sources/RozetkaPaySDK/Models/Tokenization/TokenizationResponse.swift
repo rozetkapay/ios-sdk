@@ -35,11 +35,11 @@ struct TokenizationResponse: Decodable {
     
     
     private var cardExpMonth: Int {
-           Calendar.current.component(.month, from: expiresAt)
+           Calendar.rozetkaPayBackend.component(.month, from: expiresAt)
        }
        
     private var cardExpYear: Int {
-           Calendar.current.component(.year, from: expiresAt) % 100
+           Calendar.rozetkaPayBackend.component(.year, from: expiresAt) % 100
        }
     
     private var cardExpiry: String {
@@ -62,14 +62,12 @@ struct TokenizationResponse: Decodable {
         self.issuer = try container.decodeIfPresent(Issuer.self, forKey: .issuer)
         
         let expiresAtString = try container.decode(String.self, forKey: .expiresAt)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         
-        guard let date = formatter.date(from: expiresAtString) else {
+        guard let date = Date.fromBackendTimestamp(expiresAtString) else {
             throw DecodingError.dataCorruptedError(
                 forKey: .expiresAt,
                 in: container,
-                debugDescription: "Date string does not match format expected by formatter."
+                debugDescription: "Date string \(expiresAtString) does not match format expected by formatter."
             )
         }
         

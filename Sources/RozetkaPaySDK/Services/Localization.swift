@@ -79,15 +79,9 @@ public enum Localization: String {
     public static func localizedString(forKey key: String) -> String {
         if let customLocalizedString = Bundle.main.localizedString(forKey: key, value: nil, table: nil) as String?,
            customLocalizedString != key {
-            let result = customLocalizedString
-
-//            Logger.localized.error("✏️ [Localization] Main localization used for key: '\(key)' -> '\(result)'")
-            return result
+            return customLocalizedString
         } else {
-            let fallback =  NSLocalizedString(key, bundle: Bundle.module, comment: "")
-            
-//            Logger.localized.error("✏️ [Localization] Fallback used for key: '\(key)' -> '\(fallback)'")
-            return fallback
+            return NSLocalizedString(key, bundle: Bundle.module, comment: "")
         }
     }
 }
