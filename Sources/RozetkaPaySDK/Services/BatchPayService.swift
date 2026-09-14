@@ -42,7 +42,7 @@ open class BatchPayService {
                     errorDescription: error.localizedDescription
                 )
                 
-                Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorResult.localizedDescription)")
+                Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorResult.debugDescription)")
                 result(
                     .failed(
                         batchExternalId: model.batchExternalId,
@@ -72,7 +72,10 @@ open class BatchPayService {
                         .checkBatchPayment(data: model, key: key)
                         .execute(BatchPaymentDetailsResponse.self, errorType: PaymentError.self)
 
-                    if let data = response.convertToCheckBatchPaymentData(ordersPayments: model.ordersPayments),
+                    if let data = response.convertToCheckBatchPaymentData(
+                        ordersPayments: model.ordersPayments,
+                        language: RozetkaPayLanguage.effective
+                    ),
                        data.status.isTerminated {
                         finalResponse = response
                         break
@@ -124,7 +127,7 @@ open class BatchPayService {
                     errorDescription: error.localizedDescription
                 )
                 
-                Logger.payServices.error("🔴 ERROR: Error checkBatchPayment request: \(errorResult.localizedDescription)")
+                Logger.payServices.error("🔴 ERROR: Error checkBatchPayment request: \(errorResult.debugDescription)")
                 result(
                     .failed(
                         batchExternalId: model.batchExternalId,
@@ -145,7 +148,10 @@ private extension BatchPayService {
         result: @escaping BatchPaymentResultCompletionHandler
     ) {
         
-        guard let data = response.convertToCheckBatchPaymentData(ordersPayments: model.ordersPayments) else {
+        guard let data = response.convertToCheckBatchPaymentData(
+            ordersPayments: model.ordersPayments,
+            language: RozetkaPayLanguage.effective
+        ) else {
             
             let errorModel = PaymentError(
                 code: ErrorResponseCode.failedToFinishTransaction.rawValue,
@@ -155,7 +161,7 @@ private extension BatchPayService {
                 type: ErrorResponseType.paymentError.rawValue
             )
             
-            Logger.payServices.error("🔴 ERROR: Error createBatchPayment request: \(errorModel.message ?? "")")
+            Logger.payServices.error("🔴 ERROR: Error createBatchPayment request: \(errorModel.debugDescription)")
             
             result(
                 .failed(
@@ -186,7 +192,7 @@ private extension BatchPayService {
                 externalId: model.batchExternalId,
                 type: ErrorResponseType.paymentError.rawValue
             )
-            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.message ?? "")")
+            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.debugDescription)")
             result(
                 .failed(
                     batchExternalId: model.batchExternalId,
@@ -223,7 +229,7 @@ private extension BatchPayService {
         result: @escaping CreateBatchPaymentResultCompletionHandler
     ) {
         
-        let data = response.convertToCreateBatchPaymentData()
+        let data = response.convertToCreateBatchPaymentData(language: RozetkaPayLanguage.effective)
         
         switch data.status {
         case .success:
@@ -242,7 +248,7 @@ private extension BatchPayService {
                 paymentId: data.transactionId,
                 type: ErrorResponseType.paymentError.rawValue
             )
-            Logger.payServices.error("🔴 ERROR: Error createBatchPayment request: \(errorModel.message ?? "")")
+            Logger.payServices.error("🔴 ERROR: Error createBatchPayment request: \(errorModel.debugDescription)")
             
             result(
                 .failed(
@@ -270,7 +276,7 @@ private extension BatchPayService {
                     paymentId: data.transactionId,
                     type: ErrorResponseType.unknownAction.rawValue
                 )
-                Logger.payServices.error("🔴 ERROR: Error createBatchPayment request: \(errorModel.localizedDescription)")
+                Logger.payServices.error("🔴 ERROR: Error createBatchPayment request: \(errorModel.debugDescription)")
                 
                 result(
                     .failed(

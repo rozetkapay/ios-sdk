@@ -11,8 +11,7 @@ public extension RozetkaPaySdk {
 
     /// Checks whether Apple Pay can be used on this device for the given configuration.
     ///
-    /// Hosts that draw their own Apple Pay button (UIKit, React Native) should call this
-    /// before showing it — `payByApplePay` fails with
+    /// Call it before drawing your own Apple Pay button: `payByApplePay` fails with
     /// `ErrorResponseCode.applePayUnavailable` when Apple Pay is not usable.
     ///
     /// - Parameter config: The Apple Pay configuration the payment will be made with.

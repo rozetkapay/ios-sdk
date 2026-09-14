@@ -85,9 +85,7 @@ final class ThreeDSViewModel: ObservableObject {
     ///
     /// Stores the error and flips `isError` so `ThreeDSView` renders `errorView`.
     /// The flow is finalized only when the user taps the close / cancel button,
-    /// which routes through `handleCancelled()` and emits `.failed(error:)`
-    /// because `self.error` is set here. This lets the user keep the sheet open
-    /// to read the message instead of being kicked out immediately.
+    /// which routes through `handleCancelled()` and emits `.failed(error:)`.
     func handleFailure(_ error: Error? = nil,  message: String? = nil) {
         guard !hasFinished else {
             return

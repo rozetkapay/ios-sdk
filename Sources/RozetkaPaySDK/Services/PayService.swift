@@ -40,7 +40,7 @@ open class PayService {
                     errorDescription: error.localizedDescription
                 )
                 
-                Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorResult.localizedDescription)")
+                Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorResult.debugDescription)")
                 result(
                     .failed(error: errorResult)
                 )
@@ -67,7 +67,10 @@ open class PayService {
                         .checkPayment(data: model, key: key)
                         .execute(PaymentDetailsResponse.self, errorType: PaymentError.self)
 
-                    if let data = response.convertToCheckPaymentData(paymentId: model.paymentId),
+                    if let data = response.convertToCheckPaymentData(
+                        paymentId: model.paymentId,
+                        language: RozetkaPayLanguage.effective
+                    ),
                        data.status.isTerminated {
                         finalResponse = response
                         break
@@ -117,7 +120,7 @@ open class PayService {
                     errorDescription: error.localizedDescription
                 )
                 
-                Logger.payServices.error("🔴 ERROR: Error checkPayment request: \(errorResult.localizedDescription)")
+                Logger.payServices.error("🔴 ERROR: Error checkPayment request: \(errorResult.debugDescription)")
                 result(
                     .failed(error: errorResult)
                 )
@@ -134,7 +137,10 @@ private extension PayService {
         result: @escaping PaymentResultCompletionHandler
     ) {
         
-        guard let data = response.convertToCheckPaymentData(paymentId: model.paymentId) else {
+        guard let data = response.convertToCheckPaymentData(
+            paymentId: model.paymentId,
+            language: RozetkaPayLanguage.effective
+        ) else {
             
             let errorModel = PaymentError(
                 code: ErrorResponseCode.failedToFinishTransaction.rawValue,
@@ -144,7 +150,7 @@ private extension PayService {
                 type: ErrorResponseType.paymentError.rawValue
             )
             
-            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.message ?? "")")
+            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.debugDescription)")
             
             result(
                 .failed(error: errorModel)
@@ -172,7 +178,7 @@ private extension PayService {
                 paymentId: data.paymentId,
                 type: ErrorResponseType.paymentError.rawValue
             )
-            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.message ?? "")")
+            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.debugDescription)")
             result(
                 .failed(error: errorModel)
             )
@@ -205,7 +211,7 @@ private extension PayService {
         result: @escaping CreatePaymentResultCompletionHandler
     ) {
         
-        let data = response.convertToCreatePaymentData()
+        let data = response.convertToCreatePaymentData(language: RozetkaPayLanguage.effective)
         
         switch data.status {
         case .success:
@@ -224,7 +230,7 @@ private extension PayService {
                 paymentId: data.paymentId,
                 type: ErrorResponseType.paymentError.rawValue
             )
-            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.message ?? "")")
+            Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.debugDescription)")
             
             result(
                 .failed(error: errorModel)
@@ -249,7 +255,7 @@ private extension PayService {
                     paymentId: data.paymentId,
                     type: ErrorResponseType.unknownAction.rawValue
                 )
-                Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.localizedDescription)")
+                Logger.payServices.error("🔴 ERROR: Error createPayment request: \(errorModel.debugDescription)")
                 
                 result(
                     .failed(error: errorModel)

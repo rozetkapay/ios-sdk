@@ -40,10 +40,8 @@ struct PrefixRange: PrefixContainable {
     /// - Parameter value: The integer value to be checked.
     /// - Returns: `true` if the value matches any prefix within the range; otherwise, `false`.
     func contains(_ value: Int) -> Bool {
-        // Determine the length of the prefix based on the lower bound of the range
         let valuePrefixLength = String(range.lowerBound).count
         
-        // Extract the prefix from the input value and check if it falls within the range
         if let valuePrefix = Int(String(value).prefix(valuePrefixLength)) {
             return range.contains(valuePrefix)
         }

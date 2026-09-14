@@ -29,21 +29,34 @@ public enum TokenizationError: Error, Decodable {
          }
     }
     
+    /// Message to display to the buyer.
+    ///
+    /// Carries no technical details — see `debugDescription` for those.
     public var localizedDescription: String {
         switch self {
         case .cancelled:
             return "Tokenization was cancelled"
+        case let .failed(message, _):
+            return message.isNilOrEmptyValue
+                ?? Localization.rozetka_pay_common_error_message.description
+        }
+    }
+
+    /// Diagnostic representation for logs.
+    public var debugDescription: String {
+        switch self {
+        case .cancelled:
+            return "TokenizationError(cancelled)"
         case let .failed(message, errorDescription):
-            if let desc = errorDescription.isNilOrEmptyValue {
-                return desc
-            } else if let message = message.isNilOrEmptyValue {
-                return message
-            } else {
-                return "Unknown tokenization error"
-            }
+            var parts: [String] = []
+            if let message = message { parts.append("message: \(message)") }
+            if let errorDescription = errorDescription { parts.append("error: \(errorDescription)") }
+            return "TokenizationError(\(parts.joined(separator: ", ")))"
         }
     }
 }
+
+extension TokenizationError: CustomDebugStringConvertible {}
 
 extension TokenizationError {
     

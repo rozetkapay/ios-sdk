@@ -59,37 +59,13 @@ public struct PaymentError: Error, Decodable {
         self.errorDescription = errorDescription
     }
     
-    /// init unexpected error
-    public init (
-        externalId: String,
-        message: String? = nil,
-        errorDescription: String? = nil
-    ) {
-        self.code = ErrorResponseCode.from(rawValue: nil)
-        self.message = message ?? "An unexpected error occurred"
-        self.errorDescription = errorDescription
-        self.param = nil
-        self.paymentId = nil
-        self.type = ErrorResponseType.from(rawValue: nil)
-        self.errorId = nil
-        self.externalId = externalId
-    }
-    
-    
+    /// Message to display to the buyer.
+    ///
+    /// Carries neither identifiers nor technical details — see `debugDescription` for those.
     public var localizedDescription: String {
-        let primary = message.isNilOrEmptyValue
-            ?? errorDescription.isNilOrEmptyValue
+        message.isNilOrEmptyValue
             ?? code.localizedDescription
             ?? fallbackDescription
-
-        var parts = [primary]
-        if let externalId = externalId {
-            parts.append("externalId: \(externalId)")
-        }
-        if let paymentId = paymentId {
-            parts.append("paymentId: \(paymentId)")
-        }
-        return parts.joined(separator: ", ")
     }
 
     /// Generic message used when neither server text nor a localized code is available.
@@ -125,6 +101,7 @@ public struct PaymentError: Error, Decodable {
     }
 }
 
+extension PaymentError: CustomDebugStringConvertible {}
 
 extension PaymentError {
     

@@ -29,7 +29,7 @@ public struct PaymentDetailsResponse: Decodable {
 
 extension PaymentDetailsResponse {
 
-    func convertToCheckPaymentData(paymentId: String?) -> CheckPaymentData? {
+    func convertToCheckPaymentData(paymentId: String?, language: RozetkaPayLanguage) -> CheckPaymentData? {
         guard let paymentId else {
             return nil
         }
@@ -41,7 +41,7 @@ extension PaymentDetailsResponse {
             paymentId: value.paymentId,
             status: value.convertToStatus(),
             statusCode: value.statusCode,
-            statusDescription: value.statusDescription
+            statusDescription: value.resolveDescription(language: language)
         )
     }
 }

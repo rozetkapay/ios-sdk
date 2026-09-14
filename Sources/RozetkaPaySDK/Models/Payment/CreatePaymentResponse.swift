@@ -28,13 +28,13 @@ public struct CreatePaymentResponse: Decodable {
 }
 
 extension CreatePaymentResponse {
-    func convertToCreatePaymentData() -> CreatePaymentData {
+    func convertToCreatePaymentData(language: RozetkaPayLanguage) -> CreatePaymentData {
         return CreatePaymentData(
             action: self.action?.convertToAction(),
             paymentId: self.details.paymentId,
             status: self.details.convertToStatus(),
             statusCode: self.details.statusCode,
-            statusDescription: self.details.statusDescription
+            statusDescription: self.details.resolveDescription(language: language)
         )
     }
 }
@@ -44,12 +44,16 @@ public struct PaymentResultDetails: Decodable {
     let status: String
     let statusCode: String
     let statusDescription: String?
+    let statusDescriptionEn: String?
+    let statusDescriptionUk: String?
     
     private enum CodingKeys: String, CodingKey {
         case paymentId = "payment_id"
         case status
         case statusCode = "status_code"
         case statusDescription = "status_description"
+        case statusDescriptionEn = "status_description_en"
+        case statusDescriptionUk = "status_description_uk"
     }
     
     public init(from decoder: Decoder) throws {
@@ -58,8 +62,12 @@ public struct PaymentResultDetails: Decodable {
         self.status = try container.decode(String.self, forKey: .status)
         self.statusCode = try container.decode(String.self, forKey: .statusCode)
         self.statusDescription = try container.decodeIfPresent(String.self, forKey: .statusDescription)
+        self.statusDescriptionEn = try container.decodeIfPresent(String.self, forKey: .statusDescriptionEn)
+        self.statusDescriptionUk = try container.decodeIfPresent(String.self, forKey: .statusDescriptionUk)
     }
 }
+
+extension PaymentResultDetails: LocalizedStatusDescription {}
 
 extension PaymentResultDetails {
     func convertToStatus() -> PaymentStatus {
